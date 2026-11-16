@@ -1,0 +1,1042 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rutina">
+<title>Mūsų rutina</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<meta name="theme-color" content="#f4f2fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0c18" media="(prefers-color-scheme: dark)">
+<style>
+:root{
+  --bg:#f4f2fb; --card:#ffffff; --card2:#f8f7fd; --text:#17142b; --muted:#7b7891; --line:#ebe8f5;
+  --glass:rgba(255,255,255,.78); --shadow:0 8px 24px rgba(60,30,140,.10); --shadow2:0 2px 8px rgba(60,30,140,.08);
+  --sleep:#e9e6fb; --sleepT:#8b85b8; --work:#eef0f7; --workS:#e3e6f0; --danger:#ef4444; --ok:#10b981;
+  --grad:linear-gradient(135deg,#6366f1 0%,#a855f7 45%,#ec4899 75%,#f59e0b 100%);
+  --r:20px;
+  --font:ui-rounded,"SF Pro Rounded",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0e0c18; --card:#1a1729; --card2:#211d33; --text:#f3f1ff; --muted:#9d99b8; --line:#2a2640;
+    --glass:rgba(26,23,41,.8); --shadow:0 8px 24px rgba(0,0,0,.45); --shadow2:0 2px 8px rgba(0,0,0,.35);
+    --sleep:#15122a; --sleepT:#6e68a0; --work:#1c1a2c; --workS:#222036; }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;overscroll-behavior-y:none}
+body{min-height:100vh}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:var(--card);border-radius:14px;padding:10px 14px;transition:transform .12s ease}
+button:active{transform:scale(.96)}
+input,select{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%;min-width:0;font-size:16px}
+input:focus,select:focus{outline:2px solid #a855f7;outline-offset:0;border-color:transparent}
+input[type=checkbox]{width:26px;height:26px;flex:none;accent-color:#a855f7}
+input[type=color]{padding:3px;height:44px}
+h1,h2,h3,.rd{font-family:var(--font)}
+
+/* ---------- Viršus ---------- */
+header.top{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:var(--glass);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);display:flex;align-items:center;gap:12px}
+.hello{flex:1;min-width:0}
+.hello small{display:block;color:var(--muted);font-size:13px;font-weight:500}
+.hello h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pair{display:flex}
+.av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font:700 15px var(--font);
+  background:linear-gradient(135deg,var(--c),var(--c2));box-shadow:0 0 0 2.5px var(--bg)}
+.pair .av+.av{margin-left:-10px}
+.av.sm{width:22px;height:22px;font-size:11px;box-shadow:0 0 0 2px var(--card)}
+#sync{font-size:12px;color:var(--muted);text-align:right;min-width:20px}
+
+main{padding:4px 16px calc(110px + env(safe-area-inset-bottom));max-width:720px;margin:0 auto}
+
+/* ---------- Apačia ---------- */
+nav#tabs{position:fixed;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:30;display:grid;grid-template-columns:1fr 1fr 76px 1fr 1fr;align-items:center;
+  background:var(--glass);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-radius:28px;box-shadow:var(--shadow);padding:6px;max-width:560px;margin:0 auto}
+nav#tabs button{background:none;padding:6px 2px;color:var(--muted);font-size:11px;font-weight:600;border-radius:18px}
+nav#tabs button b{display:block;font-size:22px;line-height:1.1;filter:grayscale(1);opacity:.7;transition:all .2s}
+nav#tabs button.on{color:var(--text)}
+nav#tabs button.on b{filter:none;opacity:1;transform:translateY(-1px) scale(1.08)}
+nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;background:var(--grad);color:#fff;font-size:28px;display:grid;place-items:center;
+  box-shadow:0 10px 24px rgba(168,85,247,.45),0 0 0 5px var(--bg);animation:pulse 3s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 10px 24px rgba(168,85,247,.45),0 0 0 5px var(--bg)}50%{box-shadow:0 10px 32px rgba(236,72,153,.6),0 0 0 5px var(--bg)}}
+
+/* ---------- Diena ---------- */
+.wkhead{display:flex;align-items:center;justify-content:space-between;margin:6px 0 10px}
+.wkhead div{font:700 15px var(--font)}
+.wkhead button{width:40px;height:40px;padding:0;font-size:20px;border-radius:50%;box-shadow:var(--shadow2)}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:14px}
+.strip button{padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:2px;box-shadow:var(--shadow2);border-radius:16px}
+.strip span{font-size:11px;color:var(--muted);font-weight:600}
+.strip b{font:700 18px var(--font)}
+.strip i{display:flex;gap:2px;height:5px}
+.strip i u{width:5px;height:5px;border-radius:50%;background:var(--c)}
+.strip button.today b{color:#a855f7}
+.strip button.on{background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(168,85,247,.35)}
+.strip button.on span,.strip button.on b{color:#fff}
+.strip button.on u{background:#fff!important}
+
+.hero{border-radius:var(--r);padding:16px;color:#fff;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:var(--shadow);
+  background:linear-gradient(135deg,var(--c),var(--c2))}
+.hero::after{content:"";position:absolute;right:-30px;top:-30px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.14)}
+.hero small{opacity:.9;font-weight:600;font-size:13px;text-transform:uppercase;letter-spacing:.5px}
+.hero h2{margin:4px 0 2px;font-size:24px;font-weight:800}
+.hero .meta{opacity:.92;font-size:14px}
+.hero .big{position:absolute;right:16px;bottom:8px;font-size:54px;z-index:1;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.hero .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.3);margin-top:12px;overflow:hidden;width:70%}
+.hero .bar i{display:block;height:100%;background:#fff;border-radius:3px}
+
+.chiprow{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 14px;padding:2px 16px;scrollbar-width:none}
+.chiprow::-webkit-scrollbar{display:none}
+.chiprow button{flex:none;font-size:14px;font-weight:600;box-shadow:var(--shadow2);border-radius:999px;padding:9px 14px}
+.warn{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#78350f;border-radius:16px;padding:10px 12px;margin-bottom:12px;font-size:14px}
+@media (prefers-color-scheme: dark){.warn{background:linear-gradient(135deg,#3b2f0b,#4a3708);color:#fde68a}}
+
+.cols{display:grid;grid-template-columns:46px 1fr 1fr;align-items:center;margin-bottom:6px;font-weight:700;font-size:14px}
+.cols>div{display:flex;align-items:center;justify-content:center;gap:6px}
+.tl{position:relative;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow2)}
+.hr{position:absolute;left:0;right:0;border-top:1px solid var(--line);height:0}
+.hr span{position:absolute;left:8px;top:3px;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.area{position:absolute;top:0;bottom:0;left:46px;right:0}
+.blk{position:absolute;overflow:hidden}
+.blk.sleep{background:var(--sleep);font-size:12px;color:var(--sleepT);display:flex;align-items:center;justify-content:center;gap:4px;font-weight:600}
+.blk.work{background:repeating-linear-gradient(-45deg,var(--work) 0 8px,var(--workS) 8px 16px);font-size:12px;color:var(--muted);padding:5px 8px;font-weight:600}
+.item{position:absolute;padding:2px 3px;z-index:2}
+.item>div{height:100%;border-radius:14px;background:linear-gradient(135deg,var(--c),var(--c2));color:#fff;padding:5px 8px;overflow:hidden;font-size:13px;cursor:pointer;
+  box-shadow:0 4px 12px color-mix(in srgb,var(--c) 35%,transparent);transition:transform .12s}
+.item>div:active{transform:scale(.97)}
+.item b{font-weight:700;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item small{display:block;opacity:.9;font-size:11px}
+.item.done>div{filter:saturate(.35);opacity:.75}
+.item.done>div::after{content:"✓";position:absolute;right:10px;top:4px;font-weight:800;background:#fff;color:var(--ok);border-radius:50%;width:18px;height:18px;display:grid;place-items:center;font-size:12px}
+.item .ev{background:linear-gradient(135deg,#334155,#64748b)}
+.now{position:absolute;left:0;right:0;border-top:2px solid var(--danger);z-index:5}
+.now::before{content:"";position:absolute;left:-5px;top:-6px;width:10px;height:10px;border-radius:50%;background:var(--danger)}
+
+/* ---------- Kortelės ---------- */
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:12px;box-shadow:var(--shadow2)}
+.card h3{margin:0 0 10px;font-size:16px;font-weight:800;display:flex;align-items:center;gap:8px}
+.card h3 .tag{font-size:11px;font-weight:700;color:#fff;background:var(--grad);border-radius:999px;padding:2px 8px}
+.wrow{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:15px;cursor:pointer;align-items:center}
+.wrow:first-of-type{border-top:0}
+.wrow .ic{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;font-size:18px;background:linear-gradient(135deg,var(--c),var(--c2));flex:none}
+.wrow .tx{flex:1;min-width:0}
+.wrow .tx small{display:block;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+.wrow.done .tx b{text-decoration:line-through;opacity:.6}
+.empty{color:var(--muted);font-size:14px;padding:4px 0}
+
+/* ---------- Tikslai ---------- */
+.score{border-radius:var(--r);padding:18px;color:#fff;background:var(--grad);box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.score h2{margin:0;font-size:22px;font-weight:800}
+.score p{margin:4px 0 0;opacity:.92;font-size:14px}
+.ring{--p:0;--c:#fff;width:84px;height:84px;border-radius:50%;flex:none;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p)*1%),rgba(255,255,255,.28) 0)}
+.ring>span{width:66px;height:66px;border-radius:50%;display:grid;place-items:center;font:800 20px var(--font);background:rgba(0,0,0,.08)}
+.goals{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.goal{background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shadow2);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.goal .ring{width:76px;height:76px;background:conic-gradient(var(--c) calc(var(--d)*1%),color-mix(in srgb,var(--c) 40%,transparent) 0 calc(var(--p)*1%),var(--line) 0)}
+.goal .ring>span{width:60px;height:60px;background:var(--card);font-size:26px}
+.goal b{font-size:14px}
+.goal small{color:var(--muted);font-size:12px}
+.goal.full .ring>span{animation:pop .6s ease}
+@keyframes pop{50%{transform:scale(1.15)}}
+
+/* ---------- Nustatymai ---------- */
+.set h2{font-size:18px;font-weight:800;margin:20px 0 10px}
+.row{display:flex;gap:8px;align-items:end;margin-bottom:10px}
+.row label{flex:1;font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;min-width:0;font-weight:600}
+.row.end{justify-content:flex-end}
+.row.end button{background:var(--card2)}
+.act{border-left:6px solid var(--c)}
+.emo{width:60px!important;flex:none;text-align:center;font-size:22px!important;padding:6px!important}
+.hint{font-size:13px;color:var(--muted);margin:4px 0 10px}
+.wt{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:center;font-weight:700;font-size:14px}
+.seg{display:flex;background:var(--card2);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;background:none;font-weight:700;border-radius:11px;padding:9px 6px}
+.seg button.on{background:var(--card);box-shadow:var(--shadow2)}
+.btn-grad{background:var(--grad);color:#fff;font-weight:700;box-shadow:0 6px 16px rgba(168,85,247,.35)}
+.btn-soft{background:var(--card2);font-weight:600}
+.btn-danger{background:color-mix(in srgb,var(--danger) 12%,transparent);color:var(--danger);font-weight:600}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.btns button{flex:1 1 auto}
+
+/* ---------- Lapai (sheets) ---------- */
+.sheet{position:fixed;inset:0;z-index:50;background:rgba(10,5,30,.4);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet.open{opacity:1;pointer-events:auto}
+.sheet-card{background:var(--card);width:100%;max-width:560px;border-radius:28px 28px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;
+  transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:92vh;overflow:auto}
+.sheet.open .sheet-card{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 4px;flex:none}
+.sh-hero{border-radius:20px;padding:16px;color:#fff;background:linear-gradient(135deg,var(--c),var(--c2));display:flex;gap:12px;align-items:center}
+.sh-hero .e{font-size:40px}
+.sh-hero h3{margin:0;font-size:20px;font-weight:800}
+.sh-hero small{opacity:.92}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{border-radius:18px;padding:14px 10px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:14px;color:#fff}
+.tile span{font-size:24px}
+.t-ok{background:linear-gradient(135deg,#10b981,#34d399)}
+.t-move{background:linear-gradient(135deg,#f97316,#fbbf24)}
+.t-del{background:linear-gradient(135deg,#ef4444,#f472b6)}
+.t-undo{background:linear-gradient(135deg,#64748b,#94a3b8)}
+.sheet-card label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;font-weight:600}
+
+/* ---------- Asistentas ---------- */
+#chat .sheet-card{height:88vh;padding-bottom:calc(10px + env(safe-area-inset-bottom));gap:8px}
+.chat-head{display:flex;align-items:center;gap:10px}
+.chat-head .bot{width:40px;height:40px;border-radius:14px;background:var(--grad);display:grid;place-items:center;font-size:22px}
+.chat-head b{font:800 18px var(--font);flex:1}
+.chat-head small{display:block;color:var(--muted);font-size:12px;font-weight:500}
+.chat-head button{background:var(--card2);border-radius:50%;width:36px;height:36px;padding:0}
+#msgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:4px 2px}
+.msg{max-width:88%;padding:10px 13px;border-radius:20px;font-size:15px;line-height:1.4;animation:in .25s ease}
+@keyframes in{from{opacity:0;transform:translateY(8px)}}
+.msg.bot{background:var(--card2);align-self:flex-start;border-bottom-left-radius:6px}
+.msg.me{background:var(--grad);color:#fff;align-self:flex-end;border-bottom-right-radius:6px}
+.msg.wide{max-width:100%;width:100%;padding:0;background:none}
+.prop{background:var(--card2);border-radius:22px;padding:12px;display:flex;flex-direction:column;gap:8px;border:2px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.prop .ph{display:flex;gap:10px;align-items:center;padding:12px;border-radius:16px;color:#fff;background:linear-gradient(135deg,var(--c),var(--c2))}
+.prop .ph .e{font-size:30px}
+.prop .ph b{font-size:17px;display:block}
+.prop .ph small{opacity:.92}
+.prop .lbl{font-size:12px;font-weight:700;color:var(--muted);margin-top:2px}
+.pchips{display:flex;gap:6px;flex-wrap:wrap}
+.pchips button{background:var(--card);padding:7px 11px;font-size:14px;font-weight:600;border-radius:999px;box-shadow:var(--shadow2)}
+.pchips button.on{background:var(--grad);color:#fff}
+.pchips input{width:auto;padding:6px 10px;border-radius:999px}
+.note{font-size:13px;color:var(--muted)}
+.conf{font-size:13px;background:color-mix(in srgb,#f59e0b 14%,transparent);border-radius:12px;padding:7px 10px}
+.prop.closed{border-style:dashed;opacity:.8}
+.sugg{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:none;padding:2px}
+.sugg::-webkit-scrollbar{display:none}
+.sugg button{flex:none;background:var(--card2);border-radius:999px;font-size:13px;font-weight:600;padding:8px 12px}
+.composer{display:flex;gap:8px;flex:none}
+.composer input{border-radius:999px;padding:12px 16px;font-size:16px}
+.composer button{border-radius:50%;width:48px;height:48px;padding:0;flex:none;font-size:20px}
+
+#toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(10px);background:#17142b;color:#fff;padding:11px 16px;border-radius:16px;font-size:14px;font-weight:600;
+  opacity:0;transition:all .25s;pointer-events:none;z-index:60;max-width:90vw;text-align:center;box-shadow:var(--shadow)}
+#toast.show{opacity:1;transform:translateX(-50%)}
+.cf{position:fixed;width:8px;height:12px;border-radius:2px;z-index:70;pointer-events:none}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="hello"><small id="hiDate"></small><h1 id="hi">Mūsų rutina</h1></div>
+  <div id="sync"></div>
+  <div class="pair" id="pair"></div>
+</header>
+<main id="main"></main>
+<nav id="tabs">
+  <button data-tab="day"><b>📅</b>Diena</button>
+  <button data-tab="week"><b>🗓️</b>Savaitė</button>
+  <button class="fab" data-tab="ai" aria-label="Asistentas">✨</button>
+  <button data-tab="goals"><b>🏆</b>Tikslai</button>
+  <button data-tab="settings"><b>⚙️</b>Daugiau</button>
+</nav>
+<div class="sheet" id="sheet"></div>
+<div class="sheet" id="chat">
+  <div class="sheet-card">
+    <div class="grab"></div>
+    <div class="chat-head"><div class="bot">✨</div><b>Asistentas<small>Parašykite paprastai – aš suplanuosiu</small></b><button data-chat="close" aria-label="Uždaryti">✕</button></div>
+    <div id="msgs"></div>
+    <div class="sugg" id="sugg"></div>
+    <form class="composer" id="composer" autocomplete="off">
+      <input id="ask" enterkeyhint="send" placeholder="pvz. šiandien 13:00 susitikimas">
+      <button class="btn-grad" aria-label="Siųsti">↑</button>
+    </form>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+// =============== Pagalbinės ===============
+const $ = s => document.querySelector(s);
+const DAYS = ['Pr','An','Tr','Kt','Pn','Št','Sk'];
+const DAYS_LONG = ['Pirmadienis','Antradienis','Trečiadienis','Ketvirtadienis','Penktadienis','Šeštadienis','Sekmadienis'];
+const DAYKEYS = ['mon','tue','wed','thu','fri','sat','sun'];
+const MONTHS = ['saus.','vas.','kov.','bal.','geg.','birž.','liep.','rugp.','rugs.','spal.','lapkr.','gruod.'];
+const BUF = 15, STEP = 15;
+const toMin = s => { if(!s) return 0; const [h,m] = s.split(':').map(Number); return h*60 + (m||0); };
+const toHM = m => String(Math.floor(m/60)%24).padStart(2,'0') + ':' + String(m%60).padStart(2,'0');
+const ymd = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const parseYmd = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (s,n) => { const d = parseYmd(s); d.setDate(d.getDate()+n); return ymd(d); };
+const weekStart = s => { const d = parseYmd(s); d.setDate(d.getDate() - (d.getDay()+6)%7); return ymd(d); };
+const dayIdx = s => (parseYmd(s).getDay()+6)%7;
+const today = () => ymd(new Date());
+const nowMin = () => { const d = new Date(); return d.getHours()*60 + d.getMinutes(); };
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmtDate = s => { const d = parseYmd(s); return d.getDate()+' '+MONTHS[d.getMonth()]; };
+const weekLabel = ws => fmtDate(ws) + ' – ' + fmtDate(addDays(ws,6));
+const fmtDur = m => m < 60 ? m + ' min' : Math.floor(m/60) + ' val' + (m%60 ? ' ' + m%60 + ' min' : '');
+const dayName = d => d === today() ? 'Šiandien' : d === addDays(today(),1) ? 'Rytoj' : DAYS_LONG[dayIdx(d)];
+const shade = (h, p) => { const n = parseInt(h.slice(1),16); const f = c => Math.round(c + (255-c)*p); return '#' + [n>>16, n>>8&255, n&255].map(c => f(c).toString(16).padStart(2,'0')).join(''); };
+const cvars = c => `--c:${c};--c2:${shade(c,.35)}`;
+const parseRanges = str => (str||'').split(/[,;]/).map(x => x.trim()).filter(Boolean).map(x => {
+  const m = x.match(/^(\d{1,2})[:.]?(\d{2})?\s*[-–]\s*(\d{1,2})[:.]?(\d{2})?$/);
+  if(!m) return null;
+  const a = (+m[1])*60 + (+(m[2]||0)), b = (+m[3])*60 + (+(m[4]||0));
+  return b > a ? [a, Math.min(b,1440)] : null;
+}).filter(Boolean);
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+
+// =============== Duomenys ===============
+const KEY = 'rutina.v1';
+const WORK = '09:00-13:00, 14:00-17:00';
+const DEFAULT = () => ({
+  v: 2,
+  people: [
+    { id:'a', name:'Paulius', color:'#6366f1', wake:'07:00', sleep:'23:00' },
+    { id:'b', name:'Milda',   color:'#ec4899', wake:'07:30', sleep:'23:30' },
+  ],
+  work: {
+    a: { mon:WORK, tue:WORK, wed:WORK, thu:WORK, fri:WORK, sat:'', sun:'' },
+    b: { mon:WORK, tue:WORK, wed:WORK, thu:WORK, fri:WORK, sat:'', sun:'' },
+  },
+  workOverride: {},
+  acts: [
+    { id:'together', emoji:'💛', name:'Laikas kartu', who:'both', perWeek:5, dur:90,  from:'18:00', to:'22:30', color:'#f59e0b', on:true },
+    { id:'sport',    emoji:'🏃', name:'Sportas',      who:'both', perWeek:2, dur:45,  from:'07:00', to:'12:00', color:'#10b981', on:true },
+    { id:'gym',      emoji:'🏋️', name:'Gym',          who:'each', perWeek:3, dur:60,  from:'07:00', to:'20:00', color:'#8b5cf6', on:true },
+    { id:'alone',    emoji:'🧘', name:'Laikas sau',   who:'each', perWeek:5, dur:60,  from:'07:00', to:'22:00', color:'#14b8a6', on:true },
+    { id:'surf',     emoji:'🏄', name:'Surf',         who:'both', perWeek:3, dur:120, from:'06:00', to:'18:00', color:'#0ea5e9', on:true },
+  ],
+  items: [],
+});
+const ls = { get: k => { try { return localStorage.getItem(k); } catch(e) { return null; } },
+             set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch(e) {} } };
+let state;
+try { state = JSON.parse(ls.get(KEY)) || DEFAULT(); } catch(e) { state = DEFAULT(); }
+function migrate() {
+  const [A, B] = state.people;
+  if (A.name === 'Aš') { A.name = 'Paulius'; if (A.color === '#2563eb') A.color = '#6366f1'; }
+  if (B.name === 'Draugė') { B.name = 'Milda'; if (B.color === '#db2777') B.color = '#ec4899'; }
+  const t = state.acts.find(a => a.id === 'together'); if (t && t.name === 'Prasmingas laikas kartu') t.name = 'Laikas kartu';
+  state.v = 2;
+}
+migrate();
+let lastSaved = JSON.stringify(state);
+const save = () => { const s = JSON.stringify(state); if (s === lastSaved) return; lastSaved = s; ls.set(KEY, s); Sync.schedule(); };
+const view = { tab:'day', date: today(), warn: null };
+const Me = () => ls.get('rutina.me') || '';
+
+const person = id => state.people.find(p => p.id === id);
+const actById = id => state.acts.find(a => a.id === id);
+const workRanges = (pid, date) => { const o = state.workOverride[pid+'|'+date]; return parseRanges(o !== undefined ? o : state.work[pid][DAYKEYS[dayIdx(date)]]); };
+const workStr = (pid, date) => { const o = state.workOverride[pid+'|'+date]; return o !== undefined ? o : state.work[pid][DAYKEYS[dayIdx(date)]]; };
+const awake = pid => { const p = person(pid); const w = toMin(p.wake); let s = toMin(p.sleep); if (s <= w) s = 1440; return [w, s]; };
+const groupsFor = act => act.who === 'both' ? [['a','b']] : act.who === 'each' ? [['a'],['b']] : [[act.who]];
+const overlaps = (x, y) => x.some(p => y.includes(p));
+const sameWho = (x, y) => x.length === y.length && x.every(p => y.includes(p));
+const whoLabel = who => who.length === 2 ? 'Abu' : person(who[0]).name;
+const av = (pid, cls='') => { const p = person(pid); return `<span class="av ${cls}" style="${cvars(p.color)}">${esc(p.name[0] || '?')}</span>`; };
+const avs = (who, cls='sm') => `<span class="pair">${who.map(p => av(p, cls)).join('')}</span>`;
+const itemMeta = it => {
+  if (it.kind === 'event') return { emoji: it.emoji || '📌', name: it.title || 'Įvykis', color:'#475569' };
+  const a = actById(it.actId) || { emoji:'•', name:'(pašalinta)', color:'#94a3b8' };
+  return { emoji:a.emoji, name:a.name, color:a.color };
+};
+
+// =============== Planavimas ===============
+function busyFor(pid, date, excludeId) {
+  const [w, s] = awake(pid);
+  const out = [[0, w, 0], [s, 1440, 0]];
+  workRanges(pid, date).forEach(r => out.push([r[0], r[1], 1]));
+  state.items.forEach(it => { if (it.id !== excludeId && it.date === date && it.who.includes(pid)) out.push([it.start, it.start + it.dur, 1]); });
+  return out;
+}
+function isFree(pids, date, start, end, excludeId) {
+  for (const pid of pids) for (const [a, b, pad] of busyFor(pid, date, excludeId)) { const P = pad ? BUF : 0; if (start < b + P && end > a - P) return false; }
+  return true;
+}
+function minStartFor(date) { const t = today(); if (date < t) return Infinity; if (date === t) return nowMin() + 10; return 0; }
+function findSlot(win, dur, pids, date, minStart, excludeId) {
+  if (minStart === Infinity) return null;
+  const ws = toMin(win.from), we = (win.to === '00:00' || win.to === '24:00') ? 1440 : toMin(win.to);
+  let t = Math.ceil(Math.max(ws, minStart || 0) / STEP) * STEP;
+  for (; t + dur <= we; t += STEP) if (isFree(pids, date, t, t + dur, excludeId)) return t;
+  return null;
+}
+const countOn = (actId, pids, date, excludeId) => state.items.filter(it => it.id !== excludeId && it.actId === actId && it.date === date && overlaps(it.who, pids)).length;
+
+function generateWeek(ws) {
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  const isFuture = it => it.date > today() || (it.date === today() && it.start >= nowMin());
+  state.items = state.items.filter(it => !(it.kind === 'auto' && it.status === 'planned' && !it.pinned && days.includes(it.date) && isFuture(it)));
+  const usable = days.filter(d => minStartFor(d) !== Infinity);
+  const unplaced = [];
+  for (const act of state.acts) {
+    if (!act.on || !act.perWeek) continue;
+    for (const pids of groupsFor(act)) {
+      const already = state.items.filter(it => it.actId === act.id && days.includes(it.date) && sameWho(it.who, pids)).length;
+      const need = act.perWeek - already;
+      for (let i = 0; i < need; i++) {
+        const pref = Math.floor((i + 0.5) * usable.length / Math.max(need, 1));
+        const order = usable.map((d, k) => [d, k]).sort((x, y) => {
+          const cx = countOn(act.id, pids, x[0]), cy = countOn(act.id, pids, y[0]);
+          return cx !== cy ? cx - cy : Math.abs(x[1] - pref) - Math.abs(y[1] - pref);
+        });
+        let ok = false;
+        for (const [d] of order) {
+          if (act.perWeek <= 7 && countOn(act.id, pids, d) > 0) continue;
+          const t = findSlot(act, act.dur, pids, d, minStartFor(d));
+          if (t != null) { state.items.push({ id: uid(), kind:'auto', actId: act.id, who: [...pids], date: d, start: t, dur: act.dur, status:'planned' }); ok = true; break; }
+        }
+        if (!ok) unplaced.push(act.emoji + ' ' + act.name + (pids.length === 1 ? ' (' + person(pids[0]).name + ')' : ''));
+      }
+    }
+  }
+  const c = {}; unplaced.forEach(u => c[u] = (c[u] || 0) + 1);
+  view.warn = unplaced.length ? 'Nepavyko sutalpinti: ' + Object.entries(c).map(([k, n]) => k + (n > 1 ? ' ×' + n : '')).join(', ') + '. Pakeiskite laiko langą ar kartų skaičių skiltyje „Daugiau“.' : null;
+}
+function rescheduleOtherDay(it, onlyDate) {
+  const act = actById(it.actId);
+  const win = act || { from:'07:00', to:'22:00' };
+  const ws = weekStart(it.date);
+  let cands = onlyDate ? [onlyDate] : [...Array(7)].map((_, i) => addDays(it.date, i + 1));
+  if (!onlyDate) cands.sort((x, y) => (weekStart(x) !== ws) - (weekStart(y) !== ws) || countOn(it.actId, it.who, x, it.id) - countOn(it.actId, it.who, y, it.id) || x.localeCompare(y));
+  for (const d of cands) { const t = findSlot(win, it.dur, it.who, d, minStartFor(d), it.id); if (t != null) { it.date = d; it.start = t; return true; } }
+  return false;
+}
+function fixDay(date) {
+  const msgs = [];
+  const prio = it => state.acts.findIndex(a => a.id === it.actId);
+  const list = state.items.filter(it => it.date === date && it.kind === 'auto' && it.status === 'planned' && !it.pinned).sort((a, b) => prio(a) - prio(b));
+  for (const it of list) {
+    if (isFree(it.who, date, it.start, it.start + it.dur, it.id)) continue;
+    const m = itemMeta(it);
+    const t = findSlot(actById(it.actId) || { from:'07:00', to:'22:00' }, it.dur, it.who, date, minStartFor(date), it.id);
+    if (t != null) { it.start = t; msgs.push(m.emoji + ' ' + m.name + ' → ' + toHM(t)); continue; }
+    if (rescheduleOtherDay(it)) msgs.push(m.emoji + ' ' + m.name + ' → ' + DAYS[dayIdx(it.date)] + ' ' + toHM(it.start));
+    else { state.items = state.items.filter(x => x !== it); msgs.push(m.emoji + ' ' + m.name + ' – nebėra vietos šią savaitę'); }
+  }
+  return msgs;
+}
+function ensureWeek(ws) {
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  if (days[6] < today()) return;
+  if (!state.items.some(it => it.kind === 'auto' && days.includes(it.date))) generateWeek(ws);
+}
+
+// =============== Sinchronizavimas (Supabase) ===============
+// Supabase projekto adresas ir VIEŠAS (publishable) raktas – skirti naudoti naršyklėje.
+// Duomenys pasiekiami tik per funkcijas rutina_get / rutina_put ir tik žinant slaptą plano kodą.
+const CONFIG = { url: 'https://eawvlenuwwxdoabszzqm.supabase.co', key: 'sb_publishable_rbZrYgQrrg64kaAS2v9kHw_xYjFvN0V' };
+const Sync = {
+  room: ls.get('rutina.room'), version: +(ls.get('rutina.ver') || 0), dirty: ls.get('rutina.dirty') === '1', timer: null, busy: false,
+  enabled() { return !!(CONFIG.url && CONFIG.key && this.room); },
+  setVersion(v) { this.version = v; ls.set('rutina.ver', String(v)); },
+  setDirty(d) { this.dirty = d; ls.set('rutina.dirty', d ? '1' : null); },
+  async rpc(fn, body) {
+    const h = { apikey: CONFIG.key, 'Content-Type': 'application/json' };
+    if (CONFIG.key.startsWith('eyJ')) h.Authorization = 'Bearer ' + CONFIG.key;
+    const r = await fetch(CONFIG.url.replace(/\/$/, '') + '/rest/v1/rpc/' + fn, { method:'POST', headers:h, body: JSON.stringify(body) });
+    if (!r.ok) throw new Error(r.status + ' ' + await r.text());
+    return r.json();
+  },
+  status(s) { const el = $('#sync'); if (el) el.textContent = { ok:'☁️', busy:'⏳', err:'⚠️' }[s] || ''; if (el) el.title = { ok:'Sinchronizuota', busy:'Saugoma…', err:'Nėra ryšio – išsaugota telefone' }[s] || ''; },
+  schedule() { if (!this.enabled()) return; this.setDirty(true); clearTimeout(this.timer); this.timer = setTimeout(() => this.push(), 700); },
+  async push() {
+    if (!this.enabled()) return;
+    if (this.busy) { clearTimeout(this.timer); this.timer = setTimeout(() => this.push(), 700); return; }
+    this.busy = true; this.status('busy');
+    try {
+      const sent = lastSaved;
+      const r = await this.rpc('rutina_put', { p_room: this.room, p_data: state, p_version: this.version });
+      if (r.ok) { this.setVersion(r.version); if (lastSaved === sent) this.setDirty(false); this.status('ok'); }
+      else { this.apply(r.data, r.version); toast('🔄 ' + otherName() + ' ką tik pakeitė planą – rodau naujausią. Jei kas dingo, pakartokite.'); }
+    } catch (e) { this.status('err'); }
+    this.busy = false;
+  },
+  apply(data, version) {
+    this.setVersion(version); this.setDirty(false);
+    if (data && data.people) {
+      state = data; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved);
+      if (!$('#sheet').classList.contains('open') && !(view.tab === 'settings' && document.activeElement?.dataset?.k)) render();
+    }
+    this.status('ok');
+  },
+  async pull() {
+    if (!this.enabled() || this.busy) return;
+    if (this.dirty) return this.push();
+    this.busy = true;
+    try {
+      const r = await this.rpc('rutina_get', { p_room: this.room });
+      this.busy = false;
+      if (!r) { this.setVersion(0); this.setDirty(true); return this.push(); }
+      if (r.version !== this.version) this.apply(r.data, r.version); else this.status('ok');
+    } catch (e) { this.busy = false; this.status('err'); }
+  },
+  async join(room, isNew) { this.room = room; ls.set('rutina.room', room); this.setVersion(0); this.setDirty(!!isNew); if (isNew) await this.push(); else await this.pull(); render(); },
+  leave() { this.room = null; ls.set('rutina.room', null); this.setVersion(0); this.setDirty(false); this.status(''); },
+  link() { return location.origin + location.pathname + '#k=' + this.room; },
+};
+const otherName = () => { const me = Me(); return me ? person(me === 'a' ? 'b' : 'a').name : 'Kitas telefonas'; };
+const newRoomCode = () => { const a = new Uint8Array(18); crypto.getRandomValues(a); return Array.from(a, b => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 56]).join(''); };
+const roomFromText = t => { const m = String(t).match(/(?:k=)?([A-Za-z0-9_-]{18,})\s*$/); return m ? m[1] : null; };
+
+// =============== .ics eksportas ===============
+function exportIcs(ws) {
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const dt = (date, m) => date.replace(/-/g, '') + 'T' + toHM(m).replace(':', '') + '00';
+  let s = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Musu rutina//LT\r\nCALSCALE:GREGORIAN\r\n';
+  state.items.filter(it => days.includes(it.date)).forEach(it => {
+    const m = itemMeta(it);
+    s += 'BEGIN:VEVENT\r\nUID:' + it.id + '@rutina\r\nDTSTAMP:' + stamp + '\r\nDTSTART:' + dt(it.date, it.start) + '\r\nDTEND:' + dt(it.date, Math.min(it.start + it.dur, 1439)) +
+         '\r\nSUMMARY:' + (m.emoji + ' ' + m.name + ' (' + whoLabel(it.who) + ')').replace(/[,;]/g, ' ') + '\r\nEND:VEVENT\r\n';
+  });
+  s += 'END:VCALENDAR\r\n';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([s], { type:'text/calendar' })); a.download = 'rutina-' + ws + '.ics';
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+// =============== Efektai ===============
+let toastT;
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 3400); }
+function confetti(x = innerWidth / 2, y = innerHeight / 2) {
+  const C = ['#6366f1','#a855f7','#ec4899','#f59e0b','#10b981','#0ea5e9'];
+  for (let i = 0; i < 36; i++) {
+    const d = document.createElement('i'); d.className = 'cf'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.background = C[i % C.length];
+    document.body.appendChild(d);
+    const a = Math.random() * Math.PI * 2, v = 90 + Math.random() * 140;
+    d.animate([{ transform:'translate(0,0) rotate(0)', opacity:1 }, { transform:`translate(${Math.cos(a)*v}px,${Math.sin(a)*v + 160}px) rotate(${Math.random()*900}deg)`, opacity:0 }],
+      { duration: 900 + Math.random() * 600, easing:'cubic-bezier(.2,.7,.3,1)' }).onfinish = () => d.remove();
+  }
+}
+
+// =============== Vaizdai ===============
+function header() {
+  const h = new Date().getHours();
+  const g = h < 5 ? 'Labos nakties 🌙' : h < 11 ? 'Labas rytas ☀️' : h < 17 ? 'Laba diena 🌤️' : h < 22 ? 'Labas vakaras 🌆' : 'Labos nakties 🌙';
+  const me = Me();
+  $('#hiDate').textContent = DAYS_LONG[dayIdx(today())] + ', ' + fmtDate(today()) + ' · ' + g;
+  $('#hi').textContent = me ? 'Labas, ' + person(me).name + '!' : state.people.map(p => p.name).join(' & ');
+  $('#pair').innerHTML = state.people.map(p => av(p.id)).join('');
+}
+function render() {
+  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === view.tab));
+  header();
+  const main = $('#main');
+  if (view.tab === 'day') renderDay(main);
+  else if (view.tab === 'week') renderWeek(main);
+  else if (view.tab === 'goals') renderGoals(main);
+  else renderSettings(main);
+  save();
+}
+const weekNav = ws => `<div class="wkhead"><button data-nav="-7" aria-label="Ankstesnė savaitė">‹</button><div>${weekLabel(ws)}</div><button data-nav="7" aria-label="Kita savaitė">›</button></div>`;
+const warnBox = () => view.warn ? `<div class="warn">⚠️ ${esc(view.warn)}</div>` : '';
+
+function heroCard() {
+  const d = view.date, n = nowMin();
+  const its = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start);
+  const done = its.filter(it => it.status === 'done').length;
+  const bar = its.length ? `<div class="bar"><i style="width:${Math.round(done / its.length * 100)}%"></i></div><div class="meta" style="margin-top:6px">Atlikta ${done} iš ${its.length}</div>` : '';
+  if (d === today()) {
+    const cur = its.find(it => it.start <= n && n < it.start + it.dur && it.status !== 'done');
+    const next = its.find(it => it.start > n && it.status !== 'done');
+    const it = cur || next;
+    if (it) {
+      const m = itemMeta(it);
+      const when = cur ? 'Dabar · liko ' + fmtDur(it.start + it.dur - n) : 'Toliau · po ' + fmtDur(it.start - n);
+      return `<div class="hero" style="${cvars(m.color)}" data-item="${it.id}"><small>${when}</small><h2>${esc(m.name)}</h2>
+        <div class="meta">${toHM(it.start)}–${toHM(it.start + it.dur)} · ${esc(whoLabel(it.who))}</div>${bar}<div class="big">${m.emoji}</div></div>`;
+    }
+    return `<div class="hero" style="${cvars('#a855f7')}"><small>Šiandien</small><h2>Diena baigta 🎉</h2><div class="meta">Mėgaukitės laisvu laiku</div>${bar}<div class="big">🌴</div></div>`;
+  }
+  const first = its[0];
+  return `<div class="hero" style="${cvars('#6366f1')}"><small>${dayName(d)}, ${fmtDate(d)}</small><h2>${its.length ? its.length + ' užsiėmim' + (its.length === 1 ? 'as' : its.length < 10 ? 'ai' : 'ų') : 'Laisva diena'}</h2>
+    <div class="meta">${first ? 'Pradžia ' + toHM(first.start) + ' · ' + itemMeta(first).emoji + ' ' + esc(itemMeta(first).name) : 'Nieko nesuplanuota'}</div>${bar}<div class="big">${d < today() ? '📖' : '🗓️'}</div></div>`;
+}
+
+function renderDay(main) {
+  const ws = weekStart(view.date); ensureWeek(ws);
+  let h = weekNav(ws) + '<div class="strip">' + [...Array(7)].map((_, i) => {
+    const d = addDays(ws, i);
+    const dots = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start).slice(0, 4).map(it => `<u style="--c:${itemMeta(it).color}"></u>`).join('');
+    return `<button class="${d === view.date ? 'on' : ''} ${d === today() ? 'today' : ''}" data-date="${d}"><span>${DAYS[i]}</span><b>${parseYmd(d).getDate()}</b><i>${dots}</i></button>`;
+  }).join('') + '</div>';
+  h += heroCard();
+  h += `<div class="chiprow"><button data-act="ai">✨ Įtraukti</button><button data-act="work">💻 Darbas šią dieną</button><button data-act="gen">🔀 Perdėlioti savaitę</button><button data-act="ics">📲 Į kalendorių</button></div>`;
+  h += warnBox();
+  h += `<div class="cols"><div></div>${state.people.map(p => `<div>${av(p.id, 'sm')} ${esc(p.name)}</div>`).join('')}</div>`;
+
+  const t0 = Math.max(0, Math.floor(Math.min(...state.people.map(p => toMin(p.wake))) / 60) * 60 - 60);
+  const t1 = 1440, PX = 1.25;
+  const y = m => ((m - t0) * PX).toFixed(1);
+  let tl = `<div class="tl" style="height:${(t1 - t0) * PX}px">`;
+  for (let m = t0; m < t1; m += 60) tl += `<div class="hr" style="top:${y(m)}px"><span>${toHM(m)}</span></div>`;
+  tl += '<div class="area">';
+  state.people.forEach((p, ci) => {
+    const [w, s] = awake(p.id), left = ci * 50;
+    if (w > t0) tl += `<div class="blk sleep" style="top:0;height:${y(w)}px;left:${left}%;width:50%">🌙 iki ${toHM(w)}</div>`;
+    if (s < t1) tl += `<div class="blk sleep" style="top:${y(s)}px;height:${((t1 - s) * PX).toFixed(1)}px;left:${left}%;width:50%">😴 ${toHM(s)}</div>`;
+    workRanges(p.id, view.date).forEach(([a, b]) => { tl += `<div class="blk work" data-act="work" style="top:${y(a)}px;height:${((b - a) * PX).toFixed(1)}px;left:${left}%;width:50%">💻 Darbas<br>${toHM(a)}–${toHM(b)}</div>`; });
+  });
+  state.items.filter(it => it.date === view.date).sort((a, b) => a.start - b.start).forEach(it => {
+    const m = itemMeta(it);
+    const both = it.who.length === 2, left = both ? 0 : (it.who[0] === 'a' ? 0 : 50), width = both ? 100 : 50;
+    const hgt = Math.max(it.dur * PX, 26);
+    tl += `<div class="item ${it.status === 'done' ? 'done' : ''}" style="top:${y(it.start)}px;height:${hgt}px;left:${left}%;width:${width}%;${cvars(m.color)}">
+      <div data-item="${it.id}"><b>${m.emoji} ${esc(m.name)}</b>${hgt > 40 ? `<small>${toHM(it.start)}–${toHM(it.start + it.dur)}${both ? ' · abu' : ''}</small>` : ''}</div></div>`;
+  });
+  if (view.date === today()) { const n = nowMin(); if (n > t0) tl += `<div class="now" style="top:${y(n)}px"></div>`; }
+  tl += '</div></div>';
+  main.innerHTML = h + tl;
+}
+
+function weekStats(ws) {
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  const rows = [];
+  for (const act of state.acts) {
+    if (!act.on || !act.perWeek) continue;
+    for (const pids of groupsFor(act)) {
+      const its = state.items.filter(it => it.actId === act.id && days.includes(it.date) && sameWho(it.who, pids));
+      rows.push({ act, pids, planned: its.length, done: its.filter(it => it.status === 'done').length, goal: act.perWeek });
+    }
+  }
+  return rows;
+}
+
+function renderWeek(main) {
+  const ws = weekStart(view.date); ensureWeek(ws);
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  let h = weekNav(ws) + warnBox();
+  days.forEach((d, i) => {
+    const its = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start);
+    h += `<div class="card"><h3>${DAYS_LONG[i]} <span style="color:var(--muted);font-weight:600">${fmtDate(d)}</span>${d === today() ? '<span class="tag">šiandien</span>' : ''}</h3>`;
+    if (!its.length) h += '<div class="empty">Laisva diena 🌴</div>';
+    its.forEach(it => {
+      const m = itemMeta(it);
+      h += `<div class="wrow ${it.status === 'done' ? 'done' : ''}" data-item="${it.id}" style="${cvars(m.color)}"><span class="ic">${m.emoji}</span>
+        <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}</small></span>${avs(it.who)}</div>`;
+    });
+    h += '</div>';
+  });
+  h += `<div class="btns"><button class="btn-soft" data-act="gen">🔀 Perdėlioti savaitę</button><button class="btn-grad" data-act="ics">📲 Į Apple kalendorių</button></div>`;
+  main.innerHTML = h;
+}
+
+function renderGoals(main) {
+  const ws = weekStart(view.date); ensureWeek(ws);
+  const rows = weekStats(ws);
+  const goal = rows.reduce((s, r) => s + r.goal, 0) || 1, done = rows.reduce((s, r) => s + Math.min(r.done, r.goal), 0);
+  const pct = Math.round(done / goal * 100);
+  const mood = pct >= 100 ? 'Tobula savaitė! 🏆' : pct >= 70 ? 'Puikiai sekasi! 🔥' : pct >= 40 ? 'Gerai einasi 💪' : pct > 0 ? 'Geras startas 🌱' : 'Savaitė prasideda ✨';
+  let h = weekNav(ws);
+  h += `<div class="score"><div class="ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${mood}</h2><p>Atlikta ${done} iš ${goal} savaitės tikslų.<br>Pažymėkite ✓, kai padarote.</p></div></div>`;
+  h += '<div class="goals">';
+  rows.forEach(r => {
+    const d = Math.min(100, Math.round(r.done / r.goal * 100)), p = Math.min(100, Math.round(r.planned / r.goal * 100));
+    h += `<div class="goal ${r.done >= r.goal ? 'full' : ''}" style="--c:${r.act.color}"><div class="ring" style="--d:${d};--p:${p}"><span>${r.act.emoji}</span></div>
+      <b>${esc(r.act.name)}</b><small>${r.pids.length === 1 ? esc(person(r.pids[0]).name) + ' · ' : ''}✓ ${r.done}/${r.goal}${r.planned < r.goal ? ' · ⚠️ suplanuota ' + r.planned : ''}</small></div>`;
+  });
+  h += '</div>';
+  const per = state.people.map(p => {
+    const n = state.items.filter(it => it.status === 'done' && it.who.includes(p.id) && weekStart(it.date) === ws).length;
+    return `<div class="wrow" style="cursor:default">${av(p.id)}<span class="tx"><b>${esc(p.name)}</b><small>Šią savaitę atlikta: ${n}</small></span><span style="font-size:22px">${n >= 8 ? '🔥' : n >= 4 ? '💪' : '🌱'}</span></div>`;
+  }).join('');
+  h += `<div class="card" style="margin-top:12px"><h3>Kas kiek nuveikė</h3>${per}</div>`;
+  main.innerHTML = h;
+}
+
+function renderSettings(main) {
+  const [A, B] = state.people;
+  const whoOpts = cur => [['both', 'Kartu (abu)'], ['each', 'Kiekvienas atskirai'], ['a', 'Tik ' + A.name], ['b', 'Tik ' + B.name]]
+    .map(([v, l]) => `<option value="${v}" ${cur === v ? 'selected' : ''}>${esc(l)}</option>`).join('');
+  const me = Me();
+  let h = '<div class="set">';
+  h += `<h2>📱 Šis telefonas</h2><div class="card"><div class="seg">${state.people.map(p => `<button data-me="${p.id}" class="${me === p.id ? 'on' : ''}">${av(p.id, 'sm')} ${esc(p.name)}</button>`).join('')}</div>
+    <div class="hint" style="margin:8px 0 0">Asistentas žinos, kas rašo („turiu susitikimą“ – įtrauks tik jums).</div></div>`;
+  h += '<h2>👫 Bendras planas</h2><div class="card">';
+  if (!CONFIG.url) h += '<div class="hint" style="margin:0">Sinchronizavimas dar neįjungtas – kol kas planas saugomas tik šiame įrenginyje.</div>';
+  else if (Sync.room) h += `<div class="hint" style="margin-top:0">✅ Prijungta. Antras telefonas: pridėkite programą į pradžios ekraną, atidarykite ją ir įklijuokite šią nuorodą. Nuoroda – kaip slaptažodis.</div>
+      <div class="row"><input readonly id="roomlink" value="${esc(Sync.link())}"></div>
+      <div class="btns"><button class="btn-grad" data-set="share">📤 Siųsti nuorodą</button><button class="btn-danger" data-set="leave">Atjungti</button></div>`;
+  else h += `<div class="hint" style="margin-top:0">Vienas paspaudžia „Sukurti“ ir atsiunčia nuorodą kitam. Kitas ją įklijuoja čia.</div>
+      <div class="btns" style="margin-bottom:10px"><button class="btn-grad" data-set="create">✨ Sukurti bendrą planą</button></div>
+      <div class="row" style="margin:0"><input id="joinlink" placeholder="Įklijuokite gautą nuorodą"><button class="btn-soft" data-set="join" style="flex:none">Prisijungti</button></div>`;
+  h += '</div>';
+  h += '<h2>😴 Miegas</h2>';
+  state.people.forEach((p, i) => {
+    h += `<div class="card"><div class="row">${av(p.id)}<label>Vardas<input data-k="people.${i}.name" value="${esc(p.name)}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="people.${i}.color" value="${p.color}"></label></div>
+      <div class="row" style="margin:0"><label>☀️ Keliasi<input type="time" data-k="people.${i}.wake" value="${p.wake}"></label><label>🌙 Eina miegoti<input type="time" data-k="people.${i}.sleep" value="${p.sleep}"></label></div></div>`;
+  });
+  h += '<h2>💻 Darbas online</h2><div class="hint">Įprasta savaitė. Formatas <b>09:00-13:00, 14:00-17:00</b>, tuščia – nedirba. Konkrečią dieną keiskite Dienos vaizde arba parašykite asistentui.</div>';
+  state.people.forEach(p => {
+    h += `<div class="card"><h3>${av(p.id, 'sm')} ${esc(p.name)}</h3><div class="wt">` +
+      DAYKEYS.map((k, i) => `<span>${DAYS[i]}</span><input data-k="work.${p.id}.${k}" value="${esc(state.work[p.id][k])}" placeholder="nedirba">`).join('') + '</div></div>';
+  });
+  h += '<h2>🎯 Užsiėmimai</h2><div class="hint">Viršutiniai turi pirmenybę dėliojant. „Nuo–iki“ – kuriame paros lange ieškoti laiko.</div>';
+  state.acts.forEach((a, i) => {
+    h += `<div class="card act" style="--c:${a.color}">
+      <div class="row"><input class="emo" data-k="acts.${i}.emoji" value="${esc(a.emoji)}"><input data-k="acts.${i}.name" value="${esc(a.name)}" style="font-weight:700"><input type="checkbox" title="Įjungta" data-k="acts.${i}.on" ${a.on ? 'checked' : ''}></div>
+      <div class="row"><label>Kas<select data-k="acts.${i}.who">${whoOpts(a.who)}</select></label><label style="flex:0 0 80px">Kartai/sav.<input type="number" inputmode="numeric" min="0" max="21" data-num data-k="acts.${i}.perWeek" value="${a.perWeek}"></label><label style="flex:0 0 80px">Minutės<input type="number" inputmode="numeric" min="15" step="15" data-num data-k="acts.${i}.dur" value="${a.dur}"></label></div>
+      <div class="row"><label>Nuo<input type="time" data-k="acts.${i}.from" value="${a.from}"></label><label>Iki<input type="time" data-k="acts.${i}.to" value="${a.to}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="acts.${i}.color" value="${a.color}"></label></div>
+      <div class="row end" style="margin:0"><button data-set="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>↑</button><button data-set="down" data-i="${i}" ${i === state.acts.length - 1 ? 'disabled' : ''}>↓</button><button class="btn-danger" data-set="del" data-i="${i}">Šalinti</button></div></div>`;
+  });
+  h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div>
+    <h2>Kita</h2><div class="btns"><button class="btn-danger" data-set="reset">Ištrinti viską ir pradėti iš naujo</button></div></div>`;
+  main.innerHTML = h;
+}
+
+// =============== Lapai ===============
+const sheetEl = $('#sheet');
+function openSheet(html) { sheetEl.innerHTML = `<div class="sheet-card"><div class="grab"></div>${html}</div>`; requestAnimationFrame(() => sheetEl.classList.add('open')); }
+function closeSheet() { sheetEl.classList.remove('open'); setTimeout(() => { if (!sheetEl.classList.contains('open')) sheetEl.innerHTML = ''; }, 300); }
+let sheetItem = null;
+
+function itemSheet(id) {
+  const it = state.items.find(x => x.id === id); if (!it) return;
+  sheetItem = it; const m = itemMeta(it);
+  const past = it.date < today(), done = it.status === 'done';
+  openSheet(`<div class="sh-hero" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><h3>${esc(m.name)}</h3>
+      <small>${dayName(it.date)}, ${fmtDate(it.date)} · ${toHM(it.start)}–${toHM(it.start + it.dur)}</small><div style="margin-top:4px">${avs(it.who)}</div></div></div>
+    <div class="tiles">
+      <button class="tile ${done ? 't-undo' : 't-ok'}" data-sheet="done"><span>${done ? '↩︎' : '✓'}</span>${done ? 'Neatlikta' : 'Atlikta!'}</button>
+      ${!done && !past ? `<button class="tile t-move" data-sheet="move"><span>↪︎</span>Ne šiandien – perkelti</button>` : `<button class="tile t-undo" data-sheet="close"><span>✕</span>Uždaryti</button>`}
+    </div>
+    <div class="row" style="margin:0"><label>Diena<input type="date" id="f-date" value="${it.date}"></label><label>Pradžia<input type="time" id="f-start" value="${toHM(it.start)}"></label><label style="flex:0 0 78px">Min.<input type="number" inputmode="numeric" step="15" min="15" id="f-dur" value="${it.dur}"></label></div>
+    <div class="btns"><button class="btn-soft" data-sheet="retime">🕐 Išsaugoti laiką</button><button class="btn-danger" data-sheet="del">🗑 ${it.kind === 'auto' ? 'Praleisti' : 'Ištrinti'}</button></div>`);
+}
+function workSheet() {
+  openSheet(`<h3 style="margin:0">💻 Darbas – ${dayName(view.date)}, ${fmtDate(view.date)}</h3>
+    <div class="hint" style="margin:0">Pvz. 09:00-13:00, 14:00-17:00. Tuščia – tą dieną nedirba.</div>` +
+    state.people.map(p => `<label>${esc(p.name)}<input id="f-work-${p.id}" value="${esc(workStr(p.id, view.date))}" placeholder="nedirba"></label>`).join('') +
+    `<div class="btns"><button class="btn-grad" data-sheet="save-work">Išsaugoti šiai dienai</button><button class="btn-soft" data-sheet="reset-work">Grąžinti įprastą</button></div>`);
+}
+function afterChange(dates, prefix) {
+  const msgs = [...new Set(dates)].flatMap(d => fixDay(d));
+  render();
+  if (prefix || msgs.length) toast([prefix, ...msgs].filter(Boolean).join(' · '));
+  return msgs;
+}
+sheetEl.addEventListener('click', e => {
+  if (e.target === sheetEl) return closeSheet();
+  const b = e.target.closest('[data-sheet]'); if (!b) return;
+  const a = b.dataset.sheet, it = sheetItem;
+  if (a === 'close') return closeSheet();
+  if (a === 'done') {
+    it.status = it.status === 'done' ? 'planned' : 'done';
+    const r = b.getBoundingClientRect(); if (it.status === 'done') confetti(r.left + r.width / 2, r.top);
+    closeSheet(); render(); if (it.status === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
+  }
+  if (a === 'move') {
+    const m = itemMeta(it); const ok = rescheduleOtherDay(it); closeSheet(); render();
+    toast(ok ? `${m.emoji} Perkelta → ${dayName(it.date)} ${toHM(it.start)}` : 'Per artimiausią savaitę laisvo laiko nerasta 😕');
+  }
+  if (a === 'retime') {
+    const d = $('#f-date').value, s = toMin($('#f-start').value), du = Math.max(15, +$('#f-dur').value || it.dur);
+    if (!d) return;
+    const old = it.date; it.date = d; it.start = s; it.dur = du; it.pinned = true;
+    closeSheet(); afterChange([d, old], '🕐 Laikas pakeistas');
+  }
+  if (a === 'del') { state.items = state.items.filter(x => x !== it); closeSheet(); render(); toast('Pašalinta'); }
+  if (a === 'save-work' || a === 'reset-work') {
+    state.people.forEach(p => { const k = p.id + '|' + view.date; if (a === 'reset-work') delete state.workOverride[k]; else state.workOverride[k] = $('#f-work-' + p.id).value.trim(); });
+    closeSheet(); afterChange([view.date], '💻 Darbo laikas atnaujintas');
+  }
+});
+
+// =============== ✨ Asistentas ===============
+const chat = { msgs: [], props: {} };
+const chatEl = $('#chat');
+const SUGG = ['Šiandien 13:00 susitikimas', 'Šiandien nesportuojam', 'Rytoj surf 7:00', 'Kas šiandien?', 'Milda penktadienį 18:00 kirpykla 1 val', 'Perkelk gym į rytoj'];
+function openChat() {
+  chatEl.classList.add('open');
+  if (!chat.msgs.length) botSay(`Labas! 👋 Parašykite paprastai, pvz.:<br>• <b>šiandien 13 val susitikimas</b><br>• <b>rytoj surf 7:00</b><br>• <b>šiandien nesportuojam</b> – perkelsiu<br>• <b>atlikom gym</b> – pažymėsiu ✓<br>• <b>kas rytoj?</b><br><span class="note">Galite ir padiktuoti – spauskite 🎤 klaviatūroje.</span>`);
+  $('#sugg').innerHTML = SUGG.map(s => `<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join('');
+  setTimeout(() => $('#ask').focus(), 320);
+}
+function closeChat() { chatEl.classList.remove('open'); $('#ask').blur(); }
+function botSay(html) { chat.msgs.push({ from:'bot', html }); renderChat(); }
+function renderChat() {
+  const box = $('#msgs');
+  box.innerHTML = chat.msgs.map(m => m.prop ? `<div class="msg wide">${propCard(chat.props[m.prop])}</div>` : `<div class="msg ${m.from}">${m.html}</div>`).join('');
+  box.scrollTop = box.scrollHeight;
+}
+const WD = ['pirmad','antrad','treciad','ketvirtad','penktad','sestad','sekmad'];
+function dateWord(s) {
+  if (/\bporyt/.test(s)) return addDays(today(), 2);
+  if (/\brytoj/.test(s)) return addDays(today(), 1);
+  for (let i = 0; i < 7; i++) if (s.includes(WD[i])) {
+    const diff = (i - dayIdx(today()) + 7) % 7; let d = addDays(today(), diff);
+    if (new RegExp('kit\\w*\\s+' + WD[i]).test(s)) d = addDays(d, 7);
+    return d;
+  }
+  const m = s.match(/\b(\d{1,2})\s*d\b/);
+  if (m) { const n = new Date(); let d = new Date(n.getFullYear(), n.getMonth(), +m[1]); if (ymd(d) < today()) d = new Date(n.getFullYear(), n.getMonth() + 1, +m[1]); return ymd(d); }
+  if (/\bsiandien/.test(s)) return today();
+  return null;
+}
+function parseDate(t) {
+  const tm = t.match(/\b(?:i|iki|ant)\s+((?:kit\w*\s+)?(?:rytoj|poryt|pirmad|antrad|treciad|ketvirtad|penktad|sestad|sekmad)\w*)/);
+  const target = tm ? dateWord(tm[1]) : null;
+  const d = dateWord(tm ? t.replace(tm[0], ' ') : t);
+  return { date: d || target || today(), found: !!d, target };
+}
+function parseTime(t) {
+  const r = { start:null, end:null, dur:null, soft:false };
+  const hm = (h, m) => { h = +h; m = +(m || 0); return h <= 24 && m < 60 ? h * 60 + m : null; };
+  let m = t.match(/(?:nuo\s*)?\b(\d{1,2})(?:[:.](\d{2}))?\s*(?:val\w*\s*)?(?:-|–|iki)\s*(\d{1,2})(?:[:.](\d{2}))?(?!\s*d\b)(?!\d)/);
+  if (m) { const a = hm(m[1], m[2]), b = hm(m[3], m[4]); if (a != null && b != null && b > a) { r.start = a; r.end = b; r.dur = b - a; t = t.replace(m[0], ' '); } }
+  if (r.start == null) { m = t.match(/\b(\d{1,2})[:.](\d{2})\b/); if (m) { r.start = hm(m[1], m[2]); t = t.replace(m[0], ' '); } }
+  m = t.match(/(\d+)\s*min/); if (m) { r.dur = r.dur || +m[1]; t = t.replace(m[0], ' '); }
+  if (/pusantros val/.test(t)) r.dur = r.dur || 90; else if (/pusval/.test(t)) r.dur = r.dur || 30;
+  const re = /(?<![\d:.,])(\d{1,2}(?:[.,]5)?)\s*(val\w*|h)\b/g; let x;
+  while ((x = re.exec(t))) {
+    const num = parseFloat(x[1].replace(',', '.')), word = x[2], before = t.slice(Math.max(0, x.index - 14), x.index);
+    const isDur = /[.,]/.test(x[1]) || /(truk|trukm|ilg|apie|ant|uz)\w*\s*$/.test(before) || /^(valandoms|valandai|valandas|valandu)$/.test(word) || (r.start != null && num <= 6);
+    if (isDur) { if (!r.dur) r.dur = Math.round(num * 60); } else if (r.start == null) r.start = num * 60;
+  }
+  if (r.start == null) { m = t.match(/\b(\d{1,2})\s*-\s*(a|ta|ia|ja)\b/); if (m) r.start = +m[1] * 60; }
+  if (r.start == null) {
+    if (/\bryte\b|\bryto\b/.test(t)) { r.start = 9 * 60; r.soft = true; }
+    else if (/per pietus|pietums/.test(t)) { r.start = 13 * 60; r.soft = true; }
+    else if (/po pietu|popiet/.test(t)) { r.start = 15 * 60; r.soft = true; }
+    else if (/vakare|\bvakara\b/.test(t)) { r.start = 19 * 60; r.soft = true; }
+  }
+  if (r.start != null && r.start < 6 * 60 && !/nakt|\bryto\b/.test(t)) r.start += 12 * 60;
+  if (r.start != null && r.start >= 1440) r.start = null;
+  return r;
+}
+function parseWho(t) {
+  const [A, B] = state.people;
+  const a = norm(A.name).slice(0, 4), b = norm(B.name).slice(0, 4);
+  const ha = a.length >= 3 && t.includes(' ' + a), hb = b.length >= 3 && t.includes(' ' + b);
+  if (/\b(abu|abudu|abi|abidvi|mes|mums|mudu|mudviem|musu|turim|turime|einam|eisim|darom)\b/.test(t) || (ha && hb)) return ['a', 'b'];
+  if (ha) return ['a']; if (hb) return ['b'];
+  if (/\b(as|man|turiu|mano|einu|eisiu)\b/.test(t) && Me()) return [Me()];
+  return null;
+}
+const SYN = { together:['laikas kartu','laiko kartu','laika kartu','prasming','pasimatym','romant','kartu laik'], gym:['gym','sporto sal','treniruokl','sporto kluba'],
+  sport:['sport','begi','begim','joga','jogos'], surf:['surf','bang'], alone:['laikas sau','laiko sau','laika sau','laiku sau','su savim','vienum','sau laik'] };
+function findAct(t) {
+  let best = null, len = 0;
+  for (const act of state.acts) {
+    const keys = (SYN[act.id] || []).concat(norm(act.name).split(/\s+/).filter(w => w.length >= 4).map(w => w.slice(0, 5)));
+    if (!SYN[act.id]) keys.push(norm(act.name));
+    for (const k of keys) if (k && t.includes(k) && k.length > len) { best = act; len = k.length; }
+  }
+  return best;
+}
+const STOP = /^(siandien\w*|rytoj\w*|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
+function titleFrom(raw) {
+  const names = state.people.map(p => norm(p.name).slice(0, 4));
+  const words = raw.replace(/[!?,]/g, ' ').split(/\s+/).filter(w => {
+    const n = norm(w).replace(/[^a-z0-9:.-]/g, '');
+    if (!n) return false;
+    if (/^\d/.test(n) || /^-\w+$/.test(n)) return false;
+    if (STOP.test(n)) return false;
+    if (names.some(x => x.length >= 3 && n.startsWith(x))) return false;
+    return true;
+  });
+  const s = words.join(' ').trim();
+  return s ? s[0].toUpperCase() + s.slice(1) : 'Susitikimas';
+}
+const EMOJI = [[/susitik|meet/, '🤝'], [/gydytoj|dantist|daktar|klinik/, '🩺'], [/skambut|call|zoom|teams|pokalb/, '📞'], [/kirpykl|kirpim|grozi|manikiur/, '💇'],
+  [/vakarien|piet|pusryci|restoran|kavin|kava/, '🍽️'], [/gimtadien|svent|vakarel/, '🎉'], [/kelion|skryd|lektuv|oro uost|autobus/, '✈️'], [/pirkin|parduotuv|turg/, '🛒'], [/kin|filma/, '🎬'], [/masaz|spa/, '💆']];
+const emojiFor = t => (EMOJI.find(([re]) => re.test(norm(t))) || [0, '📌'])[1];
+
+function dayList(date) {
+  const its = state.items.filter(it => it.date === date).sort((a, b) => a.start - b.start);
+  if (!its.length) return `${dayName(date)} nieko nesuplanuota – laisva diena 🌴`;
+  return `<b>${dayName(date)}, ${fmtDate(date)}:</b><br>` + its.map(it => { const m = itemMeta(it); return `${toHM(it.start)} ${m.emoji} ${esc(m.name)} <span class="note">· ${esc(whoLabel(it.who))}${it.status === 'done' ? ' ✓' : ''}</span>`; }).join('<br>');
+}
+
+function handle(raw) {
+  raw = raw.trim(); if (!raw) return;
+  chat.msgs.push({ from:'me', html: esc(raw) });
+  const t = ' ' + norm(raw).replace(/[!,]/g, ' ') + ' ';
+  const dI = parseDate(t), tm = parseTime(t), who = parseWho(t), act = findAct(t);
+  if (/pagalb|ka moki|help|kaip naud/.test(t)) return botSay('Galiu: įtraukti įvykį („rytoj 10:00 zoom 30 min“), perkelti („šiandien nesportuojam“, „perkelk surf į šeštadienį“), pažymėti ✓ („atlikom gym“) ar parodyti planą („kas rytoj?“).');
+  if ((/\?/.test(raw) || /\b(kas|ka) (siandien|rytoj|poryt|veik|turim|laukia)|planas|koks rytoj|kokia diena/.test(t)) && tm.start == null) return botSay(dayList(dI.date));
+  const skip = /(nesport|nenor|neisim|neeisim|neis\b|neisiu|neeisiu|atsauk|perkel|praleid|nebus|negal|ne siandien|nespes|nesp|neturim laiko)/.test(t);
+  if (/(darbas|dirbu|dirbam|dirbsiu|dirbsim|nedirb)/.test(t) && !act) return workChat(t, dI, tm, who);
+  if (act && skip) return skipChat(act, dI, tm, who, t);
+  if (act && /(atlik|padar|buvom|buvau|nuejom|nuejau|baig|isbuv|sportavom|surfinom)/.test(t)) return doneChat(act, dI, who);
+  if (act) return propose({ kind:'act', actId: act.id, emoji: act.emoji, title: act.name, color: act.color, date: dI.date, start: tm.start, dur: tm.dur || act.dur, durKnown: true, who: who || groupsFor(act)[0], soft: tm.soft });
+  if (skip && !act) return botSay('Kurį užsiėmimą perkelti? Pvz. „šiandien nesportuojam“ arba „perkelk surf į rytoj“ 🙂');
+  propose({ kind:'event', title: titleFrom(raw), emoji: emojiFor(raw), color:'#475569', date: dI.date, start: tm.start, dur: tm.dur || 60, durKnown: !!tm.dur, who: who || (Me() ? [Me()] : ['a', 'b']), soft: tm.soft });
+}
+
+function skipChat(act, dI, tm, who, t) {
+  const pids = who || null;
+  if (dI.target) {
+    const from = dI.found ? [dI.date] : [...Array(7)].map((_, i) => addDays(today(), i)).filter(d => d !== dI.target);
+    const match = x => x.actId === act.id && x.status === 'planned' && (!pids || overlaps(x.who, pids));
+    // imame pirmą dieną, kurioje šis užsiėmimas yra ir kurio dar nėra tikslinėje dienoje
+    const movable = x => match(x) && from.includes(x.date) && countOn(act.id, x.who, dI.target, x.id) === 0;
+    const first = state.items.filter(movable).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start)[0];
+    if (!first) {
+      const already = state.items.some(x => match(x) && x.date === dI.target);
+      return botSay(already ? `${dayName(dI.target)} ${act.emoji} ${esc(act.name)} jau suplanuotas 👍` : `Nerandu suplanuoto ${act.emoji} ${esc(act.name)}, kurį galėčiau perkelti 🤔`);
+    }
+    const its = state.items.filter(x => movable(x) && x.date === first.date);
+    const res = [];
+    for (const it of its) {
+      const who = it.who.length === 1 ? ' (' + esc(person(it.who[0]).name) + ')' : '';
+      if (tm.start != null) { it.date = dI.target; it.start = tm.start; it.pinned = true; res.push(`${act.emoji} ${esc(act.name)}${who} → <b>${dayName(it.date)} ${toHM(it.start)}</b>`); }
+      else if (rescheduleOtherDay(it, dI.target)) res.push(`${act.emoji} ${esc(act.name)}${who} → <b>${dayName(it.date)} ${toHM(it.start)}</b>`);
+      else res.push(`${act.emoji} ${esc(act.name)}${who} – ${dayName(dI.target).toLowerCase()} netelpa 😕`);
+    }
+    const ms = afterChange([dI.target]);
+    const okN = res.filter(x => x.includes('→')).length;
+    return botSay((okN ? 'Perkėliau ✅<br>' : 'Nepavyko perkelti – tą dieną nėra laisvo laiko. Parašykite su valanda, pvz. „perkelk gym į rytoj 7:00“.<br>') + res.join('<br>') + (ms.length ? '<br><span class="note">Pastumta: ' + esc(ms.join(', ')) + '</span>' : ''));
+  }
+  const its = state.items.filter(x => x.actId === act.id && x.date === dI.date && x.status === 'planned' && (!pids || overlaps(x.who, pids)));
+  if (!its.length) return botSay(`${dayName(dI.date)} ${act.emoji} ${esc(act.name)} ir taip nesuplanuotas 👍`);
+  const res = its.map(it => rescheduleOtherDay(it) ? `${act.emoji} ${esc(act.name)} → <b>${dayName(it.date)} ${toHM(it.start)}</b>` : `${act.emoji} ${esc(act.name)} – šią savaitę vietos neradau, pašalinau`);
+  its.forEach(it => { if (it.date === dI.date) state.items = state.items.filter(x => x !== it); });
+  render();
+  botSay('Jokių problemų 😌 Perkėliau:<br>' + res.join('<br>'));
+}
+function doneChat(act, dI, who) {
+  const it = state.items.find(x => x.actId === act.id && x.date === dI.date && x.status === 'planned' && (!who || overlaps(x.who, who)));
+  if (!it) return botSay(`${dayName(dI.date)} nerandu suplanuoto ${act.emoji} ${esc(act.name)}. Įtraukti kaip papildomą? Parašykite pvz. „${esc(act.name.toLowerCase())} šiandien 10:00“.`);
+  it.status = 'done'; render(); confetti(innerWidth / 2, innerHeight * .4);
+  botSay(`Šaunuoliai! 🎉 ${act.emoji} <b>${esc(act.name)}</b> pažymėtas ✓`);
+}
+function workChat(t, dI, tm, who) {
+  const pids = who || (Me() ? [Me()] : ['a', 'b']);
+  const val = /nedirb/.test(t) ? '' : (tm.start != null ? toHM(tm.start) + '-' + toHM(Math.min(1440, tm.end || tm.start + (tm.dur || 240))) : null);
+  if (val === null) return botSay('Nurodykite darbo laiką, pvz. „rytoj dirbu 10-15“ arba „penktadienį nedirbu“.');
+  pids.forEach(p => state.workOverride[p + '|' + dI.date] = val);
+  const ms = afterChange([dI.date]);
+  botSay(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(dI.date)}: ${val ? 'dirba ' + val.replace('-', '–') : 'nedirba 🎉'}${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
+}
+
+function propose(p) {
+  p.id = uid(); p.state = 'open';
+  if (p.kind === 'act') {
+    const cand = state.items.filter(x => x.actId === p.actId && x.status === 'planned' && weekStart(x.date) === weekStart(p.date) && x.date >= today() && overlaps(x.who, p.who))
+      .sort((a, b) => (a.date === p.date ? -1 : 0) - (b.date === p.date ? -1 : 0) || a.date.localeCompare(b.date));
+    if (cand[0]) p.moveId = cand[0].id;
+  }
+  if (p.start == null) {
+    const s = findSlot({ from:'08:00', to:'22:00' }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
+    if (s == null) { botSay(`${dayName(p.date)} laisvo ${fmtDur(p.dur)} lango nerandu 😕 Nurodykite laiką, pvz. „${dayName(p.date).toLowerCase()} 15:00“.`); return; }
+    p.start = s; p.suggested = true;
+  }
+  chat.props[p.id] = p; chat.msgs.push({ prop: p.id }); renderChat();
+}
+function conflicts(p) {
+  const out = [];
+  p.who.forEach(pid => workRanges(pid, p.date).forEach(([a, b]) => { if (p.start < b && p.start + p.dur > a) out.push('💻 ' + person(pid).name + ' dirba ' + toHM(a) + '–' + toHM(b)); }));
+  state.items.forEach(it => {
+    if (it.id === p.moveId || it.date !== p.date || !overlaps(it.who, p.who)) return;
+    if (p.start < it.start + it.dur && p.start + p.dur > it.start) { const m = itemMeta(it); out.push(m.emoji + ' ' + m.name + ' ' + toHM(it.start) + (it.kind === 'auto' && !it.pinned ? ' – pastumsiu' : ' – kertasi!')); }
+  });
+  p.who.forEach(pid => { const [w, s] = awake(pid); if (p.start < w || p.start + p.dur > s) out.push('😴 ' + person(pid).name + ' tuo metu miega'); });
+  return out;
+}
+function propCard(p) {
+  const head = `<div class="ph" style="${cvars(p.color)}"><span class="e">${p.emoji}</span><div><b>${esc(p.title)}</b><small>${dayName(p.date)}, ${fmtDate(p.date)} · ${toHM(p.start)}–${toHM(p.start + p.dur)}</small></div></div>`;
+  if (p.state !== 'open') return `<div class="prop closed" style="${cvars(p.color)}">${head}<div class="note">${p.state === 'added' ? '✅ Įtraukta' + (p.moved ? ' · pastumta: ' + esc(p.moved) : '') : '✕ Atšaukta'}</div></div>`;
+  const [A, B] = state.people;
+  const whoBtn = (ids, label) => `<button data-pa="who" data-v="${ids.join(',')}" data-pid="${p.id}" class="${sameWho(p.who, ids) ? 'on' : ''}">${label}</button>`;
+  const durs = [30, 60, 90, 120, 180];
+  const cf = conflicts(p);
+  const mv = p.moveId && state.items.find(x => x.id === p.moveId);
+  return `<div class="prop" style="${cvars(p.color)}">${head}
+    ${p.suggested ? '<div class="note">💡 Laiko nenurodėte – parinkau artimiausią laisvą. Galite pakeisti.</div>' : p.soft ? '<div class="note">💡 Parinkau apytikslį laiką – pakeiskite, jei reikia.</div>' : ''}
+    ${mv && mv.date !== p.date || (mv && mv.start !== p.start) ? `<div class="note">↪︎ Perkelsiu iš ${dayName(mv.date)} ${toHM(mv.start)}</div>` : ''}
+    <div class="lbl">KAS</div><div class="pchips">${whoBtn(['a'], esc(A.name))}${whoBtn(['b'], esc(B.name))}${whoBtn(['a', 'b'], 'Abu 👫')}</div>
+    <div class="lbl">PRADŽIA</div><div class="pchips"><button data-pa="shift" data-v="-30" data-pid="${p.id}">−30</button><input type="time" data-pf="start" data-pid="${p.id}" value="${toHM(p.start)}"><button data-pa="shift" data-v="30" data-pid="${p.id}">+30</button>
+      <input type="date" data-pf="date" data-pid="${p.id}" value="${p.date}"></div>
+    <div class="lbl">TRUKMĖ ${!p.durKnown ? '<span class="note" style="font-weight:500">– nežinote? Palieku 1 val, vėliau galėsite pakeisti</span>' : ''}</div>
+    <div class="pchips">${durs.map(d => `<button data-pa="dur" data-v="${d}" data-pid="${p.id}" class="${p.dur === d ? 'on' : ''}">${fmtDur(d)}</button>`).join('')}</div>
+    ${cf.length ? `<div class="conf">⚠️ ${cf.map(esc).join('<br>⚠️ ')}</div>` : ''}
+    <div class="btns"><button class="btn-grad" data-pa="add" data-pid="${p.id}">✓ Įtraukti</button><button class="btn-soft" data-pa="cancel" data-pid="${p.id}">Atšaukti</button></div></div>`;
+}
+function applyProp(p, btn) {
+  let it;
+  if (p.kind === 'act' && p.moveId && (it = state.items.find(x => x.id === p.moveId))) Object.assign(it, { date: p.date, start: p.start, dur: p.dur, who: [...p.who], pinned: true, status:'planned' });
+  else if (p.kind === 'act') state.items.push(it = { id: uid(), kind:'auto', actId: p.actId, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned', pinned: true });
+  else state.items.push(it = { id: uid(), kind:'event', title: p.title, emoji: p.emoji, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned' });
+  const ms = fixDay(p.date);
+  p.state = 'added'; p.moved = ms.join(', ');
+  view.date = p.date; render(); renderChat();
+  const r = btn.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top);
+  botSay(['Įtraukta! 🙌', 'Padaryta ✨', 'Užrašiau 📝', 'Yra! 🎯'][Math.floor(Math.random() * 4)] + (ms.length ? ' Kad tilptų, pastūmiau: ' + esc(ms.join(', ')) : ''));
+}
+chatEl.addEventListener('click', e => {
+  if (e.target === chatEl) return closeChat();
+  const c = e.target.closest('[data-chat],[data-sugg],[data-pa]'); if (!c) return;
+  if (c.dataset.chat === 'close') return closeChat();
+  if (c.dataset.sugg) { handle(c.dataset.sugg); return; }
+  const p = chat.props[c.dataset.pid]; if (!p || p.state !== 'open') return;
+  const a = c.dataset.pa;
+  if (a === 'who') p.who = c.dataset.v.split(',');
+  if (a === 'dur') { p.dur = +c.dataset.v; p.durKnown = true; }
+  if (a === 'shift') p.start = Math.max(0, Math.min(1440 - p.dur, p.start + +c.dataset.v));
+  if (a === 'cancel') p.state = 'cancelled';
+  if (a === 'add') return applyProp(p, c);
+  renderChat();
+});
+chatEl.addEventListener('change', e => {
+  const el = e.target, p = chat.props[el.dataset.pid]; if (!p || !el.dataset.pf) return;
+  if (el.dataset.pf === 'start' && el.value) { p.start = toMin(el.value); p.suggested = false; p.soft = false; }
+  if (el.dataset.pf === 'date' && el.value) p.date = el.value;
+  renderChat();
+});
+$('#composer').addEventListener('submit', e => { e.preventDefault(); const v = $('#ask').value; $('#ask').value = ''; handle(v); });
+
+// =============== Paspaudimai ===============
+$('#tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.tab === 'ai') return openChat();
+  view.tab = b.dataset.tab; render(); window.scrollTo({ top: 0 });
+});
+$('#main').addEventListener('click', e => {
+  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me]'); if (!t) return;
+  if (t.dataset.nav) { view.date = addDays(view.date, +t.dataset.nav); view.warn = null; render(); }
+  else if (t.dataset.date) { view.date = t.dataset.date; render(); }
+  else if (t.dataset.item) itemSheet(t.dataset.item);
+  else if (t.dataset.me) { ls.set('rutina.me', t.dataset.me); render(); toast('Labas, ' + person(t.dataset.me).name + '! 👋'); }
+  else if (t.dataset.act === 'ai') openChat();
+  else if (t.dataset.act === 'work') workSheet();
+  else if (t.dataset.act === 'gen') { generateWeek(weekStart(view.date)); render(); toast('🔀 Savaitė perdėliota'); }
+  else if (t.dataset.act === 'ics') exportIcs(weekStart(view.date));
+  else if (t.dataset.set === 'create') Sync.join(newRoomCode(), true);
+  else if (t.dataset.set === 'join') { const r = roomFromText($('#joinlink').value); if (!r) toast('Nuoroda neatpažinta'); else if (confirm('Prisijungti prie bendro plano? Šio telefono planas bus pakeistas bendru.')) Sync.join(r, false); }
+  else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
+  else if (t.dataset.set === 'leave') { if (confirm('Atjungti šį telefoną nuo bendro plano?')) { Sync.leave(); render(); } }
+  else if (t.dataset.set) {
+    const i = +t.dataset.i, A = state.acts;
+    if (t.dataset.set === 'up' && i > 0) [A[i - 1], A[i]] = [A[i], A[i - 1]];
+    if (t.dataset.set === 'down' && i < A.length - 1) [A[i + 1], A[i]] = [A[i], A[i + 1]];
+    if (t.dataset.set === 'del' && confirm('Šalinti „' + A[i].name + '“?')) A.splice(i, 1);
+    if (t.dataset.set === 'add') A.push({ id: uid(), emoji:'⭐', name:'Naujas', who:'both', perWeek:1, dur:60, from:'08:00', to:'21:00', color:'#f97316', on:true });
+    if (t.dataset.set === 'reset' && confirm('Ištrinti visus nustatymus ir planus?')) { state = DEFAULT(); view.warn = null; }
+    render();
+  }
+});
+$('#main').addEventListener('change', e => {
+  const el = e.target, k = el.dataset.k; if (!k) return;
+  const path = k.split('.'); let o = state;
+  for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
+  o[path[path.length - 1]] = el.type === 'checkbox' ? el.checked : el.hasAttribute('data-num') ? (+el.value || 0) : el.value;
+  save();
+  if (/^people\.\d\.(name|color)$/.test(k) || /\.(color|emoji)$/.test(k)) render();
+});
+
+// =============== Paleidimas ===============
+(async () => {
+  const m = location.hash.match(/k=([A-Za-z0-9_-]{18,})/);
+  if (m) { history.replaceState(null, '', location.pathname); if (CONFIG.url && m[1] !== Sync.room) { await Sync.join(m[1], false); toast('Prisijungta prie bendro plano 👫'); } }
+  if (Sync.enabled()) await Sync.pull();
+  render();
+  setInterval(() => { if (!document.hidden) { Sync.pull(); if (view.tab === 'day' && !sheetEl.classList.contains('open')) renderDay($('#main')); } }, 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull(); render(); } });
+  if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
