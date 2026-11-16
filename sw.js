@@ -1,8 +1,16 @@
 // Leidžia programai atsidaryti ir be interneto + rodo pranešimus (push).
-const CACHE = 'rutina-v2';
+const CACHE = 'rutina-v3';
+const BADGE = 'rutina-badge';
+// Skaičiukas ant ikonos: kiek naujų pranešimų nuo paskutinio atidarymo
+const badgeKey = () => new Request(self.registration.scope + '__badge');
+async function getN() { try { const r = await (await caches.open(BADGE)).match(badgeKey()); return r ? +(await r.text()) || 0 : 0; } catch (_) { return 0; } }
+async function setN(n) { try { await (await caches.open(BADGE)).put(badgeKey(), new Response(String(n))); } catch (_) {} }
+self.addEventListener('message', e => {
+  if (e.data === 'clearBadge') e.waitUntil(setN(0)); // rodomą skaičių nustato pati programa
+});
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
-self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== BADGE).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
   if (e.request.method !== 'GET' || u.origin !== location.origin) return; // duomenų bazės užklausų neliečiam
@@ -19,7 +27,8 @@ self.addEventListener('push', e => {
       body: d.body || '', tag: d.tag || undefined, renotify: !!d.tag,
       icon: 'icon-192.png', badge: 'icon-192.png', data: { url: d.url || './' },
     });
-    if (d.badge && self.navigator.setAppBadge) { try { await self.navigator.setAppBadge(d.badge); } catch (_) {} }
+    const n = (await getN()) + 1; await setN(n);
+    try { await self.navigator.setAppBadge?.(n); } catch (_) {}
   })());
 });
 self.addEventListener('notificationclick', e => {
