@@ -522,12 +522,67 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 .hrt{position:fixed;z-index:81;pointer-events:none;font-size:26px}
 #upd button{background:#fff;color:#7c3aed;font-weight:800;border-radius:12px;padding:8px 14px}
 #upd .x{background:rgba(255,255,255,.2);color:#fff;padding:8px 10px}
+/* ---------- 🧠 AI rašo… ---------- */
+.typing{display:inline-flex;gap:4px;padding:2px 0}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:pulse2 1s ease-in-out infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+.aiok{font-size:11px;color:var(--muted);margin-left:4px}
+#micBtn.rec{background:#ef4444;color:#fff;animation:pulse2 1s ease-in-out infinite}
+.micbig{display:flex;align-items:center;gap:12px;width:100%;margin:0 0 14px;padding:14px 16px;border-radius:18px;background:var(--card);box-shadow:var(--shadow2);text-align:left}
+.micbig span{font-size:26px;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--grad);flex:none}
+.micbig b{display:block;font-size:16px}.micbig small{color:var(--muted);font-size:13px}
+#liteBtn{width:40px;height:40px;border-radius:50%;padding:0;font-size:17px;background:var(--card);box-shadow:var(--shadow2);flex:none}
+.lite-card .seg button{padding:12px 6px}
+/* ---------- 🍃 LITE: rami, švari sąsaja – be gradientų, animacijų ir mirgėjimo ---------- */
+body.lite{--grad:#3b6fd8;--shadow:none;--shadow2:0 0 0 1px var(--line);--glass:var(--card);--r:14px;--bg:#f5f5f7;--card:#fff;--card2:#f2f2f5;--line:#e3e3e8;--text:#1c1c1e;--muted:#6e6e73;--font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif}
+@media (prefers-color-scheme: dark){body.lite{--grad:#5b8def;--bg:#000;--card:#1c1c1e;--card2:#2c2c2e;--line:#38383a;--text:#f2f2f7;--muted:#98989f}}
+body.lite *,body.lite *::before,body.lite *::after{animation:none!important;transition:none!important}
+body.lite .hello h1{background:none;color:var(--text);-webkit-text-fill-color:currentColor;font-weight:700}
+body.lite .hello small{font-weight:400}
+body.lite nav#tabs{-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:20px;box-shadow:0 0 0 1px var(--line)}
+body.lite nav#tabs button b{filter:none;opacity:.55;transform:none!important}
+body.lite nav#tabs button.on b{opacity:1}
+body.lite nav#tabs .fab{width:54px;height:54px;margin-top:-18px;font-size:24px;box-shadow:0 0 0 4px var(--bg)}
+body.lite .btn-grad,body.lite .strip button.on,body.lite .pchips button.on{box-shadow:none}
+body.lite .strip button{box-shadow:none;border:1px solid var(--line)}
+body.lite .strip button.today b{color:var(--grad)}
+body.lite .hero,body.lite .ag-card,body.lite .sh-hero,body.lite .prop .ph,body.lite .score{background:var(--card);color:var(--text);box-shadow:none;border:1px solid var(--line);border-left:4px solid var(--c,var(--grad))}
+body.lite .hero::after{display:none}
+body.lite .hero small,body.lite .hero .meta,body.lite .ag-card .tx small,body.lite .sh-hero small,body.lite .prop .ph small,body.lite .score p{color:var(--muted);opacity:1}
+body.lite .hero .bar{background:var(--line)} body.lite .hero .bar i{background:var(--c,var(--grad))}
+body.lite .hero .big{filter:none;font-size:38px}
+body.lite .ag-card.done{filter:none;opacity:.55}
+body.lite .ag-card.work{background:var(--card2);border:0}
+body.lite .ag-card.gap{border:1px dashed var(--line);border-left:1px dashed var(--line)}
+body.lite .ag-card.gap b,body.lite .add-big{color:var(--grad)}
+body.lite .add-big{border:1px dashed var(--line)}
+body.lite .item>div{background:color-mix(in srgb,var(--c) 16%,var(--card));color:var(--text);box-shadow:none;border-left:3px solid var(--c)}
+body.lite .blk.work{background:var(--card2)}
+body.lite .wrow .ic,body.lite .pick button,body.lite .tile{background:var(--card2);color:var(--text)}
+body.lite .warn{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+body.lite .ring{background:conic-gradient(var(--grad) calc(var(--p)*1%),var(--line) 0)}
+body.lite .card h3 .tag{background:var(--card2);color:var(--muted)}
+body.lite .prop{border:1px solid var(--line)}
+body.lite .msg.me,body.lite .mrow.mine .mb{background:var(--grad)}
+body.lite .chiprow button,body.lite .pchips button,body.lite .wkhead button{box-shadow:none;border:1px solid var(--line)}
+body.lite .sheet{background:rgba(0,0,0,.3)}
+body.lite .mcomp{-webkit-backdrop-filter:none;backdrop-filter:none;box-shadow:0 0 0 1px var(--line)}
+body.lite .lite-hide{display:none!important}
+body.lite #hello{background:var(--bg);color:var(--text)}
+body.lite #hello button{background:var(--grad);color:#fff;box-shadow:none}
+body.lite #upfx{background:var(--bg);color:var(--text)}
+body.lite .cf,body.lite .p,body.lite .hrt{display:none}
+body.lite .surfcard,body.lite .guide-btn,body.lite .guide-btn.alt{background:var(--card);color:var(--text);box-shadow:none;border:1px solid var(--line);border-left:4px solid #0ea5e9}
+body.lite .surfcard small,body.lite .guide-btn small{color:var(--muted);opacity:1}
+body.lite .nowc.on{outline:2px solid var(--grad)}
+body.lite .micbig{box-shadow:none;border:1px solid var(--line)}
 </style>
 </head>
 <body>
 <header class="top">
   <div class="hello"><small id="hiDate"></small><h1 id="hi">Mūsų rutina</h1></div>
   <div id="sync"></div>
+  <button id="liteBtn" aria-label="Lite režimas">🍃</button>
   <button id="bell" aria-label="Kas nutiko">🔔<i id="bellN" class="bdg"></i></button>
   <div class="pair" id="pair"></div>
 </header>
@@ -547,6 +602,7 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
     <div id="msgs"></div>
     <div class="sugg" id="sugg"></div>
     <form class="composer" id="composer" autocomplete="off">
+      <button type="button" id="micBtn" class="btn-soft" aria-label="Pasakyti balsu">🎤</button>
       <input id="ask" enterkeyhint="send" placeholder="pvz. šiandien 13:00 susitikimas">
       <button class="btn-grad" aria-label="Siųsti">↑</button>
     </form>
@@ -557,8 +613,13 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.3';
+const APP_VERSION = '2.4';
 const WHATS_NEW = [
+  '🎤 Planuokite balsu: paspauskite 🎤 ir pasakykite lietuviškai – „rytoj dirbsiu nuo 11 iki 12 su Milda“',
+  '🧠 Asistentas su tikru AI (Claude) – supranta laisvą kalbą ir kelis dalykus vienu sakiniu',
+  '🍃 Lite versija: viršuje 🍃 – rami, švari sąsaja be animacijų ir margumo',
+];
+const WHATS_NEW_OLD = [
   '🧠 Išmanesnis asistentas: „darbo dienomis 9 am–11 am“, „su Milda“, „1,5 val“, „rytoj 10“, „lapkričio 25“…',
   '✈️ Kelionės dienos: „skrydis 27 d. iš Lomboko į Kuala Lumpūrą“ – tą dieną veiklų nededa',
   '🗺️ Savaitės žemėlapis: visa jūsų abiejų savaitė viename ekrane',
@@ -654,6 +715,14 @@ let lastSaved = body(state);
 const save = () => { const s = body(state); if (s === lastSaved) return; lastSaved = s; if (Me()) state.lastBy = Me(); ls.set(KEY, JSON.stringify(state)); Sync.schedule(); };
 const view = { tab:'day', date: today(), warn: null };
 const Me = () => ls.get('rutina.me') || '';
+// 🍃 Lite režimas – kiekvienam telefonui atskirai (Pauliui gali būti Lite, Mildai – pilnas)
+const LITE = () => ls.get('rutina.lite') === '1';
+function applyLite() {
+  document.body.classList.toggle('lite', LITE());
+  const b = document.getElementById('liteBtn'); if (b) { b.textContent = LITE() ? '✨' : '🍃'; b.setAttribute('aria-label', LITE() ? 'Įjungti pilną versiją' : 'Įjungti Lite versiją'); }
+}
+function setLite(on) { ls.set('rutina.lite', on ? '1' : null); applyLite(); render(); haptic(); toast(on ? '🍃 Lite: rami, paprasta sąsaja' : '✨ Pilna versija su spalvomis'); }
+applyLite();
 
 const person = id => state.people.find(p => p.id === id);
 const actById = id => state.acts.find(a => a.id === id);
@@ -949,6 +1018,7 @@ function toastUndo(msg) {
   };
 }
 function confetti(x = innerWidth / 2, y = innerHeight / 2) {
+  if (LITE()) return;
   const C = ['#6366f1','#a855f7','#ec4899','#f59e0b','#10b981','#0ea5e9'];
   for (let i = 0; i < 36; i++) {
     const d = document.createElement('i'); d.className = 'cf'; d.style.left = x + 'px'; d.style.top = y + 'px'; d.style.background = C[i % C.length];
@@ -1001,6 +1071,7 @@ function announceUpdate() {
   if (prev && prev !== APP_VERSION) updateShow();
 }
 function particles(n, set, cx = innerWidth / 2, cy = innerHeight * .42) {
+  if (LITE()) return;
   for (let i = 0; i < n; i++) {
     const p = document.createElement('span'); p.className = 'p'; p.textContent = set[i % set.length];
     p.style.left = cx + 'px'; p.style.top = cy + 'px'; p.style.fontSize = (14 + Math.random() * 26) + 'px';
@@ -1041,8 +1112,13 @@ function heartbeat() { tone(70, 0, .16, 'sine', .45, 45); tone(62, .2, .18, 'sin
 function updateShow() {
   let d = $('#upfx');
   if (!d) { d = document.createElement('div'); d.id = 'upfx'; document.body.appendChild(d); }
-  d.innerHTML = '<div class="uh beat" role="button" aria-label="Paliesk širdį">❤️</div><small class="tap">Paliesk širdį 💥</small>';
   const news = Array.isArray(WHATS_NEW) ? WHATS_NEW : [WHATS_NEW];
+  if (LITE()) { // 🍃 Lite – be širdies, garsų ir sprogimų: tik ramus sąrašas
+    d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2><ul>${news.map(x => `<li>${esc(x)}</li>`).join('')}</ul><button>Gerai</button></div>`;
+    d.querySelector('button').onclick = () => d.remove();
+    ls.set('rutina.fx', null); return;
+  }
+  d.innerHTML = '<div class="uh beat" role="button" aria-label="Paliesk širdį">❤️</div><small class="tap">Paliesk širdį 💥</small>';
   let done = false;
   const go = () => {
     if (done) return; done = true;
@@ -1080,6 +1156,7 @@ const fmtAgo = ts => { const m = Math.round((Date.now() - ts) / 60000); return m
 
 // =============== Mildos pasisveikinimas ❤️ ===============
 function heartRain(n = 30) {
+  if (LITE()) return;
   for (let i = 0; i < n; i++) {
     const h = document.createElement('span'); h.className = 'hrt';
     h.textContent = ['❤️','💖','💕','😘','💗'][i % 5];
@@ -1120,6 +1197,7 @@ function render() {
   save();
 }
 $('#bell').addEventListener('click', feedSheet);
+$('#liteBtn').addEventListener('click', () => setLite(!LITE()));
 function badge() {
   const me = Me(), readAt = +(ls.get('rutina.readAt') || 0);
   const n = (state.messages || []).filter(m => m.by !== me && m.at > readAt).length;
@@ -1228,6 +1306,14 @@ function feedSheet() {
   ls.set('rutina.logRead', String(Date.now())); bell();
 }
 // =============== 📖 Vadovas: visos funkcijos (naudoja ir ✨ asistentas) ===============
+const HELP_NEW = [
+  { e:'🎤', t:'Kaip planuoti balsu?', k:['balsu','balsas','audio','mikrofon','diktuot','pasakyti','irasa','kalbet'],
+    a:'Dienos ekrane paspauskite <b>🎤 Pasakykite – aš suplanuosiu</b> (arba asistente 🎤 šalia laukelio) ir kalbėkite lietuviškai, pvz. <i>„rytoj dirbsiu nuo 11 iki 12 su Milda“</i>. Baigus – asistentas parodo kortelę patvirtinti. Jei telefonas neleidžia – paspauskite laukelį ir klaviatūros 🎤 (diktavimas).' },
+  { e:'🍃', t:'Kas yra Lite versija?', k:['lite versij','lite rezim','lite','paprast','ramu','mirga','marg','spalv','animac'],
+    a:'Viršuje paspauskite <b>🍃</b> – sąsaja tampa rami ir švari: be gradientų, animacijų, konfeti ir garsų. Viskas veikia taip pat. Atgal – <b>✨</b>. Taip pat: <b>Daugiau → 🎨 Išvaizda</b>. Nustatymas – kiekvienam telefonui atskirai.' },
+  { e:'🧠', t:'Kaip veikia AI asistentas?', k:[' ai ','dirbtin','claude','protingas','ismanus'],
+    a:'Kai yra internetas, asistentas klausia <b>Claude AI</b> – supranta laisvą kalbą, kelis dalykus vienu sakiniu ir klausimus apie planą. Viską parodo kortele patvirtinti. Be interneto veikia įprastas asistentas. Būsena ir patikra: <b>Daugiau → 🧠 Išmanusis asistentas</b>.' },
+];
 const HELP = [
   { e:'➕', t:'Kaip pridėti veiklą?', k:['prideti','itraukti','irasyti','nauja veikl','susitikim','ivyk','sukurti veikl'],
     a:'Trys būdai:<br>1) <b>Diena → ＋ Pridėti</b> – pasirinkite veiklą (ar „📌 Kita veikla“), patikslinkite kas, kada, kiek laiko → <b>✓ Įtraukti</b>.<br>2) Paspauskite <b>„＋ Laisva kartu“</b> kortelę – veikla bus pasiūlyta tuo laisvu laiku.<br>3) Parašykite man, pvz. <i>„rytoj 13:00 susitikimas 1 val“</i>.' },
@@ -1289,8 +1375,9 @@ const HELP = [
     a:'Dienos sąrašo viršuje: <b>👫 Mūsų diena / Paulius / Milda</b> – parodo tik to žmogaus veiklas ir darbą.' },
   { e:'⌨️', t:'Kas ta juosta su rodyklėmis virš klaviatūros?', k:['rodykl','juosta virs klav','klaviatur'],
     a:'Tai paties iPhone juosta (⌃ ⌄ ✓) – ją rodo visos svetainės ir žiniatinklio programos, paslėpti jos neleidžia Apple (tai įmanoma tik App Store programoms). ✓ – paslepia klaviatūrą.' },
+  ...HELP_NEW,
 ];
-const hq = i => `<button class="qbtn" data-help="${i}" aria-label="Paaiškinimas">?</button>`;
+const hq =i => `<button class="qbtn" data-help="${i}" aria-label="Paaiškinimas">?</button>`;
 function helpMatch(t) {
   let best = null, score = 0;
   for (const h of HELP) { const s = h.k.reduce((n, k) => n + (t.includes(k) ? k.length : 0), 0); if (s > score) { score = s; best = h; } }
@@ -1376,12 +1463,14 @@ function renderDay(main) {
     const dots = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start).slice(0, 4).map(it => `<u style="--c:${itemMeta(it).color}"></u>`).join('');
     return `<button class="${d === view.date ? 'on' : ''} ${d === today() ? 'today' : ''}" data-date="${d}"><span>${DAYS[i]}</span><b>${parseYmd(d).getDate()}</b><i>${dots}</i></button>`;
   }).join('') + '</div>';
+  h += `<button class="micbig" data-act="voice"><span>🎤</span><div><b>Pasakykite – aš suplanuosiu</b><small>pvz. „rytoj dirbsiu nuo 11 iki 12 su Milda“</small></div></button>`;
   h += nowStrip();
-  h += heroCard();
+  if (!LITE()) h += heroCard(); // 🍃 Lite – be didelės spalvotos kortelės
   h += askDone();
   h += surfStrip(view.date);
   const tlMode = ls.get('rutina.mode') === 'tl';
-  h += `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="roulette">🎲 Ką veiksim?</button><button data-act="ping">💗 Pagalvojau</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Stulpeliai'}</button></div>`;
+  h += LITE() ? `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="ai">✨ Parašyti asistentui</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Stulpeliai'}</button></div>`
+    : `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="roulette">🎲 Ką veiksim?</button><button data-act="ping">💗 Pagalvojau</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Stulpeliai'}</button></div>`;
   if (!tlMode) { main.innerHTML = h + agenda(view.date); return; }
   h += `<div class="cols"><div></div>${state.people.map(p => `<div>${av(p.id, 'sm')} ${esc(p.name)}</div>`).join('')}</div>`;
 
@@ -1592,6 +1681,9 @@ function renderSettings(main) {
   let h = '<div class="set">';
   h += `<button class="guide-btn" data-set="guide"><span>📖</span><b>Kaip naudotis programa</b><small>Visos funkcijos paprastai – paspauskite</small></button>`;
   h += `<button class="guide-btn alt" data-act="wizard"><span>✨</span><b>Pritaikyti planą (vedlys)</b><small>Miegas, darbas, veiklos, surf – per 1 minutę</small></button>`;
+  h += `<h2>🎨 Išvaizda</h2><div class="card lite-card"><div class="seg"><button data-set="lite0" class="${!LITE() ? 'on' : ''}">✨ Pilna</button><button data-set="lite1" class="${LITE() ? 'on' : ''}">🍃 Lite</button></div>
+    <div class="hint" style="margin:8px 0 0">Lite – rami, švari sąsaja: be spalvų gradientų, animacijų, konfeti ir garsų. Viskas veikia taip pat. Perjungti galima ir viršuje 🍃 / ✨ mygtuku. Nustatymas – tik šiam telefonui.</div></div>`;
+  h += aiCard();
   h += `<h2>📱 Šis telefonas ${hq(8)}</h2><div class="card"><div class="seg">${state.people.map(p => `<button data-me="${p.id}" class="${me === p.id ? 'on' : ''}">${av(p.id, 'sm')} ${esc(p.name)}</button>`).join('')}</div>
     <div class="hint" style="margin:8px 0 0">Asistentas žinos, kas rašo („turiu susitikimą“ – įtrauks tik jums).</div></div>`;
   h += pushCard() + calCard();
@@ -1771,13 +1863,40 @@ sheetEl.addEventListener('click', e => {
 const chat = { msgs: [], props: {} };
 const chatEl = $('#chat');
 const SUGG = ['❓ Ką moki?', 'Kada geriausios bangos?', 'Ką veiksim?','Šiandien 13:00 susitikimas', 'Šiandien nesportuojam', 'Kas rytoj?', 'Rytoj surf 7:00', 'Kaip įjungti pranešimus?', 'Perkelk gym į rytoj', 'Kaip sujungti su Apple kalendoriumi?'];
-function openChat() {
+function openChat(voice) {
   chatEl.inert = false; chatEl.classList.add('open');
+  if (voice) { if (!chat.msgs.length) botSay('🎤 Klausau! Pasakykite lietuviškai, pvz. <b>„rytoj dirbsiu nuo 11 iki 12 su Milda“</b> arba <b>„penktadienį 18 val vakarienė“</b>.'); $('#sugg').innerHTML = SUGG.map(s => `<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join(''); return startMic(); }
   if (!chat.msgs.length) botSay(`Labas! 👋 Parašykite paprastai, pvz.:<br>• <b>šiandien 13 val susitikimas</b><br>• <b>rytoj surf 7:00</b><br>• <b>šiandien nesportuojam</b> – perkelsiu<br>• <b>atlikom gym</b> – pažymėsiu ✓<br>• <b>kas rytoj?</b><br>• <b>kaip įjungti pranešimus?</b> – paaiškinsiu bet kurią funkciją<br><span class="note">Galite ir padiktuoti – spauskite 🎤 klaviatūroje.</span><div class="pchips" style="margin-top:8px"><button data-sugg="Ką moki?">📖 Visos funkcijos</button></div>`);
   $('#sugg').innerHTML = SUGG.map(s => `<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join('');
   setTimeout(() => $('#ask').focus(), 320);
 }
-function closeChat() { chatEl.classList.remove('open'); chatEl.inert = true; $('#ask').blur(); }
+function closeChat() { if (REC) try { REC.abort(); } catch (e) {} chatEl.classList.remove('open'); chatEl.inert = true; $('#ask').blur(); }
+// =============== 🎤 Balsu (lietuviškai) ===============
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let REC = null;
+function startMic() {
+  const inp = $('#ask'), btn = $('#micBtn');
+  if (REC) { try { REC.stop(); } catch (e) {} return; } // antras paspaudimas – baigti
+  if (!SR) return botSay('🎤 Šis telefonas neleidžia programai klausytis tiesiogiai. Paspauskite laukelį ir klaviatūroje – 🎤 (diktavimas): pasakykite, tekstas atsiras, tada ↑.');
+  let text = '', failed = false;
+  try { REC = new SR(); } catch (e) { REC = null; return botSay('🎤 Balso įvedimas nepasileido – naudokite klaviatūros 🎤.'); }
+  REC.lang = 'lt-LT'; REC.interimResults = true; REC.continuous = false; REC.maxAlternatives = 1;
+  btn.classList.add('rec'); inp.placeholder = '🎤 Klausau… kalbėkite (paspauskite 🎤 dar kartą – baigti)';
+  REC.onresult = e => { text = [...e.results].map(r => r[0].transcript).join(' ').trim(); inp.value = text; };
+  REC.onerror = e => {
+    failed = true;
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') botSay('🎤 Mikrofonas neleidžiamas. iPhone: <b>Nustatymai → Programos → Safari → Mikrofonas → Leisti</b> (ir <b>Nustatymai → Bendrieji → Klaviatūra → Įjungti diktavimą</b>). Arba naudokite klaviatūros 🎤.');
+    else if (e.error === 'language-not-supported') botSay('🎤 Šis telefonas lietuvių kalbos atpažinimo nepalaiko – naudokite klaviatūros 🎤 diktavimą.');
+    else if (e.error === 'no-speech') botSay('🎤 Nieko neišgirdau – paspauskite 🎤 ir kalbėkite iškart.');
+    else if (e.error !== 'aborted') botSay('🎤 Nepavyko atpažinti (' + esc(e.error) + '). Pabandykite dar kartą arba parašykite.');
+  };
+  REC.onend = () => {
+    REC = null; btn.classList.remove('rec'); inp.placeholder = 'pvz. šiandien 13:00 susitikimas';
+    if (text && !failed) { inp.value = ''; handle(text); } else if (text) inp.focus();
+  };
+  try { REC.start(); haptic(); } catch (e) { REC = null; btn.classList.remove('rec'); botSay('🎤 Balso įvedimas nepasileido – naudokite klaviatūros 🎤.'); }
+}
+$('#micBtn').addEventListener('click', e => { e.preventDefault(); startMic(); });
 function botSay(html) { chat.msgs.push({ from:'bot', html }); renderChat(); }
 function renderChat() {
   const box = $('#msgs');
@@ -1885,11 +2004,145 @@ function dayList(date) {
   return `<b>${dayName(date)}, ${fmtDate(date)}:</b><br>` + its.map(it => { const m = itemMeta(it); return `${toHM(it.start)} ${m.emoji} ${esc(m.name)} <span class="note">· ${esc(whoLabel(it.who))}${it.status === 'done' ? ' ✓' : ''}</span>`; }).join('<br>');
 }
 
-function handle(raw) {
+// =============== 🧠 Tikras AI (Claude per Supabase funkciją „rutina-ai“) ===============
+// Pirma klausiam AI; jei nėra interneto / rakto / klaida – veikia įprastas asistentas taisyklėmis.
+const AI_FN = CONFIG.url + '/functions/v1/rutina-ai';
+const AI = { until: 0, status: null }; // status: 'ok' | 'no_key' | 'err'
+const aiOn = () => ls.get('rutina.ai') !== 'off';
+const aiReady = () => aiOn() && !!Sync.room && navigator.onLine !== false && Date.now() > AI.until;
+// Programos funkcijų klausimai, ruletė, bangos, apžvalga – lieka vietiniai (greiti ir tikslūs)
+function localFirst(t) {
+  if (/(ka moki|ka gali|funkcij|instrukc|pagalb|\bhelp\b|kaip naud)/.test(t)) return true;
+  if (/(\bkaip\b|\bkur\b|ka reiskia|kas yra|paaiskink|nesuprantu)/.test(t) && helpMatch(t)) return true;
+  if (/(ka veiksim|rulet|nuobodu|apzvalg|statistik|kaip mums sek|\bbang|potvyn|prognoz|sudelio\w* surf|surf pagal bang)/.test(t)) return true;
+  if (/^\s*(problema|ideja|pasiulymas)\s*:/.test(t)) return true;
+  return false;
+}
+function aiContext() {
+  const T = today(), from = addDays(T, -2), until = addDays(T, 14);
+  const ov = {}; Object.entries(state.workOverride || {}).forEach(([k, v]) => { const d = k.split('|')[1]; if (d >= T && d <= until) ov[k] = v; });
+  return {
+    now: `${T} ${DAYS_LONG[dayIdx(T)]} ${toHM(nowMin())}`, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, me: Me() || 'a',
+    people: state.people.map(p => ({ id: p.id, name: p.name, wake: p.wake, sleep: p.sleep })),
+    activities: state.acts.filter(a => a.on !== false).map(a => ({ id: a.id, name: a.name, emoji: a.emoji, who: a.who, per_week: a.perWeek, duration_min: a.dur, window: a.from + '-' + a.to })),
+    work_weekly: state.work, work_overrides: ov,
+    items: state.items.filter(i => i.date >= from && i.date <= until).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start).map(i => { const m = itemMeta(i);
+      return { id: i.id, date: i.date, start: i.allDay ? null : toHM(i.start), end: i.allDay ? null : toHM(Math.min(1440, i.start + i.dur)), title: m.name, act_id: i.actId || null, who: i.who.length === 2 ? 'both' : i.who[0], status: i.status, all_day: !!i.allDay }; }),
+    next_14_days: [...Array(14)].map((_, i) => { const d = addDays(T, i); return d + ' ' + DAYS_LONG[dayIdx(d)]; }),
+  };
+}
+async function callAI(text, history) {
+  const ctrl = new AbortController(), to = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const r = await fetch(AI_FN, { method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({ room: Sync.room, me: Me() || 'a', text, history, ctx: aiContext() }) });
+    return await r.json();
+  } catch (e) { return { error: 'net' }; } finally { clearTimeout(to); }
+}
+async function askAI(raw) {
+  const plain = h => String(h || '').replace(/<br\s*\/?>/g, '\n').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;/g, ' ').replace(/[ \t]+/g, ' ').trim();
+  const history = chat.msgs.filter(m => m.html && !m.tmp).slice(-6).map(m => ({ role: m.from === 'me' ? 'me' : 'bot', text: plain(m.html).slice(0, 500) }));
+  chat.msgs.push({ from: 'me', html: esc(raw) });
+  const wait = { from: 'bot', html: '<span class="typing"><i></i><i></i><i></i></span>', tmp: true };
+  chat.msgs.push(wait); renderChat();
+  const res = await callAI(raw, history);
+  chat.msgs = chat.msgs.filter(m => m !== wait);
+  if (!res || res.error) {
+    AI.status = res?.error === 'no_key' || res?.error === 'bad_key' ? 'no_key' : 'err';
+    if (AI.status === 'no_key') AI.until = Date.now() + 10 * 60000; // raktas neįvestas – kurį laiką nebandom
+    return handle(raw, true);
+  }
+  AI.status = 'ok';
+  applyAI(res, raw);
+}
+// AI veiksmai → tokios pačios kortelės / pakeitimai kaip įprasto asistento
+function applyAI(res, raw) {
+  const W = w => w === 'both' ? ['a', 'b'] : w === 'a' || w === 'b' ? [w] : null;
+  const okD = d => /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? d : null;
+  const okT = s => { const m = /^(\d{1,2}):(\d{2})$/.exec(s || ''); return m && +m[1] < 24 && +m[2] < 60 ? +m[1] * 60 + +m[2] : null; };
+  const okR = s => { if (s === '' || s == null) return ''; const parts = String(s).split(/\s*,\s*/).map(p => { const m = /^(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})$/.exec(p.trim()); return m ? `${m[1].padStart(2, '0')}:${m[2]}-${m[3].padStart(2, '0')}:${m[4]}` : null; }); return parts.every(Boolean) ? parts.join(', ') : null; };
+  const acts = Array.isArray(res.actions) ? res.actions.slice(0, 12) : [];
+  const done = [], dates = new Set(); let snap = false;
+  const undo = () => { if (!snap) { snapUndo(); snap = true; } };
+  if (res.reply) botSay(esc(res.reply) + '<span class="aiok">🧠</span>');
+  for (const a of acts) {
+    const date = okD(a.date) || today(), start = okT(a.start), who = W(a.who);
+    const dur = Math.round(+a.duration_min) > 0 ? Math.min(1440, Math.round(+a.duration_min)) : null;
+    const it = a.item_id ? state.items.find(x => x.id === a.item_id) : null;
+    try {
+      if (a.type === 'add_event') {
+        const all = !!a.all_day, title = String(a.title || '').trim() || titleFrom(raw);
+        propose({ kind: 'event', title, emoji: a.emoji || emojiFor(title), color: all ? '#0ea5e9' : '#475569', date, start: all ? 0 : start, dur: all ? 0 : (dur || 60), durKnown: all || !!dur,
+          who: who || (Me() ? [Me()] : ['a', 'b']), ...(all ? { allDay: true, block: true } : {}), repeat: Math.max(0, Math.min(12, Math.round(+a.repeat_weeks || 0))) || undefined });
+      } else if (a.type === 'add_activity') {
+        const act = actById(a.act_id); if (!act) continue;
+        propose({ kind: 'act', actId: act.id, emoji: act.emoji, title: act.name, color: act.color, date, start, dur: dur || act.dur, durKnown: true, who: who || groupsFor(act)[0] });
+      } else if (a.type === 'move_item' && it) {
+        undo(); const m = itemMeta(it), nd = okD(a.date) || it.date; dates.add(it.date);
+        if (start != null) { it.date = nd; it.start = start; if (dur) it.dur = dur; it.pinned = true; it.status = 'planned'; }
+        else if (!rescheduleOtherDay(it, nd !== it.date ? nd : undefined)) { done.push(`${m.emoji} ${esc(m.name)} – laisvo laiko neradau 😕`); continue; }
+        dates.add(it.date); logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(it.date, it.start)}`, it.id);
+        done.push(`↪︎ ${m.emoji} ${esc(m.name)} → <b>${dayName(it.date)} ${toHM(it.start)}</b>`);
+      } else if (a.type === 'mark_done' && it) {
+        undo(); const m = itemMeta(it); it.status = 'done'; logAct(`pažymėjo ✓ ${m.emoji} ${m.name}`, it.id); done.push(`✓ ${m.emoji} ${esc(m.name)} atlikta`); confetti(innerWidth / 2, innerHeight * .4);
+      } else if (a.type === 'skip_item' && it) {
+        undo(); const m = itemMeta(it); dates.add(it.date);
+        if (it.kind === 'auto' && rescheduleOtherDay(it)) { it.status = 'planned'; dates.add(it.date); logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(it.date, it.start)}`, it.id); done.push(`↪︎ ${m.emoji} ${esc(m.name)} → <b>${dayName(it.date)} ${toHM(it.start)}</b>`); }
+        else { state.items = state.items.filter(x => x !== it); logAct(`atšaukė ${m.emoji} ${m.name}`, it.id); done.push(`✕ ${m.emoji} ${esc(m.name)} atšaukta`); }
+      } else if (a.type === 'delete_item' && it) {
+        undo(); const m = itemMeta(it); dates.add(it.date); state.items = state.items.filter(x => x !== it); logAct(`ištrynė ${m.emoji} ${m.name}`, it.id); done.push(`🗑 ${m.emoji} ${esc(m.name)} ištrinta`);
+      } else if (a.type === 'set_work_weekly') {
+        const val = okR(a.ranges), days = (Array.isArray(a.weekdays) ? a.weekdays : []).map(Number).filter(i => i >= 0 && i <= 6);
+        if (val == null || !days.length) continue;
+        undo(); const pids = who || (Me() ? [Me()] : ['a', 'b']);
+        pids.forEach(p => days.forEach(i => { state.work[p][DAYKEYS[i]] = val; Object.keys(state.workOverride).forEach(k => { const [pp, dd] = k.split('|'); if (pp === p && dayIdx(dd) === i) delete state.workOverride[k]; }); }));
+        [...Array(14)].map((_, i) => addDays(today(), i)).filter(d => days.includes(dayIdx(d))).forEach(d => dates.add(d));
+        const dl = days.length === 5 && days.every((x, i) => x === i) ? 'darbo dienomis' : days.length === 7 ? 'kasdien' : days.map(i => DAYS[i]).join(', ');
+        logAct(`nustatė nuolatinį darbo laiką: ${dl} ${val || 'nedirba'}`);
+        done.push(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))}: ${dl} – ${val ? '<b>' + esc(val.replace(/-/g, '–')) + '</b>' : '<b>nedirba</b> 🎉'} (visoms savaitėms)`);
+      } else if (a.type === 'set_work_day') {
+        const val = okR(a.ranges); if (val == null) continue;
+        undo(); const pids = who || (Me() ? [Me()] : ['a', 'b']);
+        pids.forEach(p => state.workOverride[p + '|' + date] = val); dates.add(date);
+        logAct(`pakeitė darbo laiką (${dayName(date).toLowerCase()}: ${val || 'nedirba'})`);
+        done.push(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(date)}: ${val ? 'dirba ' + esc(val.replace(/-/g, '–')) : 'nedirba 🎉'}`);
+      } else if (a.type === 'regenerate_week') {
+        undo(); generateWeek(weekStart(today())); logAct('perdėliojo savaitę 🔀'); done.push('🔀 Perdėliojau likusią savaitę');
+      } else if (a.type === 'save_feedback') {
+        saveFeedback(String(a.title || raw)); done.push('📝 Užrašiau į patobulinimų sąrašą (Daugiau → Problemos ir idėjos)');
+      }
+    } catch (e) { console.warn('AI veiksmas', a, e); }
+  }
+  const moved = [...dates].flatMap(d => fixDay(d));
+  if (done.length) {
+    render();
+    botSay(done.join('<br>') + (moved.length ? '<br><span class="note">Persidėliojo: ' + esc(moved.join(', ')) + '</span>' : ''));
+    if (snap) toastUndo('Pakeista: ' + done.length + ' · galite atšaukti');
+  }
+  if (!res.reply && !done.length && !acts.length) handle(raw, true);
+}
+async function aiTest() {
+  if (!Sync.room) return toast('Pirma prisijunkite prie bendro plano');
+  toast('🧠 Tikrinu AI…');
+  const r = await callAI('Labas! Atsakyk vienu trumpu sakiniu, kad veiki.', []);
+  AI.status = r && !r.error ? 'ok' : r?.error === 'no_key' || r?.error === 'bad_key' ? 'no_key' : 'err';
+  AI.until = 0; render();
+  toast(AI.status === 'ok' ? '✅ AI veikia: ' + String(r.reply || '').slice(0, 80) : AI.status === 'no_key' ? '🔑 AI raktas dar neįvestas Supabase' : '⚠️ AI nepasiekiamas (' + (r?.error || 'klaida') + ')');
+}
+function aiCard() {
+  const st = !aiOn() ? '⏸ Išjungtas – veikia taisyklėmis' : AI.status === 'ok' ? '✅ Veikia (Claude)' : AI.status === 'no_key' ? '🔑 Laukia API rakto (Supabase)' : AI.status === 'err' ? '⚠️ Paskutinį kartą nepasiekiamas – veikia taisyklėmis' : '🧠 Įjungtas';
+  return `<h2>🧠 Išmanusis asistentas</h2><div class="card"><div class="row" style="margin:0 0 8px;align-items:center"><span style="flex:1"><b>Claude AI</b><br><small style="color:var(--muted)">${st}</small></span></div>
+    <div class="seg"><button data-set="ai1" class="${aiOn() ? 'on' : ''}">🧠 AI</button><button data-set="ai0" class="${!aiOn() ? 'on' : ''}">⚙️ Be AI</button></div>
+    <div class="hint" style="margin:8px 0">AI supranta laisvą tekstą, kelis dalykus viename sakinyje ir klausimus apie planą. Viską vis tiek parodo kortele patvirtinti. Be interneto – veikia įprastas asistentas.</div>
+    <div class="btns"><button class="btn-soft" data-set="aitest">🔍 Patikrinti AI</button></div></div>`;
+}
+
+function handle(raw, noAI) {
   raw = raw.trim(); if (!raw) return;
-  chat.msgs.push({ from:'me', html: esc(raw) });
   // „9 am“, „11am“, „2:30 pm“ → 24 val. formatas
   const t = (' ' + norm(raw).replace(/!/g, ' ').replace(/,(?!\d)/g, ' ') + ' ').replace(/(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)\b/g, (m, h, mm, ap) => { let H = +h % 12; if (ap === 'pm') H += 12; return String(H).padStart(2, '0') + ':' + (mm || '00'); });
+  if (!noAI && aiReady() && !localFirst(t)) { askAI(raw); return; }
+  if (!noAI) chat.msgs.push({ from:'me', html: esc(raw) });
   const dI = parseDate(t), tm = parseTime(t), who = parseWho(t), act = findAct(t);
   if (/perdelio\w* savait/.test(t)) { snapUndo(); generateWeek(weekStart(today())); logAct('perdėliojo savaitę 🔀'); render(); return botSay('🔀 Perdėliojau likusią savaitę pagal naują grafiką. Galite atšaukti apačioje.'); }
   // ✈️ Kelionės / skrydžiai be laiko – visos dienos įvykis
@@ -2164,6 +2417,7 @@ $('#main').addEventListener('click', e => {
     if (t.dataset.me === 'b' && !ls.get('rutina.hello')) mildaHello(); else toast('Labas, ' + person(t.dataset.me).name + '! 👋');
   }
   else if (t.dataset.act === 'ai') openChat();
+  else if (t.dataset.act === 'voice') openChat(true);
   else if (t.dataset.act === 'work') workSheet();
   else if (t.dataset.act === 'gen') { generateWeek(weekStart(view.date)); logAct('perdėliojo savaitę 🔀'); render(); toast('🔀 Savaitė perdėliota'); }
   else if (t.dataset.act === 'ics') exportIcs(weekStart(view.date));
@@ -2172,6 +2426,9 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
   else if (t.dataset.set === 'update') checkUpdate(true);
   else if (t.dataset.set === 'guide') guideSheet();
+  else if (t.dataset.set === 'lite0' || t.dataset.set === 'lite1') setLite(t.dataset.set === 'lite1');
+  else if (t.dataset.set === 'ai0' || t.dataset.set === 'ai1') { ls.set('rutina.ai', t.dataset.set === 'ai0' ? 'off' : null); AI.until = 0; AI.status = null; render(); toast(t.dataset.set === 'ai1' ? '🧠 AI asistentas įjungtas' : 'Asistentas veiks be AI (taisyklėmis)'); }
+  else if (t.dataset.set === 'aitest') aiTest();
   else if (t.dataset.set === 'surfset') surfSettingsSheet();
   else if (t.dataset.set === 'backup') backupDownload();
   else if (t.dataset.set === 'push') enablePush(false);
