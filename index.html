@@ -40,8 +40,7 @@ input[type=color]{padding:3px;height:44px}
 h1,h2,h3,.rd{font-family:var(--font)}
 
 /* ---------- Viršus ---------- */
-header.top{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:var(--glass);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);display:flex;align-items:center;gap:12px}
+header.top{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;background:var(--bg);display:flex;align-items:center;gap:12px}
 .hello{flex:1;min-width:0}
 .hello small{display:block;color:var(--muted);font-size:13px;font-weight:500}
 .hello h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -391,7 +390,7 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 /* ↩︎ Atšaukti */
 #toast.act{pointer-events:auto;display:flex;gap:12px;align-items:center}
 #toast.act button{background:rgba(255,255,255,.18);color:#fde047;font-weight:800;border-radius:10px;padding:6px 10px}
-html,body{overflow-x:hidden}
+html,body{overflow-x:clip}
 main{overflow-x:clip}
 /* Braukiamos kortelės */
 .sw-row{position:relative}
@@ -407,9 +406,10 @@ main{overflow-x:clip}
 #ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translate(-50%,0);z-index:19;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s}
 #ptr.spin{animation:pulse2 .8s ease-in-out infinite}
 /* Antraštė susitraukia slenkant */
-.hello small,.hello h1{transition:all .25s ease}
+.hello small{transition:opacity .2s ease}
+.hello h1{-webkit-font-smoothing:antialiased}
 body.scrolled .hello small{opacity:0;height:0;margin:0;overflow:hidden}
-body.scrolled .hello h1{font-size:19px}
+body.scrolled .hello h1{font-size:20px}
 body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 #msgs,.feedwrap,.sheet-card{overscroll-behavior:contain}
 .grab{width:44px;height:5px;margin:2px auto 6px;cursor:grab}
@@ -471,8 +471,10 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.0';
+const APP_VERSION = '2.0.1';
 const WHATS_NEW = [
+  '🔎 Viršutinė juosta visada ryški ir nebedingsta slenkant',
+  '🏄 Vakare surf kortelė rodo geriausią rytojaus laiką',
   '🏄 Surf pagal tikras Lomboko bangas, vėją ir potvynius',
   '✨ Vedlys – planas pagal jūsų tikrą gyvenimą',
   '❤️ Reakcijos žinutėms, „Matė ✓✓“ ir 💗 „Pagalvojau apie tave“',
@@ -2318,9 +2320,14 @@ function surfStrip(d) {
   if (!Surf.data?.[d]) return d >= today() && d <= addDays(today(), 6) ? `<div class="surfcard" data-act="surf"><span class="e">🏄</span><div><b>Surf prognozė</b><small>${Surf.data ? 'Šiai dienai prognozės dar nėra' : 'Kraunama…'}</small></div></div>` : '';
   const dur = surfAct().dur || 120; let b = null;
   for (let t = 6 * 60; t + dur <= 18 * 60; t += 30) { if (d === today() && t < nowMin()) continue; const sc = Surf.score(d, t, dur); if (!b || sc > b.sc) b = { t, sc }; }
+  let bd = d;
+  if (!b && d === today()) { // šiandien šviesus laikas baigėsi – rodom rytojų
+    bd = addDays(d, 1);
+    for (let t = 6 * 60; t + dur <= 18 * 60; t += 30) { const sc = Surf.score(bd, t, dur); if (Surf.data?.[bd] && (!b || sc > b.sc)) b = { t, sc }; }
+  }
   const sug = surfSuggestion();
-  let h = b ? `<div class="surfcard" data-act="surf"><span class="e">🏄</span><div><b>${esc(spotOf().name)}: ${Surf.label(b.sc)} <span class="stars">${Surf.stars(b.sc)}</span></b>
-    <small>Geriausia ${toHM(b.t)}–${toHM(b.t + dur)} · ${esc(Surf.info(d, b.t))}</small></div><span class="chev">›</span></div>` : '';
+  let h = b ? `<div class="surfcard" data-act="surf"><span class="e">🏄</span><div><b>${esc(spotOf().name)}${bd !== d ? ' rytoj' : ''}: ${Surf.label(b.sc)} <span class="stars">${Surf.stars(b.sc)}</span></b>
+    <small>Geriausia ${bd !== d ? 'rytoj ' : ''}${toHM(b.t)}–${toHM(b.t + dur)} · ${esc(Surf.info(bd, b.t))}</small></div><span class="chev">›</span></div>` : '';
   if (sug) h += `<div class="surfsug"><span>🌊 Geresnės bangos <b>${dayName(sug.d).toLowerCase()} ${toHM(sug.t)}</b> ${Surf.stars(sug.sc)} (dabar ${Surf.stars(sug.cur)})</span><button class="btn-grad" data-act="surfmove">Perkelti</button></div>`;
   return h;
 }
