@@ -309,6 +309,28 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 .guide-btn span{grid-row:1/3;font-size:30px}
 .guide-btn b{font:800 17px var(--font)}
 .guide-btn small{opacity:.9;font-size:13px}
+html,body{overflow-x:hidden}
+main{overflow-x:clip}
+/* Braukiamos kortelės */
+.sw-row{position:relative}
+.sw-row .ag-card{position:relative;z-index:1;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+.ag-swipe{position:absolute;left:58px;right:0;top:0;bottom:0;border-radius:18px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-weight:800;font-size:14px;color:#fff;opacity:0;transition:background .15s}
+.sw-row[data-dir] .ag-swipe{opacity:1}
+.sw-row[data-dir=r] .ag-swipe{background:color-mix(in srgb,#10b981 55%,transparent)}
+.sw-row[data-dir=l] .ag-swipe{background:color-mix(in srgb,#f97316 55%,transparent)}
+.sw-row.armed[data-dir=r] .ag-swipe{background:#10b981}
+.sw-row.armed[data-dir=l] .ag-swipe{background:#f97316}
+.sw-row[data-dir=r] .ag-swipe .r,.sw-row[data-dir=l] .ag-swipe .l{visibility:hidden}
+/* Tempti žemyn = atnaujinti */
+#ptr{position:fixed;left:50%;top:calc(env(safe-area-inset-top) + 64px);transform:translate(-50%,0);z-index:19;background:var(--card);box-shadow:var(--shadow);border-radius:999px;padding:8px 14px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s}
+#ptr.spin{animation:pulse2 .8s ease-in-out infinite}
+/* Antraštė susitraukia slenkant */
+.hello small,.hello h1{transition:all .25s ease}
+body.scrolled .hello small{opacity:0;height:0;margin:0;overflow:hidden}
+body.scrolled .hello h1{font-size:19px}
+body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
+#msgs,.feedwrap,.sheet-card{overscroll-behavior:contain}
+.grab{width:44px;height:5px;margin:2px auto 6px;cursor:grab}
 .abtn{display:flex;align-items:center;justify-content:center;border-radius:14px;padding:10px 14px;text-decoration:none;color:inherit;flex:1 1 auto}
 .abtn.btn-grad{color:#fff}
 .msgs{padding-bottom:90px}
@@ -367,13 +389,14 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.7';
+const APP_VERSION = '1.8';
 const WHATS_NEW = [
-  '⌨️ Rašant meniu juosta pasislepia, laukelis prie klaviatūros',
-  '🔴 Skaičiukas ant programos ikonos – kiek naujų pranešimų',
-  '📖 Vadovas „Kaip naudotis“ ir ? paaiškinimai prie kiekvieno nustatymo',
-  '✨ Asistentas atsako į „kaip…?“ – paklauskite bet ko',
-  '🎵 Širdis su garsu ir muzika (garsas veikia, kai telefonas ne begarsio režime)',
+  '👇 Langus ir asistentą uždarykite perbraukę žemyn',
+  '👉 Veiklą braukite → – atlikta ✓, ← – perkelti',
+  '↔️ Dienas ir savaites keiskite braukdami',
+  '↻ Tempkite žemyn viršuje – viskas atsinaujina',
+  '📳 Lengva vibracija ir garsai kaip Apple programose',
+  '🗓️ Asistentas supranta „ryt“',
 ];
 
 // =============== Pagalbinės ===============
@@ -1023,6 +1046,8 @@ const HELP = [
     a:'Rašykite paprastai:<br>• <i>„šiandien 13 val susitikimas“</i> – pridės<br>• <i>„šiandien nesportuojam“</i>, <i>„perkelk gym į rytoj“</i> – perkels<br>• <i>„atlikom surf“</i> – pažymės ✓<br>• <i>„kas rytoj?“</i> – parodys planą<br>• <i>„rytoj dirbu 10-15“</i> – pakeis darbo laiką<br>• <i>„kaip įjungti pranešimus?“</i> – paaiškins<br>• <i>„problema: …“</i>, <i>„idėja: …“</i> – užrašys patobulinimui<br>Galite ir padiktuoti 🎤.' },
   { e:'🔄', t:'Kaip atnaujinti programą?', k:['atnaujin','versij','update'],
     a:'Pati: atidarius programą nauja versija užsikrauna automatiškai (pamatysite ❤️ šou – palieskite širdį!). Rankiniu būdu: <b>⚙️ Daugiau → Kita → 🔄 Patikrinti atnaujinimus</b>, arba užverkite ir atidarykite programą iš naujo.' },
+  { e:'👆', t:'Kokie yra gestai (braukimai)?', k:['gest','brauk','perbrauk','swipe','uzdaryt','paslept','tempti'],
+    a:'• <b>Veiklos kortelę braukite →</b> – pažymėsite ✓ atlikta; <b>←</b> – perkelsite į kitą laisvą dieną.<br>• <b>Dienos sąrašą braukite ← →</b> – kita / ankstesnė diena (Savaitėje – kita savaitė).<br>• <b>Tempkite žemyn</b> pačiame viršuje – atnaujins planą ir programą.<br>• <b>Bet kurį langą</b> (veikla, asistentas, vadovas) <b>perbraukite žemyn</b> – užsidarys.<br>• <b>Dar kartą paspaudus „Diena“</b> – grįšite į šiandieną.' },
   { e:'🛠️', t:'Kur pranešti apie problemą ar idėją?', k:['problem','ideja','pasiulym','klaida','neveik','bug'],
     a:'Parašykite man <i>„problema: …“</i> arba <i>„idėja: …“</i>, arba <b>⚙️ Daugiau → 🛠️ Problemos ir idėjos</b>. Viskas kaupiama ir bus peržiūrėta kito atnaujinimo metu.' },
 ];
@@ -1128,7 +1153,8 @@ function agenda(d) {
   });
   Object.values(groups).forEach(g => {
     const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id)));
-    rows.push({ t: it.start, html: `<div class="ag-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
+    rows.push({ t: it.start, html: `<div class="ag-row sw-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
+      <div class="ag-swipe"><span class="l">${it.status === 'done' ? '↩︎ Neatlikta' : '✓ Atlikta'}</span><span class="r">Perkelti ↪︎</span></div>
       <div class="ag-card ${it.status === 'done' ? 'done' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
       <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}</small></span>${avs(who)}</div></div>` });
   });
@@ -1276,7 +1302,7 @@ function renderSettings(main) {
       <div class="row end" style="margin:0"><button data-set="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>↑</button><button data-set="down" data-i="${i}" ${i === state.acts.length - 1 ? 'disabled' : ''}>↓</button><button class="btn-danger" data-set="del" data-i="${i}">Šalinti</button></div></div>`;
   });
   h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div>
-    <h2>🛠️ Problemos ir idėjos ${hq(20)}</h2><div class="card">
+    <h2>🛠️ Problemos ir idėjos ${hq(21)}</h2><div class="card">
       <div class="hint" style="margin-top:0">Kas neveikia ar ką norėtumėte pagerinti? Užrašykite – viskas kaupiama ir bus peržiūrėta kito atnaujinimo metu. Galite rašyti ir ✨ asistentui, pvz. „problema: …“ ar „idėja: …“.</div>
       <div class="row"><input id="fbtext" placeholder="pvz. norėtume priminimų prieš surf"><button class="btn-grad" data-set="fb" style="flex:none">Siųsti</button></div>
       ${(state.feedback || []).slice(-5).reverse().map(f => `<div class="wrow" style="cursor:default">${f.by && person(f.by) ? av(f.by, 'sm') : '📝'}<span class="tx"><b style="font-weight:600">${esc(f.text)}</b><small>${fmtAgo(f.at)} · v${esc(f.ver)}</small></span></div>`).join('')}
@@ -1351,7 +1377,7 @@ sheetEl.addEventListener('click', e => {
   if (a === 'done') {
     const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
     logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${itemMeta(it).emoji} ${itemMeta(it).name}`, it.id);
-    const r = b.getBoundingClientRect(); if (st === 'done') confetti(r.left + r.width / 2, r.top);
+    const r = b.getBoundingClientRect(); haptic(); if (st === 'done') { confetti(r.left + r.width / 2, r.top); chime(); }
     closeSheet(); render(); if (st === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
   }
   if (a === 'move') {
@@ -1395,7 +1421,7 @@ function renderChat() {
 const WD = ['pirmad','antrad','treciad','ketvirtad','penktad','sestad','sekmad'];
 function dateWord(s) {
   if (/\bporyt/.test(s)) return addDays(today(), 2);
-  if (/\brytoj/.test(s)) return addDays(today(), 1);
+  if (/\brytoj|\bryt\b|\brit\b|\brytdien/.test(s)) return addDays(today(), 1);
   for (let i = 0; i < 7; i++) if (s.includes(WD[i])) {
     const diff = (i - dayIdx(today()) + 7) % 7; let d = addDays(today(), diff);
     if (new RegExp('kit\\w*\\s+' + WD[i]).test(s)) d = addDays(d, 7);
@@ -1457,7 +1483,7 @@ function findAct(t) {
   }
   return best;
 }
-const STOP = /^(siandien\w*|rytoj\w*|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
+const STOP = /^(siandien\w*|rytoj\w*|ryt|rit|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
 function titleFrom(raw) {
   const names = state.people.map(p => norm(p.name).slice(0, 4));
   const words = raw.replace(/[!?,]/g, ' ').split(/\s+/).filter(w => {
@@ -1658,14 +1684,18 @@ $('#composer').addEventListener('submit', e => { e.preventDefault(); const v = $
 // =============== Paspaudimai ===============
 $('#tabs').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
+  haptic();
   if (b.dataset.tab === 'ai') return openChat();
+  if (view.tab === b.dataset.tab) { if (b.dataset.tab === 'day') { view.date = today(); render(); } return window.scrollTo({ top: 0, behavior: 'smooth' }); } // pakartotinis paspaudimas – į viršų / į šiandien
   view.tab = b.dataset.tab; render(); window.scrollTo({ top: 0 });
+  $('#main').animate([{ opacity: 0, transform: 'translateY(10px)' }, { opacity: 1, transform: 'none' }], { duration: 220, easing: 'cubic-bezier(.2,.8,.2,1)' });
 });
 $('#main').addEventListener('click', e => {
   if (e.target.classList?.contains('area')) {
     const r = e.target.getBoundingClientRect(), t0 = +e.target.dataset.t0, px = +e.target.dataset.px;
     return addSheet(view.date, Math.round((t0 + (e.clientY - r.top) / px) / STEP) * STEP);
   }
+  if (Date.now() - (view.noClick || 0) < 450) return; // ką tik buvo braukimas
   const hb = e.target.closest('[data-help]'); if (hb) return guideSheet(+hb.dataset.help);
   const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat]'); if (!t) return;
   if (t.dataset.addat) return addSheet(view.date, +t.dataset.addat);
@@ -1716,6 +1746,122 @@ $('#main').addEventListener('change', e => {
   if (/^people\.\d\.(name|color)$/.test(k) || /\.(color|emoji)$/.test(k)) render();
 });
 
+// =============== 📱 Apple pojūtis: vibracija, garsas, gestai ===============
+// iPhone (iOS 18+) duoda lengvą vibraciją perjungiant „switch“ jungiklį – naudojam tai kaip haptic
+const hapticEl = (() => { const l = document.createElement('label'); l.setAttribute('aria-hidden', 'true'); l.style.cssText = 'position:fixed;left:-99px;top:0;width:1px;height:1px;overflow:hidden;opacity:0'; const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1; l.appendChild(i); document.body.appendChild(l); return l; })();
+function haptic() { try { navigator.vibrate?.(8); hapticEl.click(); } catch (e) {} }
+function chime() { tone(1319, 0, .12, 'triangle', .07); tone(1760, .07, .2, 'triangle', .06); }
+
+// Langai (veikla, asistentas, vadovas…) užsidaro perbraukus žemyn
+function swipeToClose(root, close) {
+  let y0 = null, dy = 0, card = null;
+  root.addEventListener('touchstart', e => {
+    card = root.querySelector('.sheet-card'); if (!card || e.touches.length !== 1) return;
+    if (e.target.closest('input,textarea,select,.pchips,.sugg')) { y0 = null; return; }
+    const sc = e.target.closest('#msgs,.feedwrap') || card;
+    if (sc.scrollTop > 2 && !e.target.closest('.grab,.chat-head,.sh-hero,h3')) { y0 = null; return; }
+    y0 = e.touches[0].clientY; dy = 0;
+  }, { passive: true });
+  root.addEventListener('touchmove', e => {
+    if (y0 == null) return;
+    dy = Math.max(0, e.touches[0].clientY - y0);
+    if (dy > 4) { card.style.transition = 'none'; card.style.transform = `translateY(${dy}px)`; }
+  }, { passive: true });
+  root.addEventListener('touchend', () => {
+    if (y0 == null) return; y0 = null;
+    card.style.transition = '';
+    if (dy > 110) { haptic(); card.style.transform = ''; close(); } else card.style.transform = '';
+  });
+}
+swipeToClose(sheetEl, closeSheet);
+swipeToClose(chatEl, closeChat);
+
+// Kortelės braukimas: → atlikta ✓, ← perkelti į kitą dieną
+function swipeAct(ids, kind) {
+  const G = String(ids).split(',').map(id => state.items.find(x => x.id === id)).filter(Boolean), it = G[0];
+  if (!it) return render();
+  const m = itemMeta(it);
+  setTimeout(() => {
+    if (kind === 'done') {
+      const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
+      logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${m.emoji} ${m.name}`, it.id);
+      if (st === 'done') { confetti(innerWidth / 2, innerHeight * .45); chime(); toast('Šaunuoliai! ' + m.emoji + ' ✓'); } else toast('Atžymėta');
+    } else if (it.date < today()) toast('Praėjusios dienos veiklos perkelti negalima');
+    else {
+      const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean);
+      if (ok) { logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(it.date, it.start)}`, it.id); toast(`↪︎ ${m.emoji} ${m.name} → ${dayName(it.date)} ${toHM(it.start)}`); }
+      else toast('Per savaitę laisvo laiko nerasta 😕');
+    }
+    render();
+  }, 160);
+}
+
+// Gestai pagrindiniame ekrane: dienos ←→, kortelės, tempti žemyn = atnaujinti
+(() => {
+  const main = $('#main');
+  const ptr = document.createElement('div'); ptr.id = 'ptr'; document.body.appendChild(ptr);
+  let s = null;
+  main.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1 || $('#upfx')) { s = null; return; }
+    const t = e.touches[0];
+    s = { x: t.clientX, y: t.clientY, dx: 0, dy: 0, axis: null, card: e.target.closest('.ag-card[data-item]'),
+          top: scrollY <= 0, block: !!e.target.closest('input,textarea,select,.chiprow,.mcomp,.tl') };
+  }, { passive: true });
+  main.addEventListener('touchmove', e => {
+    if (!s || s.block) return;
+    const t = e.touches[0]; s.dx = t.clientX - s.x; s.dy = t.clientY - s.y;
+    if (!s.axis && Math.hypot(s.dx, s.dy) > 10) s.axis = Math.abs(s.dx) > Math.abs(s.dy) * 1.2 ? 'x' : 'y';
+    if (s.axis === 'x' && s.card) {
+      const row = s.card.parentElement;
+      s.card.style.transition = 'none'; s.card.style.transform = `translateX(${s.dx * .85}px)`;
+      row.dataset.dir = s.dx > 0 ? 'r' : 'l';
+      const armed = Math.abs(s.dx) > 95; if (armed !== !!s.armed) { s.armed = armed; row.classList.toggle('armed', armed); if (armed) haptic(); }
+    } else if (s.axis === 'x' && (view.tab === 'day' || view.tab === 'week')) {
+      main.style.transition = 'none'; main.style.transform = `translateX(${s.dx * .3}px)`; main.style.opacity = String(1 - Math.min(Math.abs(s.dx) / 700, .35));
+    } else if (s.axis === 'y' && s.top && s.dy > 0 && (view.tab === 'day' || view.tab === 'week')) {
+      const p = Math.min(s.dy * .5, 95);
+      ptr.style.transform = `translate(-50%, ${p}px)`; ptr.style.opacity = String(Math.min(p / 55, 1));
+      ptr.textContent = p >= 65 ? '↻ Paleiskite – atnaujinsiu' : '↓ Tempkite atnaujinti';
+      const armed = p >= 65; if (armed !== !!s.ptr) { s.ptr = armed; if (armed) haptic(); }
+    }
+  }, { passive: true });
+  main.addEventListener('touchend', async () => {
+    if (!s) return; const st = s; s = null;
+    if (st.axis === 'x' && st.card) {
+      view.noClick = Date.now();
+      const row = st.card.parentElement; st.card.style.transition = '';
+      if (Math.abs(st.dx) > 95) { st.card.style.transform = `translateX(${st.dx > 0 ? 115 : -115}%)`; swipeAct(st.card.dataset.item, st.dx > 0 ? 'done' : 'move'); }
+      else { st.card.style.transform = ''; delete row.dataset.dir; row.classList.remove('armed'); }
+    } else if (st.axis === 'x' && (view.tab === 'day' || view.tab === 'week')) {
+      main.style.transition = ''; main.style.transform = ''; main.style.opacity = '';
+      if (Math.abs(st.dx) > 70) {
+        haptic(); view.noClick = Date.now();
+        view.date = addDays(view.date, (st.dx < 0 ? 1 : -1) * (view.tab === 'week' ? 7 : 1)); view.warn = null; render();
+        main.animate([{ transform: `translateX(${st.dx < 0 ? 46 : -46}px)`, opacity: .2 }, { transform: 'none', opacity: 1 }], { duration: 240, easing: 'cubic-bezier(.2,.8,.2,1)' });
+      }
+    } else if (st.ptr) {
+      ptr.textContent = '↻ Atnaujinama…'; ptr.classList.add('spin');
+      await Sync.pull(); await checkUpdate(false); render();
+      ptr.classList.remove('spin'); ptr.style.transform = ''; ptr.style.opacity = '0'; toast('✓ Viskas atnaujinta');
+    } else { ptr.style.transform = ''; ptr.style.opacity = '0'; }
+  });
+})();
+
+// Antraštė susitraukia slenkant (kaip Apple programose)
+addEventListener('scroll', () => document.body.classList.toggle('scrolled', scrollY > 30), { passive: true });
+
+// Nuorodos į konkrečią vietą (paspaudus pranešimą ir pan.): #msgs, #week, #feed, #add, #ask=…
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (!h || h.startsWith('k=')) return;
+  history.replaceState(null, '', location.pathname);
+  if (['msgs', 'week', 'day', 'settings'].includes(h)) { view.tab = h; render(); }
+  else if (h === 'feed') feedSheet();
+  else if (h === 'add') addSheet(view.date);
+  else if (h.startsWith('ask=')) { openChat(); handle(h.slice(4)); }
+}
+addEventListener('hashchange', route);
+
 // =============== Paleidimas ===============
 (async () => {
   const m = location.hash.match(/k=([A-Za-z0-9_-]{18,})/);
@@ -1723,6 +1869,7 @@ $('#main').addEventListener('change', e => {
   if (Sync.enabled()) await Sync.pull();
   markSeen();
   render();
+  route();
   announceUpdate();
   // Klaviatūra (iPhone): žinome tikrą matomą aukštį ir paslepiame apatinę juostą
   // iPhone: atsidarius klaviatūrai kartais susitraukia ir visas langas, todėl remiamės tuo, ar rašoma į laukelį
