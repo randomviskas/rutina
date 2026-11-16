@@ -24,7 +24,7 @@ Rules:
 - who: "a", "b" or "both". The writer is "me". Personal things default to the writer; "mes/abu/kartu/dirbam/su Milda/su Pauliumi" and couple activities mean "both"; a named person alone means that person.
 - Existing planned activities (activity ids from "activities") go through add_activity with act_id; anything else is add_event with a clear Lithuanian title (no dates/times in the title) and one fitting emoji.
 - Travel / flights / trips without a time: add_event with all_day=true. With a time: normal add_event.
-- Recurring work schedule ("darbo dienomis", "kasdien", "pirmadieniais", "savaitgaliais nedirbu"): set_work_weekly with weekdays (Mon=0 … Sun=6) and ranges like "09:00-11:00" or "09:00-13:00, 14:00-17:00"; "" means not working. A single day: set_work_day.
+- Recurring work schedule ("darbo dienomis", "kasdien", "pirmadieniais", "savaitgaliais nedirbu"): set_work_weekly with weekdays (Mon=0 … Sun=6) and ranges like "09:00-11:00" or "09:00-13:00, 14:00-17:00"; "" means not working. A single day: set_work_day. IMPORTANT: a singular weekday ("šeštadienį", "penktadienį", "rytoj", "27 d.") is ONE date → set_work_day for the next such date. Only plural weekday forms ("šeštadieniais", "pirmadieniais"), "kiekvieną …", "kasdien", "darbo dienomis", "visada", "paprastai" are recurring → set_work_weekly.
 - Changing existing items: use their exact item_id from "items". move_item (new date and/or start), mark_done, skip_item (did not happen / cancel today), delete_item. Never invent item ids.
 - "perdėlioti savaitę" / re-plan: regenerate_week.
 - Questions about the plan ("kas rytoj?", "kada laisvi?"): answer in reply from the context, with actions [].
