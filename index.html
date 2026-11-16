@@ -613,8 +613,14 @@ body.lite .micbig{box-shadow:none;border:1px solid var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.4';
+const APP_VERSION = '2.5';
 const WHATS_NEW = [
+  '🧠 Asistentas supranta tęsinį: „po to valgyt eisim 35 min“, „ryt valgom po darbo“',
+  '💻 „dirbtu / dirbti / dirbsim“ – visada darbo laikas (ir Mildai, jei „su Milda“)',
+  '📅 Pilna diena? Nebesako „nerandu“ – pasiūlo logišką laiką, kitos veiklos pasislenka',
+  '🎤 iPhone: 🎤 atidaro klaviatūrą diktavimui (programa iš pagrindinio ekrano tiesiogiai klausytis negali)',
+];
+const WHATS_NEW_24 = [
   '🎤 Planuokite balsu: paspauskite 🎤 ir pasakykite lietuviškai – „rytoj dirbsiu nuo 11 iki 12 su Milda“',
   '🧠 Asistentas su tikru AI (Claude) – supranta laisvą kalbą ir kelis dalykus vienu sakiniu',
   '🍃 Lite versija: viršuje 🍃 – rami, švari sąsaja be animacijų ir margumo',
@@ -1877,6 +1883,9 @@ let REC = null;
 function startMic() {
   const inp = $('#ask'), btn = $('#micBtn');
   if (REC) { try { REC.stop(); } catch (e) {} return; } // antras paspaudimas – baigti
+  if (SR && ls.get('rutina.nosr') === '1') { // telefonas neleidžia – iškart klaviatūra su diktavimu
+    inp.focus(); toast('🎤 Klaviatūroje paspauskite mikrofoną ir kalbėkite, tada ↑'); return;
+  }
   if (!SR) return botSay('🎤 Šis telefonas neleidžia programai klausytis tiesiogiai. Paspauskite laukelį ir klaviatūroje – 🎤 (diktavimas): pasakykite, tekstas atsiras, tada ↑.');
   let text = '', failed = false;
   try { REC = new SR(); } catch (e) { REC = null; return botSay('🎤 Balso įvedimas nepasileido – naudokite klaviatūros 🎤.'); }
@@ -1884,8 +1893,12 @@ function startMic() {
   btn.classList.add('rec'); inp.placeholder = '🎤 Klausau… kalbėkite (paspauskite 🎤 dar kartą – baigti)';
   REC.onresult = e => { text = [...e.results].map(r => r[0].transcript).join(' ').trim(); inp.value = text; };
   REC.onerror = e => {
-    failed = true;
-    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') botSay('🎤 Mikrofonas neleidžiamas. iPhone: <b>Nustatymai → Programos → Safari → Mikrofonas → Leisti</b> (ir <b>Nustatymai → Bendrieji → Klaviatūra → Įjungti diktavimą</b>). Arba naudokite klaviatūros 🎤.');
+    failed = true; btn.classList.remove('rec'); inp.placeholder = 'pvz. šiandien 13:00 susitikimas';
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      ls.set('rutina.nosr', '1');
+      botSay('🎤 iPhone neleidžia programai (iš pagrindinio ekrano) klausytis tiesiogiai. Naudokite <b>klaviatūros 🎤</b>: paspauskite laukelį → mikrofonas klaviatūros apačioje → kalbėkite → ↑. Nuo šiol 🎤 mygtukas iškart atidarys klaviatūrą.<br><span class="note">Jei klaviatūroje mikrofono nėra: Nustatymai → Bendrieji → Klaviatūra → Įjungti diktavimą.</span>');
+      setTimeout(() => inp.focus(), 50);
+    }
     else if (e.error === 'language-not-supported') botSay('🎤 Šis telefonas lietuvių kalbos atpažinimo nepalaiko – naudokite klaviatūros 🎤 diktavimą.');
     else if (e.error === 'no-speech') botSay('🎤 Nieko neišgirdau – paspauskite 🎤 ir kalbėkite iškart.');
     else if (e.error !== 'aborted') botSay('🎤 Nepavyko atpažinti (' + esc(e.error) + '). Pabandykite dar kartą arba parašykite.');
@@ -1978,7 +1991,7 @@ function findAct(t) {
   }
   return best;
 }
-const STOP = /^(saus\w*|vasar\w*|kov\w*|bal\w*|geg\w*|birz\w*|liep\w*|rugp\w*|rugs\w*|spal\w*|lapkr\w*|gruod\w*|dien\w*|siandien\w*|rytoj\w*|ryt|rit|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
+const STOP = /^(saus\w*|vasar\w*|kov\w*|bal\w*|geg\w*|birz\w*|liep\w*|rugp\w*|rugs\w*|spal\w*|lapkr\w*|gruod\w*|dien\w*|siandien\w*|rytoj\w*|ryt|rit|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val(?!g)\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal|to|poto|paskui|tada|eisim|einam|eisiu|eime|veliau)$/;
 function titleFrom(raw) {
   const names = state.people.map(p => norm(p.name).slice(0, 4));
   const words = raw.replace(/[!?,]/g, ' ').split(/\s+/).filter(w => {
@@ -1992,10 +2005,11 @@ function titleFrom(raw) {
   // nepalikti kabančių žodžių gale („Pica su“ → „Pica“)
   while (words.length > 1 && /^(su|pas|prie|i|ir|ar|kad|po|be|uz|del|nuo|apie)$/.test(norm(words[words.length - 1]))) words.pop();
   const s = words.join(' ').trim();
+  if (/^(pa)?valg\w*$/.test(norm(s))) return 'Pavalgyti';
   return s ? s[0].toUpperCase() + s.slice(1) : 'Susitikimas';
 }
 const EMOJI = [[/susitik|meet/, '🤝'], [/gydytoj|dantist|daktar|klinik/, '🩺'], [/skambut|call|zoom|teams|pokalb/, '📞'], [/kirpykl|kirpim|grozi|manikiur/, '💇'],
-  [/vakarien|piet|pusryci|restoran|kavin|kava/, '🍽️'], [/gimtadien|svent|vakarel/, '🎉'], [/kelion|skryd|skrend|lektuv|oro uost|autobus/, '✈️'], [/pirkin|parduotuv|turg/, '🛒'], [/kin|filma/, '🎬'], [/masaz|spa/, '💆']];
+  [/vakarien|piet|pusryci|restoran|kavin|kava|valg|maist/, '🍽️'], [/gimtadien|svent|vakarel/, '🎉'], [/kelion|skryd|skrend|lektuv|oro uost|autobus/, '✈️'], [/pirkin|parduotuv|turg/, '🛒'], [/kin|filma/, '🎬'], [/masaz|spa/, '💆']];
 const emojiFor = t => (EMOJI.find(([re]) => re.test(norm(t))) || [0, '📌'])[1];
 
 function dayList(date) {
@@ -2041,7 +2055,8 @@ async function callAI(text, history) {
 }
 async function askAI(raw) {
   const plain = h => String(h || '').replace(/<br\s*\/?>/g, '\n').replace(/<[^>]+>/g, ' ').replace(/&nbsp;|&amp;|&lt;|&gt;|&quot;|&#39;/g, ' ').replace(/[ \t]+/g, ' ').trim();
-  const history = chat.msgs.filter(m => m.html && !m.tmp).slice(-6).map(m => ({ role: m.from === 'me' ? 'me' : 'bot', text: plain(m.html).slice(0, 500) }));
+  const propTxt = p => p ? `[kortelė: ${p.emoji} ${p.title} · ${p.date} ${p.allDay ? 'visa diena' : toHM(p.start) + '–' + toHM(p.start + p.dur)} · ${p.who.length === 2 ? 'abu' : p.who[0]} · ${p.state === 'added' ? 'ĮTRAUKTA' : p.state === 'cancelled' ? 'atšaukta' : 'laukia patvirtinimo'}]` : '';
+  const history = chat.msgs.filter(m => (m.html || m.prop) && !m.tmp).slice(-8).map(m => ({ role: m.from === 'me' ? 'me' : 'bot', text: (m.prop ? propTxt(chat.props[m.prop]) : plain(m.html)).slice(0, 500) }));
   chat.msgs.push({ from: 'me', html: esc(raw) });
   const wait = { from: 'bot', html: '<span class="typing"><i></i><i></i><i></i></span>', tmp: true };
   chat.msgs.push(wait); renderChat();
@@ -2104,6 +2119,7 @@ function applyAI(res, raw) {
         const val = okR(a.ranges); if (val == null) continue;
         undo(); const pids = who || (Me() ? [Me()] : ['a', 'b']);
         pids.forEach(p => state.workOverride[p + '|' + date] = val); dates.add(date);
+        if (val) chat.lastRef = { date, end: toMin(val.split(', ').pop().split('-')[1]) };
         logAct(`pakeitė darbo laiką (${dayName(date).toLowerCase()}: ${val || 'nedirba'})`);
         done.push(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(date)}: ${val ? 'dirba ' + esc(val.replace(/-/g, '–')) : 'nedirba 🎉'}`);
       } else if (a.type === 'regenerate_week') {
@@ -2185,12 +2201,18 @@ function handle(raw, noAI) {
   if (/pagalb|ka moki|help|kaip naud/.test(t)) return botSay('Galiu: įtraukti įvykį („rytoj 10:00 zoom 30 min“), perkelti („šiandien nesportuojam“, „perkelk surf į šeštadienį“), pažymėti ✓ („atlikom gym“) ar parodyti planą („kas rytoj?“).');
   if ((/\?/.test(raw) || /\b(kas|ka) (siandien|rytoj|poryt|veik|turim|laukia)|planas|koks rytoj|kokia diena/.test(t)) && tm.start == null) return botSay(dayList(dI.date));
   const skip = /(nesport|nenor|neisim|neeisim|neis\b|neisiu|neeisiu|atsauk|perkel|praleid|nebus|negal|ne siandien|nespes|nesp|neturim laiko)/.test(t);
-  if (/(darbas|darbo laik|dirbu|dirbam|dirba\b|dirbs\w*|nedirb)/.test(t) && !act) return workChat(t, dI, tm, who);
+  if (/(darbas|darbo laik|\bdirb\w*|nedirb)/.test(t) && !act && !/\bpo\s+darb/.test(t)) return workChat(t, dI, tm, who);
   if (act && skip) return skipChat(act, dI, tm, who, t);
   if (act && /(atlik|padar|buvom|buvau|nuejom|nuejau|baig|isbuv|sportavom|surfinom)/.test(t)) return doneChat(act, dI, who);
-  if (act) return propose({ kind:'act', actId: act.id, emoji: act.emoji, title: act.name, color: act.color, date: dI.date, start: tm.start, dur: tm.dur || act.dur, durKnown: true, who: who || groupsFor(act)[0], soft: tm.soft });
+  // „po to“, „po darbo“ → laikas pagal ankstesnį dalyką; vėlų vakarą be datos – rytojus
+  const pW = who || (act ? groupsFor(act)[0] : (Me() ? [Me()] : ['a', 'b']));
+  const anc = tm.start == null ? anchorFor(t, dI.found ? dI.date : (chat.lastRef?.date || dI.date), pW) : null;
+  let date = anc && !dI.found ? anc.date : dI.date;
+  if (!anc && !dI.found && tm.start == null && date === today() && nowMin() >= 21 * 60) date = addDays(today(), 1);
+  if (act) return propose({ kind:'act', actId: act.id, emoji: act.emoji, title: act.name, color: act.color, date, start: tm.start, anchor: anc?.end, dur: tm.dur || act.dur, durKnown: true, who: pW, soft: tm.soft });
   if (skip && !act) return botSay('Kurį užsiėmimą perkelti? Pvz. „šiandien nesportuojam“ arba „perkelk surf į rytoj“ 🙂');
-  propose({ kind:'event', title: titleFrom(raw), emoji: emojiFor(raw), color:'#475569', date: dI.date, start: tm.start, dur: tm.dur || 60, durKnown: !!tm.dur, who: who || (Me() ? [Me()] : ['a', 'b']), soft: tm.soft });
+  const clean = raw.replace(/\bpo\s*to\b|\bpo\s+darb\w*|\bpaskui\b|\bvėliau\b/gi, ' ');
+  propose({ kind:'event', title: titleFrom(clean), emoji: emojiFor(raw), color:'#475569', date, start: tm.start, anchor: anc?.end, dur: tm.dur || 60, durKnown: !!tm.dur, who: who || (Me() ? [Me()] : ['a', 'b']), soft: tm.soft });
 }
 
 function skipChat(act, dI, tm, who, t) {
@@ -2256,6 +2278,7 @@ function workChat(t, dI, tm, who) {
       <br><span class="note">Atsilaisvino laiko? Programa gali sudėlioti daugiau veiklų.</span><div class="pchips" style="margin-top:8px"><button data-sugg="Perdėlioti savaitę">🔀 Perdėlioti savaitę</button></div>`);
   }
   pids.forEach(p => state.workOverride[p + '|' + dI.date] = val);
+  if (val) chat.lastRef = { date: dI.date, end: toMin(val.split('-')[1]) };
   logAct(`pakeitė darbo laiką (${dayName(dI.date).toLowerCase()}: ${val || 'nedirba'})`);
   const ms = afterChange([dI.date]);
   botSay(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(dI.date)}: ${val ? 'dirba ' + val.replace('-', '–') : 'nedirba 🎉'}${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
@@ -2263,7 +2286,7 @@ function workChat(t, dI, tm, who) {
 
 // Logiškas paros laikas pagal veiklos pavadinimą
 const TIME_WIN = [[/saulely|sunset/, '17:00', '19:30'], [/zvaigzd|naktin|nakti/, '20:00', '23:30'], [/saulete|saulet.*tek|sunrise/, '05:30', '07:30'],
-  [/vakarien|kokteil|filmu|kinas|kino|stalo zaid|baras|vakarel|pica|picos/, '18:00', '23:00'], [/pusryc|kava|kavin|brunch/, '08:00', '11:30'], [/piet(u|us|ums)\b|lunch/, '12:00', '14:30'],
+  [/vakarien|kokteil|filmu|kinas|kino|stalo zaid|baras|vakarel|pica|picos/, '18:00', '23:00'], [/pusryc|kava|kavin|brunch/, '08:00', '11:30'], [/piet(u|us|ums)\b|lunch/, '12:00', '14:30'], [/valg|maist/, '12:00', '21:30'],
   [/joga|snorkel|krioklys|motorol|gili|fotoses|zygi|turg|kelion|ekskurs|nardym|masaz/, '08:00', '17:30']];
 const winFor = t => { const n = norm(t || ''); const w = TIME_WIN.find(([re]) => re.test(n)); return w ? { from: w[1], to: w[2] } : null; };
 function prepProp(p) {
@@ -2275,15 +2298,37 @@ function prepProp(p) {
   }
   if (p.start == null) {
     const act = p.kind === 'act' && actById(p.actId);
-    let s = act ? findSlot(act, p.dur, p.who, p.date, minStartFor(p.date), p.moveId) : null;
     const win = p.kind === 'event' ? winFor(p.title) : null; // pvz. vakarienė – vakare, žvaigždės – naktį
+    let s = null;
+    // „po to“ / „po darbo“ – kuo arčiau nurodyto momento
+    if (p.anchor != null) {
+      const a = Math.ceil(p.anchor / STEP) * STEP;
+      s = isFree(p.who, p.date, a, a + p.dur, p.moveId) ? a : findSlot({ from: toHM(a), to: toHM(Math.min(1430, a + 180 + p.dur)) }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
+      if (s == null) { s = a; p.forced = true; }
+    }
+    if (s == null && act) s = findSlot(act, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
     if (s == null && win) s = findSlot(win, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
     if (s == null) s = findSlot({ from:'08:00', to:'22:00' }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
-    if (s == null) return null;
-    p.start = s; p.suggested = true;
+    // laisvo lango nėra – vis tiek siūlom logišką laiką; automatinės veiklos pasislinks, konfliktai parodomi kortelėje
+    if (s == null) {
+      const base = toMin((act || win || { from: '18:00' }).from);
+      const ms = minStartFor(p.date);
+      s = Math.min(1440 - p.dur, Math.max(base, ms === Infinity ? 0 : Math.ceil(ms / STEP) * STEP));
+      p.forced = true;
+    }
+    p.start = s; p.suggested = !p.forced;
   }
   chat.props[p.id] = p;
   return p;
+}
+// „po to“ – po paskutinio aptarto dalyko; „po darbo“ – kai baigiasi darbas
+function anchorFor(t, date, pids) {
+  if (/\bpo\s*to\b|\bpaskui\b|\bpo\s+(jo|sito|siu|tu)\b|\bvelia[ui]\b/.test(t) && chat.lastRef) return chat.lastRef;
+  if (/\bpo\s+darb/.test(t)) {
+    const ends = pids.map(p => { const r = workRanges(p, date); return r.length ? r[r.length - 1][1] : null; }).filter(x => x != null);
+    if (ends.length) return { date, end: Math.max(...ends) };
+  }
+  return null;
 }
 function propose(p) {
   if (!prepProp(p)) return botSay(`${dayName(p.date)} laisvo ${fmtDur(p.dur)} lango nerandu 😕 Nurodykite laiką, pvz. „${dayName(p.date).toLowerCase()} 15:00“.`);
@@ -2330,7 +2375,7 @@ function propCard(p) {
   const mc = p.moveCand && state.items.find(x => x.id === p.moveCand);
   return `<div class="prop" style="${cvars(p.color)}">${head}
     ${p.kind === 'event' ? `<div class="lbl">PAVADINIMAS</div><input data-pf="title" data-pid="${p.id}" value="${esc(p.title)}" placeholder="pvz. Susitikimas, gydytojas, vakarienė">` : ''}
-    ${p.suggested ? '<div class="note">💡 Parinkau artimiausią laisvą laiką. Galite pakeisti.</div>' : p.soft ? '<div class="note">💡 Parinkau apytikslį laiką – pakeiskite, jei reikia.</div>' : ''}
+    ${p.forced ? '<div class="note">💡 Laisvo lango tiksliai nebuvo – pasiūliau logišką laiką. Automatinės veiklos pasislinks pačios; jei kertasi – pakeiskite laiką.</div>' : p.suggested ? '<div class="note">💡 Parinkau artimiausią laisvą laiką. Galite pakeisti.</div>' : p.soft ?'<div class="note">💡 Parinkau apytikslį laiką – pakeiskite, jei reikia.</div>' : ''}
     ${mc ? `<div class="lbl">ŠIOS SAVAITĖS PLANE JAU YRA ${DAYS[dayIdx(mc.date)].toUpperCase()} ${toHM(mc.start)}</div><div class="pchips">
       <button data-pa="mv" data-v="1" data-pid="${p.id}" class="${p.moveId ? 'on' : ''}">↪︎ Perkelti jį čia</button><button data-pa="mv" data-v="0" data-pid="${p.id}" class="${!p.moveId ? 'on' : ''}">＋ Papildomai</button></div>` : ''}
     <div class="lbl">KAS</div><div class="pchips">${whoBtn(['a'], esc(A.name))}${whoBtn(['b'], esc(B.name))}${whoBtn(['a', 'b'], 'Abu 👫')}</div>
@@ -2359,6 +2404,7 @@ function applyProp(p, btn) {
   }
   const ms = fixDay(p.date);
   p.state = 'added'; p.moved = ms.join(', ');
+  if (!p.allDay) chat.lastRef = { date: p.date, end: p.start + p.dur };
   logAct(`${p.kind === 'act' && p.moveId ? 'perkėlė' : 'pridėjo'} ${p.emoji} ${p.title} → ${p.allDay ? dayName(p.date) + ' ' + fmtDate(p.date) + ' (visa diena)' : whenShort(p.date, p.start)}`, it?.id);
   view.date = p.date;
   const r = btn.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top);

@@ -31,6 +31,9 @@ Rules:
 - Messages are often dictated by voice: no punctuation, numbers as words ("vienuoliktos", "pusę dvylikos" = 11:30, "be penkiolikos trys" = 14:45 in the afternoon context), filler words. Interpret generously.
 - Work: "dirbu/dirbsiu/dirbam/dirbsim" with a date = set_work_day for that date (e.g. "rytoj dirbsiu nuo 11 iki 12" → set_work_day, ranges "11:00-12:00"). "dirbsiu su Milda/Pauliumi" or "dirbam" → who "both". "nedirbu" → ranges "".
 - Bug reports or improvement ideas about the app itself ("neveikia…", "būtų gerai, kad programa…") → save_feedback with the text in title.
+- Follow-ups refer to the conversation: "po to / poto / paskui" = right after the item just discussed or added (same date, start = its end time). "po darbo" = right when that person's work ends that day (see work_weekly / work_overrides). "ten pat", "tą pačią dieną" = same date as before. Previous cards appear in history as "[kortelė: …]".
+- Never refuse because the day looks full: pick the most sensible time anyway (the app moves flexible auto activities). Meals: "valgyt/pavalgyt/valgom" → title "Pavalgyti" 🍽️, ~45–60 min (lunch 12–14, dinner 18–21) unless a duration is given.
+- If it is late evening (after ~21:00 in "now") and no date is given for a new plan, assume tomorrow.
 - Use 24h times between 06:00 and 23:59 unless clearly night; "2 val dieną" = 14:00, "8 vakaro" = 20:00.`;
 
 const TOOL = {
