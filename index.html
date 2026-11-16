@@ -328,6 +328,24 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 .bars i{flex:1;border-radius:4px 4px 2px 2px;min-height:4px}
 .bars-x{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:2px 0 6px}
 .sheet-card>*{flex-shrink:0}
+/* 👀 Dabar */
+.nowstrip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.nowc{display:flex;gap:8px;align-items:center;text-align:left;padding:9px 10px;border-radius:16px;background:var(--card);box-shadow:var(--shadow2);border-left:4px solid var(--c,var(--line));min-width:0}
+.nowc>div{min-width:0}
+.nowc b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nowc small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nowc.on{outline:2px solid #a855f7}
+/* ✅ Ar padarėte? */
+.askdone{background:var(--card);border-radius:18px;padding:12px 12px 6px;margin-bottom:12px;box-shadow:var(--shadow2);border:1.5px solid color-mix(in srgb,#10b981 40%,transparent)}
+.askdone>b{display:block;margin-bottom:6px;font:800 15px var(--font)}
+.adrow{display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.adrow span{flex:1;min-width:0;font-size:15px}
+.adrow small{color:var(--muted);font-size:12px}
+.adrow button{width:40px;height:36px;padding:0;border-radius:12px;font-weight:900;font-size:17px}
+.adrow button[aria-label=Atlikta]{background:#10b981;color:#fff}
+.adrow button[aria-label=Nepavyko]{background:var(--card2);color:var(--muted)}
+.ag-card.skipped{filter:grayscale(1);opacity:.45}
+.ag-card.skipped .tx b{text-decoration:line-through}
 .sdays{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:2px -2px 0;padding:2px}
 .sdays::-webkit-scrollbar{display:none}
 .sdays button{flex:1 0 48px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:14px;background:var(--card2)}
@@ -501,8 +519,12 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.1';
+const APP_VERSION = '2.2';
 const WHATS_NEW = [
+  '👀 Viršuje matosi, ką kiekvienas veikia DABAR – paspaudus, to žmogaus diena',
+  '✅ „Ar padarėte?“ – vienu paspaudimu ✓ arba ✕ praėjusioms veikloms',
+  '🌅 Vakarienė, saulėlydis, žvaigždės – siūlomos logišku paros laiku',
+  '🧹 Tvarkingesnė diena: mažiau mygtukų viršuje',
   '🏄 Tikslus surf grafikas: kiekviena valanda, bangos, potvynis, vėjas',
   '⭐ Aiškiai pažymėtas geriausias laikas ir valandų lentelė',
   '🎯 Tikslesni balai: vėjo kryptis, žemas potvynis ant rifo, idealus bangų aukštis',
@@ -1240,9 +1262,48 @@ function saveFeedback(text) {
 const weekNav = ws => `<div class="wkhead"><button data-nav="-7" aria-label="Ankstesnė savaitė">‹</button><div>${weekLabel(ws)}</div><button data-nav="7" aria-label="Kita savaitė">›</button></div>`;
 const warnBox = () => view.warn ? `<div class="warn">⚠️ ${esc(view.warn)}</div>` : '';
 
+// 👀 Ką kiekvienas veikia DABAR
+function statusOf(pid) {
+  const d = today(), n = nowMin(), [w, s] = awake(pid);
+  if (n < w) return { e:'😴', t:'Miega', sub:'keliasi ' + toHM(w) };
+  if (n >= s) return { e:'😴', t:'Miega', sub:'nuo ' + toHM(s) };
+  const cur = state.items.find(i => i.date === d && i.who.includes(pid) && i.start <= n && n < i.start + i.dur && i.status !== 'skipped');
+  if (cur) { const m = itemMeta(cur); return { e: m.emoji, t: m.name, sub:'iki ' + toHM(cur.start + cur.dur) + (cur.who.length === 2 ? ' · kartu' : ''), c: m.color }; }
+  const wr = workRanges(pid, d).find(([a, b]) => a <= n && n < b);
+  if (wr) return { e:'💻', t:'Dirba', sub:'iki ' + toHM(wr[1]) };
+  const nx = state.items.filter(i => i.date === d && i.who.includes(pid) && i.start > n && i.status === 'planned').sort((a, b) => a.start - b.start)[0];
+  return { e:'☕', t:'Laisvas', sub: nx ? 'toliau ' + toHM(nx.start) + ' ' + itemMeta(nx).emoji + ' ' + itemMeta(nx).name : 'šiandien daugiau nieko' };
+}
+function nowStrip() {
+  if (view.date !== today()) return '';
+  const F = ls.get('rutina.filter');
+  return `<div class="nowstrip">${state.people.map(p => { const s = statusOf(p.id);
+    return `<button class="nowc ${F === p.id ? 'on' : ''}" data-filter="${F === p.id ? 'all' : p.id}" style="${s.c ? cvars(s.c) : ''}">${av(p.id, 'sm')}<div><b>${s.e} ${esc(s.t)}</b><small>${esc(p.name)}${p.id === Me() ? ' (aš)' : ''} · ${esc(s.sub)}</small></div></button>`; }).join('')}</div>`;
+}
+// ✅ „Ar padarėte?“ – praėjusios nepažymėtos veiklos (šiandien ir vakar)
+function askDone() {
+  if (view.date !== today()) return '';
+  const n = nowMin(), y = addDays(today(), -1), seen = new Set();
+  const L = state.items.filter(i => i.status === 'planned' && ((i.date === today() && i.start + i.dur <= n) || i.date === y))
+    .sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start)
+    .filter(i => { const k = (i.actId || i.title) + i.date + i.start; if (seen.has(k)) return false; seen.add(k); return true; }).slice(-4);
+  if (!L.length) return '';
+  return `<div class="askdone"><b>✅ Ar padarėte?</b>${L.map(i => { const m = itemMeta(i);
+    const ids = state.items.filter(x => x.status === 'planned' && x.date === i.date && x.start === i.start && (x.actId || x.title) === (i.actId || i.title)).map(x => x.id).join(',');
+    return `<div class="adrow"><span>${m.emoji} ${esc(m.name)} <small>${i.date === today() ? '' : 'vakar '}${toHM(i.start)}</small></span><button data-quick="${ids}|done" aria-label="Atlikta">✓</button><button data-quick="${ids}|skip" aria-label="Nepavyko">✕</button></div>`; }).join('')}</div>`;
+}
+function quickMark(ids, kind) {
+  snapUndo();
+  const G = ids.split(',').map(id => state.items.find(x => x.id === id)).filter(Boolean); if (!G.length) return;
+  const m = itemMeta(G[0]);
+  G.forEach(x => x.status = kind === 'done' ? 'done' : 'skipped');
+  logAct(`${kind === 'done' ? 'pažymėjo ✓' : 'praleido ✕'} ${m.emoji} ${m.name}`, G[0].id);
+  haptic(); render();
+  if (kind === 'done') { confetti(innerWidth / 2, 260); chime(); toastUndo('Šaunuoliai! ' + m.emoji + ' ✓' + streakNote()); } else toastUndo('Gerai, kitą kartą 💪');
+}
 function heroCard() {
-  const d = view.date, n = nowMin();
-  const its = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start);
+  const d = view.date, n = nowMin(), F = ls.get('rutina.filter');
+  const its = state.items.filter(it => it.date === d && it.status !== 'skipped' && (!F || it.who.includes(F))).sort((a, b) => a.start - b.start);
   const done = its.filter(it => it.status === 'done').length;
   const bar = its.length ? `<div class="bar"><i style="width:${Math.round(done / its.length * 100)}%"></i></div><div class="meta" style="margin-top:6px">Atlikta ${done} iš ${its.length}</div>` : '';
   if (d === today()) {
@@ -1269,10 +1330,12 @@ function renderDay(main) {
     const dots = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start).slice(0, 4).map(it => `<u style="--c:${itemMeta(it).color}"></u>`).join('');
     return `<button class="${d === view.date ? 'on' : ''} ${d === today() ? 'today' : ''}" data-date="${d}"><span>${DAYS[i]}</span><b>${parseYmd(d).getDate()}</b><i>${dots}</i></button>`;
   }).join('') + '</div>';
+  h += nowStrip();
   h += heroCard();
+  h += askDone();
   h += surfStrip(view.date);
   const tlMode = ls.get('rutina.mode') === 'tl';
-  h += `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="roulette">🎲 Ką veiksim?</button><button data-act="ping">💗 Pagalvojau</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Laiko juosta'}</button><button data-act="work">💻 Darbas šią dieną</button></div>`;
+  h += `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="roulette">🎲 Ką veiksim?</button><button data-act="ping">💗 Pagalvojau</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Stulpeliai'}</button></div>`;
   if (!tlMode) { main.innerHTML = h + agenda(view.date); return; }
   h += `<div class="cols"><div></div>${state.people.map(p => `<div>${av(p.id, 'sm')} ${esc(p.name)}</div>`).join('')}</div>`;
 
@@ -1329,7 +1392,7 @@ function agenda(d) {
     const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id)));
     rows.push({ t: it.start, html: `<div class="ag-row sw-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
       <div class="ag-swipe"><span class="l">${it.status === 'done' ? '↩︎ Neatlikta' : '✓ Atlikta'}</span><span class="r">Perkelti ↪︎</span></div>
-      <div class="ag-card ${it.status === 'done' ? 'done' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
+      <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
       <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}${it.actId === sid && Surf.data?.[d] ? ' · ' + Surf.stars(Surf.score(d, it.start, it.dur)) : ''}${it.series ? ' · 🔁' : ''}</small></span>${avs(who)}</div></div>` });
   });
   const wk = {};
@@ -1717,6 +1780,8 @@ function titleFrom(raw) {
     if (names.some(x => x.length >= 3 && n.startsWith(x))) return false;
     return true;
   });
+  // nepalikti kabančių žodžių gale („Pica su“ → „Pica“)
+  while (words.length > 1 && /^(su|pas|prie|i|ir|ar|kad|po|be|uz|del|nuo|apie)$/.test(norm(words[words.length - 1]))) words.pop();
   const s = words.join(' ').trim();
   return s ? s[0].toUpperCase() + s.slice(1) : 'Susitikimas';
 }
@@ -1824,6 +1889,11 @@ function workChat(t, dI, tm, who) {
   botSay(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(dI.date)}: ${val ? 'dirba ' + val.replace('-', '–') : 'nedirba 🎉'}${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
 }
 
+// Logiškas paros laikas pagal veiklos pavadinimą
+const TIME_WIN = [[/saulely|sunset/, '17:00', '19:30'], [/zvaigzd|naktin|nakti/, '20:00', '23:30'], [/saulete|saulet.*tek|sunrise/, '05:30', '07:30'],
+  [/vakarien|kokteil|filmu|kinas|kino|stalo zaid|baras|vakarel|pica|picos/, '18:00', '23:00'], [/pusryc|kava|kavin|brunch/, '08:00', '11:30'], [/piet(u|us|ums)\b|lunch/, '12:00', '14:30'],
+  [/joga|snorkel|krioklys|motorol|gili|fotoses|zygi|turg|kelion|ekskurs|nardym|masaz/, '08:00', '17:30']];
+const winFor = t => { const n = norm(t || ''); const w = TIME_WIN.find(([re]) => re.test(n)); return w ? { from: w[1], to: w[2] } : null; };
 function prepProp(p) {
   p.id = uid(); p.state = 'open';
   if (p.kind === 'act') {
@@ -1834,6 +1904,8 @@ function prepProp(p) {
   if (p.start == null) {
     const act = p.kind === 'act' && actById(p.actId);
     let s = act ? findSlot(act, p.dur, p.who, p.date, minStartFor(p.date), p.moveId) : null;
+    const win = p.kind === 'event' ? winFor(p.title) : null; // pvz. vakarienė – vakare, žvaigždės – naktį
+    if (s == null && win) s = findSlot(win, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
     if (s == null) s = findSlot({ from:'08:00', to:'22:00' }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
     if (s == null) return null;
     p.start = s; p.suggested = true;
@@ -1943,8 +2015,9 @@ $('#main').addEventListener('click', e => {
   }
   if (Date.now() - (view.noClick || 0) < 450) return; // ką tik buvo braukimas
   const hb = e.target.closest('[data-help]'); if (hb) return guideSheet(+hb.dataset.help);
-  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat],[data-filter]'); if (!t) return;
+  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat],[data-filter],[data-quick]'); if (!t) return;
   if (t.dataset.addat) return addSheet(view.date, +t.dataset.addat);
+  if (t.dataset.quick) { const [ids, k] = t.dataset.quick.split('|'); return quickMark(ids, k); }
   if (t.dataset.act === 'surf') return surfSheet();
   if (t.dataset.act === 'ping') return sendPing();
   if (t.dataset.act === 'roulette') return rouletteSheet(null);
