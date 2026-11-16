@@ -327,6 +327,36 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 .bars{display:flex;align-items:flex-end;gap:3px;height:54px}
 .bars i{flex:1;border-radius:4px 4px 2px 2px;min-height:4px}
 .bars-x{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:2px 0 6px}
+.sheet-card>*{flex-shrink:0}
+.sdays{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:2px -2px 0;padding:2px}
+.sdays::-webkit-scrollbar{display:none}
+.sdays button{flex:1 0 48px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:14px;background:var(--card2)}
+.sdays span{font-size:11px;color:var(--muted);font-weight:700}
+.sdays b{font:800 16px var(--font)}
+.sdays i{font-style:normal;color:#fff;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px}
+.sdays button.on{background:var(--grad);color:#fff}
+.sdays button.on span{color:#fff}
+.sd-best{font-size:15px;margin-bottom:4px}
+.schart{width:100%;height:auto;display:block;color:var(--text);margin-top:4px}
+.schart rect[data-surfhr]{cursor:pointer}
+.schart .sx{font-size:11px;fill:var(--muted);font-weight:700}
+.schart .st{font-size:9px;font-weight:800;letter-spacing:.5px}
+.slegend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--muted);margin-top:6px}
+.slegend span{display:flex;align-items:center;gap:4px}
+.slegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.slegend i.ln{height:3px;width:14px;border-radius:2px}
+.slegend i.dash{background:repeating-linear-gradient(90deg,#38bdf8 0 4px,transparent 4px 7px)}
+.shours{gap:6px}
+.shr{display:grid;grid-template-columns:48px 38px 1fr auto;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;background:var(--card2);font-size:14px}
+.shr .t{font-variant-numeric:tabular-nums}
+.shr .sc{color:#fff;font-weight:800;border-radius:9px;text-align:center;padding:3px 0;font-size:13px;line-height:1.1}
+.shr .sc small{display:block;font-size:7.5px;letter-spacing:-.5px;opacity:.95}
+.shr .d small{display:block;color:var(--muted);font-size:12px}
+.shr .tide{font-size:12px;color:var(--muted);white-space:nowrap}
+.shr.past{opacity:.45}
+.shr.best{outline:2px solid #10b981;background:color-mix(in srgb,#10b981 10%,var(--card2))}
+.shr.flash{animation:flashrow 1.2s ease}
+@keyframes flashrow{0%,40%{background:color-mix(in srgb,#a855f7 30%,var(--card2))}}
 .spot{display:block;width:100%;text-align:left;background:var(--card2);border:2px solid transparent;border-radius:16px;padding:11px 13px;margin-bottom:8px}
 .spot b{display:block}
 .spot small{color:var(--muted);font-size:12.5px}
@@ -471,8 +501,11 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.0.1';
+const APP_VERSION = '2.1';
 const WHATS_NEW = [
+  '🏄 Tikslus surf grafikas: kiekviena valanda, bangos, potvynis, vėjas',
+  '⭐ Aiškiai pažymėtas geriausias laikas ir valandų lentelė',
+  '🎯 Tikslesni balai: vėjo kryptis, žemas potvynis ant rifo, idealus bangų aukštis',
   '🔎 Viršutinė juosta visada ryški ir nebedingsta slenkant',
   '🏄 Vakare surf kortelė rodo geriausią rytojaus laiką',
   '🏄 Surf pagal tikras Lomboko bangas, vėją ir potvynius',
@@ -1521,6 +1554,9 @@ sheetEl.addEventListener('click', e => {
   const fi = e.target.closest('[data-feeditem]');
   if (fi) { if (state.items.some(x => x.id === fi.dataset.feeditem)) return itemSheet(fi.dataset.feeditem); return toast('Ši veikla jau pašalinta'); }
   const pk = e.target.closest('[data-pick]'); if (pk) return pickAdd(pk.dataset.pick);
+  const sdb = e.target.closest('[data-surfday]'); if (sdb) { view.surfDay = sdb.dataset.surfday; haptic(); return surfSheet(); }
+  const shb = e.target.closest('[data-surfhr]');
+  if (shb) { const row = $('#shr' + shb.dataset.surfhr); if (row) { row.scrollIntoView({ block: 'center', behavior: 'smooth' }); row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); } return; }
   const sl = e.target.closest('[data-surflevel],[data-surfspot]');
   if (sl) {
     state.surf = { ...surfCfg(), ...(sl.dataset.surflevel ? { level: sl.dataset.surflevel } : { spot: sl.dataset.surfspot }) };
@@ -2223,14 +2259,20 @@ const Surf = {
   hourScore(date, hr) {
     const day = this.data?.[date], o = day?.h?.[hr]; if (!o || hr < 6 || hr > 17 || o.h == null) return 0;
     const L = LEVELS[surfCfg().level] || LEVELS.mid, s = spotOf();
-    const hs = o.h >= L.lo && o.h <= L.hi ? 1 : Math.max(0, 1 - (o.h < L.lo ? L.lo - o.h : o.h - L.hi) / .8);
-    const ps = o.p >= 13 ? 1 : o.p >= 10 ? .9 : o.p >= 8 ? .65 : o.p >= 6 ? .4 : .2;
+    // bangų aukštis: geriausia lygio vidurys, toliau – mažiau (Gauso kreivė)
+    const mid = (L.lo + L.hi) / 2, sig = (L.hi - L.lo) / 2.2;
+    const hs = Math.exp(-Math.pow((o.h - mid) / sig, 2) / 2);
+    // periodas: ilgesnis – galingesnės, tvarkingesnės bangos
+    const ps = o.p >= 14 ? 1 : o.p >= 12 ? .9 : o.p >= 10 ? .75 : o.p >= 8 ? .5 : o.p >= 6 ? .3 : .15;
+    // vėjas: stiprumas × kryptis (offshore geriausia, onshore blogiausia)
     const ad = Math.abs(((o.wd - s.off) % 360 + 540) % 360 - 180); const diff = 180 - ad; // 0 = tiksliai offshore
-    const off = diff < 50, cross = diff < 100;
-    const ws = o.w < 8 ? 1 : o.w < 15 ? (off ? .95 : cross ? .7 : .45) : o.w < 25 ? (off ? .7 : cross ? .4 : .15) : .1;
+    const dir = diff < 45 ? 1 : diff < 80 ? .8 : diff < 115 ? .6 : .35;
+    const spd = o.w < 5 ? 1 : o.w < 10 ? .85 : o.w < 15 ? .65 : o.w < 20 ? .45 : o.w < 28 ? .25 : .1;
+    const ws = o.w < 5 ? 1 : spd * dir + (1 - spd) * 0;
+    // potvynis: Lomboko rifams geriausia vidutinis–aukštas, žemas – pavojinga
     const tn = day.hi > day.lo ? (o.sea - day.lo) / (day.hi - day.lo) : .5;
-    const ts = tn >= .35 && tn <= .9 ? 1 : tn < .2 ? .35 : .7;
-    return Math.round(10 * (.35 * hs + .25 * ps + .25 * ws + .15 * ts) * 10) / 10;
+    const ts = tn < .15 ? .15 : tn < .35 ? .55 : tn <= .85 ? 1 : .8;
+    return Math.round(10 * (.33 * hs + .2 * ps + .3 * ws + .17 * ts) * 10) / 10;
   },
   score(date, start, dur) {
     const hs = []; for (let m = start; m < start + dur; m += 60) hs.push(this.hourScore(date, Math.floor(m / 60)));
@@ -2299,21 +2341,56 @@ function surfSheet() {
   const s = spotOf(), L = LEVELS[surfCfg().level];
   if (!Surf.data) { openSheet('<h3 style="margin:0">🏄 Surf prognozė</h3><div class="empty">Kraunama… (reikia interneto)</div>'); Surf.load().then(d => d && surfSheet()); return; }
   const act = surfAct(), dur = act?.dur || 120;
-  let h = `<h3 style="margin:0">🏄 ${esc(s.name)} · ${L.n}</h3><div class="hint" style="margin:0">${esc(s.note)}. Balai įvertina bangų aukštį pagal jūsų lygį, periodą, vėją ir potvynį.</div><div class="feedwrap">`;
-  for (let i = 0; i < 7; i++) {
-    const d = addDays(today(), i); if (!Surf.data[d]) continue;
-    let b = null; const bars = [];
-    for (let hr = 6; hr < 18; hr++) { const sc = Surf.hourScore(d, hr); bars.push(sc); }
-    for (let t = 6 * 60; t + dur <= 18 * 60; t += 30) { if (d === today() && t < nowMin()) continue; const sc = Surf.score(d, t, dur); if (!b || sc > b.sc) b = { t, sc }; }
-    const planned = act && state.items.find(x => x.actId === act.id && x.date === d);
-    h += `<div class="surfday"><div class="sd-head"><b>${dayName(d)}, ${fmtDate(d)}</b>${b ? `<span class="stars">${Surf.stars(b.sc)}</span>` : ''}</div>
-      <div class="bars">${bars.map((sc, j) => `<i style="height:${Math.max(6, sc * 10)}%;background:${sc >= 7 ? '#10b981' : sc >= 5 ? '#0ea5e9' : sc >= 3.5 ? '#f59e0b' : '#94a3b8'}" title="${6 + j}:00 – ${sc}"></i>`).join('')}</div>
-      <div class="bars-x"><span>6</span><span>9</span><span>12</span><span>15</span><span>18</span></div>
-      ${b ? `<div class="note">Geriausia ${toHM(b.t)}–${toHM(b.t + dur)} · ${Surf.label(b.sc)} · ${esc(Surf.info(d, b.t))}</div>` : ''}
-      ${planned ? `<div class="note">🗓️ Suplanuota: ${toHM(planned.start)} (${Surf.stars(Surf.score(d, planned.start, planned.dur))})</div>` : ''}</div>`;
+  const days = [...Array(7)].map((_, i) => addDays(today(), i)).filter(d => Surf.data[d]);
+  const d = days.includes(view.surfDay) ? view.surfDay : days[0];
+  const col = sc => sc >= 7.5 ? '#10b981' : sc >= 6 ? '#0ea5e9' : sc >= 4.5 ? '#f59e0b' : '#94a3b8';
+  const dayBest = dd => { let b = null; for (let t = 6 * 60; t + dur <= 18 * 60; t += 30) { if (dd === today() && t < nowMin()) continue; const sc = Surf.score(dd, t, dur); if (!b || sc > b.sc) b = { t, sc }; } return b; };
+  // dienų pasirinkimas su geriausiu balu
+  let h = `<h3 style="margin:0">🏄 ${esc(s.name)} · ${L.n}</h3>
+    <div class="sdays">${days.map(dd => { const b = dayBest(dd); return `<button data-surfday="${dd}" class="${dd === d ? 'on' : ''}"><span>${dd === today() ? 'Šiand.' : dd === addDays(today(), 1) ? 'Rytoj' : DAYS[dayIdx(dd)]}</span><b>${parseYmd(dd).getDate()}</b><i style="background:${b ? col(b.sc) : '#94a3b8'}">${b ? (b.sc / 2).toFixed(1) : '–'}</i></button>`; }).join('')}</div>`;
+  const day = Surf.data[d], best = dayBest(d), planned = act && state.items.find(x => x.actId === act.id && x.date === d);
+  // grafikas 05–19 val.: stulpeliai = balas, linija = bangų aukštis, punktyras = potvynis, rodyklės = vėjas
+  const H0 = 5, H1 = 19, W = 360, X = hr => 22 + (hr - H0) * ((W - 30) / (H1 - H0)), base = 132, top = 30;
+  const hrs = []; for (let hr = H0; hr <= H1; hr++) if (day.h[hr]) hrs.push(hr);
+  const maxH = Math.max(2, ...hrs.map(hr => day.h[hr].h || 0)) * 1.15;
+  const bw = (W - 30) / (H1 - H0) * .62;
+  let svg = `<svg viewBox="0 0 ${W} 168" class="schart" role="img" aria-label="Surf grafikas">`;
+  if (best) svg += `<rect x="${X(best.t / 60) - 2}" y="${top - 6}" width="${X((best.t + dur) / 60) - X(best.t / 60) + 4}" height="${base - top + 8}" rx="6" fill="#10b981" opacity=".13"/><text x="${(X(best.t / 60) + X((best.t + dur) / 60)) / 2}" y="${top - 10}" class="st" text-anchor="middle" fill="#10b981">GERIAUSIA</text>`;
+  if (planned) svg += `<rect x="${X(planned.start / 60)}" y="${base + 3}" width="${X((planned.start + planned.dur) / 60) - X(planned.start / 60)}" height="5" rx="2.5" fill="#a855f7"/>`;
+  [0, 5, 10].forEach(v => svg += `<line x1="18" x2="${W - 4}" y1="${base - v / 10 * (base - top)}" y2="${base - v / 10 * (base - top)}" stroke="currentColor" opacity=".08"/>`);
+  hrs.forEach(hr => { const sc = Surf.hourScore(d, hr), x = X(hr + .5); if (hr >= 6 && hr <= 17) svg += `<rect data-surfhr="${hr}" x="${x - bw / 2}" y="${base - sc / 10 * (base - top)}" width="${bw}" height="${Math.max(2, sc / 10 * (base - top))}" rx="3" fill="${col(sc)}"/>`; });
+  const line = (f, attrs) => `<polyline fill="none" ${attrs} points="${hrs.map(hr => `${X(hr).toFixed(1)},${f(day.h[hr]).toFixed(1)}`).join(' ')}"/>`;
+  svg += line(o => base - (o.sea - day.lo) / ((day.hi - day.lo) || 1) * (base - top), 'stroke="#38bdf8" stroke-width="2" stroke-dasharray="4 3" opacity=".9"');
+  svg += line(o => base - (o.h || 0) / maxH * (base - top), 'stroke="#f472b6" stroke-width="2.5"');
+  hrs.filter(hr => hr % 2 === 0).forEach(hr => { const o = day.h[hr], x = X(hr);
+    svg += `<text x="${x}" y="${base + 22}" class="sx" text-anchor="middle">${hr}</text>`;
+    svg += `<g transform="translate(${x},12) rotate(${(o.wd + 180) % 360})"><path d="M0,-6 L4,4 L0,1 L-4,4 Z" fill="${o.w < 12 ? '#10b981' : o.w < 20 ? '#f59e0b' : '#ef4444'}"/></g>`; });
+  if (d === today()) { const n = nowMin() / 60; if (n > H0 && n < H1) svg += `<line x1="${X(n)}" x2="${X(n)}" y1="${top - 4}" y2="${base}" stroke="#ef4444" stroke-width="1.5"/>`; }
+  svg += '</svg>';
+  h += `<div class="surfday">${best ? `<div class="sd-best">⭐ Geriausia <b>${toHM(best.t)}–${toHM(best.t + dur)}</b> · ${Surf.stars(best.sc)} ${Surf.label(best.sc)}</div>` : '<div class="sd-best">Šiandien šviesaus laiko surf nebeliko</div>'}
+    ${planned ? `<div class="note">🗓️ Jūsų suplanuota ${toHM(planned.start)}–${toHM(planned.start + planned.dur)} (violetinė juosta) · ${Surf.stars(Surf.score(d, planned.start, planned.dur))}</div>` : ''}
+    ${svg}
+    <div class="slegend"><span><i style="background:#10b981"></i>Puiku</span><span><i style="background:#0ea5e9"></i>Gera</span><span><i style="background:#f59e0b"></i>Vidutiniškai</span><span><i style="background:#94a3b8"></i>Prastai</span>
+      <span><i class="ln" style="background:#f472b6"></i>Bangos (m)</span><span><i class="ln dash"></i>Potvynis</span><span>▲ Vėjas</span></div></div>`;
+  // valandų lentelė
+  h += '<div class="feedwrap shours">';
+  for (let hr = 6; hr <= 17; hr++) {
+    const o = day.h[hr]; if (!o) continue;
+    const sc = Surf.hourScore(d, hr), nx = day.h[hr + 1];
+    const diff = 180 - Math.abs(((o.wd - s.off) % 360 + 540) % 360 - 180);
+    const wl = diff < 50 ? 'offshore 👌' : diff < 100 ? 'šoninis' : 'onshore';
+    const tn = Math.round((o.sea - day.lo) / ((day.hi - day.lo) || 1) * 100);
+    const past = d === today() && hr < Math.floor(nowMin() / 60);
+    const inBest = best && hr * 60 >= best.t && hr * 60 < best.t + dur;
+    h += `<div class="shr ${past ? 'past' : ''} ${inBest ? 'best' : ''}" id="shr${hr}">
+      <b class="t">${String(hr).padStart(2, '0')}:00</b><span class="sc" style="background:${col(sc)}">${(sc / 2).toFixed(1)}<small>${'★'.repeat(Math.round(sc / 2))}</small></span>
+      <span class="d"><b>${(o.h || 0).toFixed(1)} m</b> · ${Math.round(o.p || 0)} s<small>🌬 ${Math.round(o.w)} km/h ${compass(o.wd)} · ${wl}</small></span>
+      <span class="tide">🌊 ${nx ? (nx.sea > o.sea ? '↑' : '↓') : ''} ${tn}%</span></div>`;
   }
-  h += '</div><div class="btns"><button class="btn-grad" data-sheet="surfplan">🏄 Sudėlioti surf pagal bangas</button><button class="btn-soft" data-sheet="surfset">⚙️ Spotas ir lygis</button></div>';
-  openSheet(h);
+  h += '</div><div class="hint" style="margin:0">Balas 0–5 ★: bangų aukštis jūsų lygiui (' + L.lo + '–' + L.hi + ' m), periodas (ilgesnis – geriau), vėjas (silpnas / offshore – geriau) ir potvynis (vidutinis–aukštas – geriau). 🌊 % – potvynio aukštis tą dieną (0 % žemiausias, 100 % aukščiausias).</div>';
+  h += '<div class="btns"><button class="btn-grad" data-sheet="surfplan">🏄 Sudėlioti surf pagal bangas</button><button class="btn-soft" data-sheet="surfset">⚙️ Spotas ir lygis</button></div>';
+  if (sheetEl.classList.contains('open') && sheetEl.querySelector('.sdays')) { sheetEl.querySelector('.sheet-card').innerHTML = '<div class="grab"></div>' + h; }
+  else openSheet(h);
 }
 function surfStrip(d) {
   if (!surfAct()) return '';
