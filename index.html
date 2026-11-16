@@ -49,6 +49,12 @@ header.top{position:sticky;top:0;z-index:20;padding:calc(env(safe-area-inset-top
 .av{width:34px;height:34px;border-radius:50%;display:inline-grid;place-items:center;color:#fff;font:700 15px var(--font);
   background:linear-gradient(135deg,var(--c),var(--c2));box-shadow:0 0 0 2.5px var(--bg)}
 .pair .av+.av{margin-left:-10px}
+.av.ph{background-size:cover;background-position:center;color:transparent}
+.av.lg{width:52px;height:52px;font-size:20px}
+.photo-btn{position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:6px;background:var(--card2);border-radius:12px;padding:8px 12px;font-weight:600;font-size:14px;cursor:pointer}
+.photo-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+#hello .me{width:150px;height:150px;border-radius:50%;background-size:cover;background-position:center;border:5px solid #fff;box-shadow:0 12px 30px rgba(0,0,0,.3);position:relative;animation:beat 1.4s ease-in-out infinite}
+#hello .me i{position:absolute;right:-6px;bottom:-4px;font-size:44px;font-style:normal}
 .av.sm{width:22px;height:22px;font-size:11px;box-shadow:0 0 0 2px var(--card)}
 #sync{font-size:12px;color:var(--muted);text-align:right;min-width:20px}
 
@@ -269,8 +275,8 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.1';
-const WHATS_NEW = 'Programa pati praneša apie naujas versijas 🔄';
+const APP_VERSION = '1.2';
+const WHATS_NEW = 'Jūsų nuotraukos vietoj raidžių 📸';
 
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
@@ -353,7 +359,25 @@ const groupsFor = act => act.who === 'both' ? [['a','b']] : act.who === 'each' ?
 const overlaps = (x, y) => x.some(p => y.includes(p));
 const sameWho = (x, y) => x.length === y.length && x.every(p => y.includes(p));
 const whoLabel = who => who.length === 2 ? 'Abu' : person(who[0]).name;
-const av = (pid, cls='') => { const p = person(pid); return `<span class="av ${cls}" style="${cvars(p.color)}">${esc(p.name[0] || '?')}</span>`; };
+const photoOk = s => typeof s === 'string' && /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(s);
+const av = (pid, cls='') => {
+  const p = person(pid);
+  if (photoOk(p.photo)) return `<span class="av ph ${cls}" style="${cvars(p.color)};background-image:url(${p.photo})">${esc(p.name[0] || '?')}</span>`;
+  return `<span class="av ${cls}" style="${cvars(p.color)}">${esc(p.name[0] || '?')}</span>`;
+};
+// Nuotrauka iš telefono → apkarpytas kvadratas 192×192 (JPEG), saugomas bendrame plane
+function photoFromFile(file) {
+  return new Promise((ok, bad) => {
+    const url = URL.createObjectURL(file), img = new Image();
+    img.onload = () => {
+      const s = Math.min(img.naturalWidth, img.naturalHeight), c = document.createElement('canvas'); c.width = c.height = 192;
+      c.getContext('2d').drawImage(img, (img.naturalWidth - s) / 2, (img.naturalHeight - s) / 2.6, s, s, 0, 0, 192, 192);
+      URL.revokeObjectURL(url); ok(c.toDataURL('image/jpeg', 0.85));
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(); };
+    img.src = url;
+  });
+}
 const avs = (who, cls='sm') => `<span class="pair">${who.map(p => av(p, cls)).join('')}</span>`;
 const itemMeta = it => {
   if (it.kind === 'event') return { emoji: it.emoji || '📌', name: it.title || 'Įvykis', color:'#475569' };
@@ -577,7 +601,8 @@ function heartRain(n = 30) {
 function mildaHello() {
   if ($('#hello')) return;
   const d = document.createElement('div'); d.id = 'hello';
-  d.innerHTML = `<div class="h">❤️</div><h2>Labas, Mažule! 😘</h2><p>Ar pasiruošus<b>PLANAVIMUI?</b>XDDD</p><button>Taip! 💪❤️</button>`;
+  const ph = person('b').photo;
+  d.innerHTML = `${photoOk(ph) ? `<div class="me" style="background-image:url(${ph})"><i>❤️</i></div>` : '<div class="h">❤️</div>'}<h2>Labas, Mažule! 😘</h2><p>Ar pasiruošus<b>PLANAVIMUI?</b>XDDD</p><button>Taip! 💪❤️</button>`;
   d.querySelector('button').onclick = () => { ls.set('rutina.hello', '1'); heartRain(40); d.style.transition = 'opacity .5s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 500); };
   document.body.appendChild(d);
   setTimeout(() => heartRain(24), 400);
@@ -737,7 +762,8 @@ function renderSettings(main) {
   h += '</div>';
   h += '<h2>😴 Miegas</h2>';
   state.people.forEach((p, i) => {
-    h += `<div class="card"><div class="row">${av(p.id)}<label>Vardas<input data-k="people.${i}.name" value="${esc(p.name)}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="people.${i}.color" value="${p.color}"></label></div>
+    h += `<div class="card"><div class="row">${av(p.id, 'lg')}<label>Vardas<input data-k="people.${i}.name" value="${esc(p.name)}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="people.${i}.color" value="${p.color}"></label></div>
+      <div class="row"><label class="photo-btn">📷 ${photoOk(p.photo) ? 'Keisti nuotrauką' : 'Įkelti nuotrauką'}<input type="file" accept="image/*" data-photo="${i}"></label>${photoOk(p.photo) ? `<button class="btn-soft" data-set="nophoto" data-i="${i}" style="flex:none">Pašalinti</button>` : ''}</div>
       <div class="row" style="margin:0"><label>☀️ Keliasi<input type="time" data-k="people.${i}.wake" value="${p.wake}"></label><label>🌙 Eina miegoti<input type="time" data-k="people.${i}.sleep" value="${p.sleep}"></label></div></div>`;
   });
   h += '<h2>💻 Darbas online</h2><div class="hint">Įprasta savaitė. Formatas <b>09:00-13:00, 14:00-17:00</b>, tuščia – nedirba. Konkrečią dieną keiskite Dienos vaizde arba parašykite asistentui.</div>';
@@ -1084,6 +1110,7 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.set === 'join') { const r = roomFromText($('#joinlink').value); if (!r) toast('Nuoroda neatpažinta'); else if (confirm('Prisijungti prie bendro plano? Šio telefono planas bus pakeistas bendru.')) Sync.join(r, false); }
   else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
   else if (t.dataset.set === 'update') checkUpdate(true);
+  else if (t.dataset.set === 'nophoto') { delete state.people[+t.dataset.i].photo; render(); }
   else if (t.dataset.set === 'leave') { if (confirm('Atjungti šį telefoną nuo bendro plano?')) { Sync.leave(); render(); } }
   else if (t.dataset.set) {
     const i = +t.dataset.i, A = state.acts;
@@ -1096,7 +1123,12 @@ $('#main').addEventListener('click', e => {
   }
 });
 $('#main').addEventListener('change', e => {
-  const el = e.target, k = el.dataset.k; if (!k) return;
+  const el = e.target;
+  if (el.dataset.photo !== undefined && el.files?.[0]) {
+    photoFromFile(el.files[0]).then(d => { state.people[+el.dataset.photo].photo = d; render(); toast('📸 Nuotrauka atnaujinta'); }, () => toast('Nepavyko nuskaityti nuotraukos'));
+    return;
+  }
+  const k = el.dataset.k; if (!k) return;
   const path = k.split('.'); let o = state;
   for (let i = 0; i < path.length - 1; i++) o = o[path[i]];
   o[path[path.length - 1]] = el.type === 'checkbox' ? el.checked : el.hasAttribute('data-num') ? (+el.value || 0) : el.value;
