@@ -20,6 +20,7 @@ Rules:
 - Dates: use the provided "now" and resolve relative dates (šiandien, rytoj/ryt, poryt, weekdays like "penktadienį" = the next such day, "kitą pirmadienį" = next week's, "27 d.", "lapkričio 27"). Output YYYY-MM-DD.
 - Times: 24h "HH:MM". "9 am" = 09:00, "7 pm" = 19:00. If no time is given, set start to null and the app will pick a free slot at a sensible time of day.
 - duration_min: use the stated duration; otherwise a sensible typical one (meeting 60, call 30, dinner 120, flight 180, doctor 60).
+- who: first-person PLURAL verbs ("-am/-ame/-im/-ime/-sim/-sime": nedirbam, dirbsim, einam, eisim, valgom, valgysim, darom, važiuojam, ilsimės) always mean "both" – also for work changes. Dinners/meals/outings with friends that the writer mentions without "aš" are usually "both".
 - who: "a", "b" or "both". The writer is "me". Personal things default to the writer; "mes/abu/kartu/dirbam/su Milda/su Pauliumi" and couple activities mean "both"; a named person alone means that person.
 - Existing planned activities (activity ids from "activities") go through add_activity with act_id; anything else is add_event with a clear Lithuanian title (no dates/times in the title) and one fitting emoji.
 - Travel / flights / trips without a time: add_event with all_day=true. With a time: normal add_event.

@@ -613,8 +613,12 @@ body.lite .micbig{box-shadow:none;border:1px solid var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.5';
+const APP_VERSION = '2.6';
 const WHATS_NEW = [
+  '🧠 AI asistentas įjungtas! Rašykite ar diktuokite laisvai – supranta kelis dalykus vienu sakiniu',
+  '👫 „nedirbam“, „valgysim“, „važiuojam“ – planuoja jums abiem',
+];
+const WHATS_NEW_25 = [
   '🧠 Asistentas supranta tęsinį: „po to valgyt eisim 35 min“, „ryt valgom po darbo“',
   '💻 „dirbtu / dirbti / dirbsim“ – visada darbo laikas (ir Mildai, jei „su Milda“)',
   '📅 Pilna diena? Nebesako „nerandu“ – pasiūlo logišką laiką, kitos veiklos pasislenka',
@@ -1973,7 +1977,7 @@ function parseWho(t) {
   const [A, B] = state.people;
   const a = norm(A.name).slice(0, 4), b = norm(B.name).slice(0, 4);
   const ha = a.length >= 3 && t.includes(' ' + a), hb = b.length >= 3 && t.includes(' ' + b);
-  if (/\b(abu|abudu|abi|abidvi|mes|mums|mudu|mudviem|musu|turim|turime|einam|eisim|darom|dirbam|dirbsim|keliaujam|skrendam|valgom|einame|kartu su)\b/.test(t) || (ha && hb)) return ['a', 'b'];
+  if (/\b(abu|abudu|abi|abidvi|mes|mums|mudu|mudviem|musu|turim|turime|einam|eisim|darom|dirbam|dirbsim|nedirbam|nedirbsim|keliaujam|keliausim|skrendam|skrisim|valgom|valgysim|pavalgysim|einame|eisime|vaziuojam|vaziuosim|plaukiam|plauksim|ziuresim|sportuosim|ilsimes|kartu su)\b/.test(t) || (ha && hb)) return ['a', 'b'];
   // „su Milda“ / „su Pauliumi“ – kartu su rašančiuoju
   if ((hb && new RegExp('\\bsu\\s+' + b).test(t)) || (ha && new RegExp('\\bsu\\s+' + a).test(t))) return ['a', 'b'];
   if (ha) return ['a']; if (hb) return ['b'];
