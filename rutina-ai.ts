@@ -1,13 +1,14 @@
 // Supabase Edge Function „rutina-ai“ – išmanusis asistentas (Claude).
 // Programa siunčia: plano kodą, kas rašo ir tekstą. Funkcija pati pasiima planą iš DB,
 // paklausia Claude ir grąžina { reply, actions } – programa veiksmus parodo patvirtinimui.
-// Paslaptys (įveda vartotojas): ANTHROPIC_API_KEY. Neprivaloma: RUTINA_AI_MODEL (numatytas claude-opus-5-5).
+// Paslaptys (įveda vartotojas): ANTHROPIC_API_KEY. Neprivaloma: RUTINA_AI_MODEL (numatytas claude-haiku-5-5).
 // JWT tikrinimas išjungtas – prieiga tik žinant plano kodą.
 import Anthropic from "npm:@anthropic-ai/sdk";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-const MODEL = Deno.env.get("RUTINA_AI_MODEL") || "claude-opus-5-5";
+// Vartotojo pasirinkimas (2026-11-16): pigesnis Haiku 5.5. Protingesnis – RUTINA_AI_MODEL = claude-opus-5-5.
+const MODEL = Deno.env.get("RUTINA_AI_MODEL") || "claude-haiku-5-5";
 const cors = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "content-type, apikey, authorization", "Access-Control-Allow-Methods": "POST, OPTIONS" };
 type Any = Record<string, any>;
 
