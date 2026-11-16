@@ -1,12 +1,28 @@
 // Supabase Edge Function „rutina-push“ – siunčia pranešimus į telefonus (Web Push).
 // Kviečia: DB trigeris (pakeitus planą), pg_cron (kas 5 min priminimams) ir rutina_test_push.
-// Paslaptys (Edge Functions → Secrets): VAPID_PUBLIC, VAPID_PRIVATE, RUTINA_SECRET.
+// Raktai niekur neįvedami rankomis: VAPID raktus funkcija susikuria pati (lentelė rutina_config),
+// slaptą žodį trigeriui/cron sugeneruoja duomenų bazė (rutina_config.secret).
 // JWT tikrinimas išjungtas – apsauga per x-rutina-secret antraštę.
 import webpush from "npm:web-push@3.6.7";
 import { createClient } from "npm:@supabase/supabase-js@2";
 
 const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
-webpush.setVapidDetails("https://randomviskas.github.io/rutina/", Deno.env.get("VAPID_PUBLIC")!, Deno.env.get("VAPID_PRIVATE")!);
+const b64u = (u: Uint8Array) => btoa(String.fromCharCode(...u)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+let CFG: Record<string, string> | null = null;
+async function cfg() {
+  if (CFG?.vapid_pub && CFG?.secret) return CFG;
+  const read = async () => Object.fromEntries(((await sb.from("rutina_config").select("key, value")).data ?? []).map((r: any) => [r.key, r.value]));
+  let m = await read();
+  if (!m.vapid_pub) {
+    const kp = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+    const pub = b64u(new Uint8Array(await crypto.subtle.exportKey("raw", kp.publicKey)));
+    const priv = (await crypto.subtle.exportKey("jwk", kp.privateKey)).d!;
+    await sb.from("rutina_config").upsert([{ key: "vapid_pub", value: pub }, { key: "vapid_priv", value: priv }], { onConflict: "key", ignoreDuplicates: true });
+    m = await read();
+  }
+  webpush.setVapidDetails("https://randomviskas.github.io/rutina/", m.vapid_pub, m.vapid_priv);
+  return (CFG = m);
+}
 
 type Any = Record<string, any>;
 const DAYS = ["Sk", "Pr", "An", "Tr", "Kt", "Pn", "Št"];
@@ -118,7 +134,10 @@ async function ics(room: string, p: string | null) {
 Deno.serve(async (req) => {
   const url = new URL(req.url), k = url.searchParams.get("ics");
   if (req.method === "GET" && k && k.length >= 18) return ics(k, url.searchParams.get("p"));
-  if (req.headers.get("x-rutina-secret") !== Deno.env.get("RUTINA_SECRET")) return new Response("no", { status: 401 });
+  const c = await cfg();
+  const cors = { "Access-Control-Allow-Origin": "*" };
+  if (url.searchParams.has("vapid")) return Response.json({ key: c.vapid_pub }, { headers: cors });
+  if (!c.secret || req.headers.get("x-rutina-secret") !== c.secret) return new Response("no", { status: 401 });
   const b = await req.json().catch(() => ({}));
   let sent = 0;
   if (b.mode === "change") sent = await onChange(b.room, b.old, b.new);
