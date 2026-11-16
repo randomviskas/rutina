@@ -221,6 +221,20 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
   opacity:0;transition:all .25s;pointer-events:none;z-index:60;max-width:90vw;text-align:center;box-shadow:var(--shadow)}
 #toast.show{opacity:1;transform:translateX(-50%)}
 .cf{position:fixed;width:8px;height:12px;border-radius:2px;z-index:70;pointer-events:none}
+#upd{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 78px);z-index:45;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-radius:18px;
+  background:var(--grad);color:#fff;font-weight:700;font-size:14px;box-shadow:0 10px 28px rgba(168,85,247,.45);max-width:560px;margin:0 auto;animation:in .3s ease}
+#upd span{flex:1}
+#hello{position:fixed;inset:0;z-index:80;background:linear-gradient(160deg,#ff1744 0%,#d50000 55%,#ff4081 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:32px;animation:in .4s ease;overflow:hidden}
+#hello .h{font-size:96px;animation:beat 1s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(0,0,0,.25))}
+@keyframes beat{0%,100%{transform:scale(1)}15%{transform:scale(1.18)}30%{transform:scale(1)}45%{transform:scale(1.12)}}
+#hello h2{font:900 38px var(--font);margin:18px 0 10px;letter-spacing:-.5px}
+#hello p{font:800 22px/1.35 var(--font);margin:0}
+#hello p b{display:block;font-size:40px;font-weight:900;letter-spacing:1px;margin:6px 0}
+#hello button{margin-top:34px;background:#fff;color:#d50000;font:900 19px var(--font);padding:16px 34px;border-radius:999px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.hrt{position:fixed;z-index:81;pointer-events:none;font-size:26px}
+#upd button{background:#fff;color:#7c3aed;font-weight:800;border-radius:12px;padding:8px 14px}
+#upd .x{background:rgba(255,255,255,.2);color:#fff;padding:8px 10px}
 </style>
 </head>
 <body>
@@ -253,6 +267,11 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <div id="toast"></div>
 
 <script>
+// =============== Versija ===============
+// Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
+const APP_VERSION = '1.1';
+const WHATS_NEW = 'Programa pati praneša apie naujas versijas 🔄';
+
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
 const DAYS = ['Pr','An','Tr','Kt','Pn','Št','Sk'];
@@ -511,6 +530,59 @@ function confetti(x = innerWidth / 2, y = innerHeight / 2) {
   }
 }
 
+// =============== Atnaujinimai ===============
+async function checkUpdate(manual) {
+  try {
+    const r = await fetch(location.pathname + '?v=' + Date.now(), { cache:'no-store' });
+    const m = (await r.text()).match(/const APP_VERSION = '([^']+)'/);
+    if (m && m[1] !== APP_VERSION) { showUpdate(m[1]); return true; }
+    if (manual) toast('Turite naujausią versiją ✓ (v' + APP_VERSION + ')');
+  } catch (e) { if (manual) toast('Nepavyko patikrinti – nėra interneto'); }
+  return false;
+}
+function showUpdate(v) {
+  if ($('#upd')) return;
+  const d = document.createElement('div'); d.id = 'upd';
+  d.innerHTML = `<span>✨ Yra nauja versija (v${esc(v)})</span><button class="go">Atnaujinti</button><button class="x" aria-label="Vėliau">✕</button>`;
+  d.querySelector('.go').onclick = doUpdate;
+  d.querySelector('.x').onclick = () => d.remove();
+  document.body.appendChild(d);
+}
+async function doUpdate() {
+  try {
+    const regs = (await navigator.serviceWorker?.getRegistrations?.()) || [];
+    await Promise.all(regs.map(r => r.update().catch(() => {})));
+    const ks = (await window.caches?.keys?.()) || [];
+    await Promise.all(ks.map(k => caches.delete(k)));
+  } catch (e) {}
+  location.reload();
+}
+function announceUpdate() {
+  const prev = ls.get('rutina.appver');
+  ls.set('rutina.appver', APP_VERSION);
+  if (prev && prev !== APP_VERSION) setTimeout(() => { toast('✨ Atnaujinta į v' + APP_VERSION + ': ' + WHATS_NEW); confetti(innerWidth / 2, 120); }, 600);
+}
+
+// =============== Mildos pasisveikinimas ❤️ ===============
+function heartRain(n = 30) {
+  for (let i = 0; i < n; i++) {
+    const h = document.createElement('span'); h.className = 'hrt';
+    h.textContent = ['❤️','💖','💕','😘','💗'][i % 5];
+    h.style.left = Math.random() * innerWidth + 'px'; h.style.top = '-40px'; h.style.fontSize = (18 + Math.random() * 22) + 'px';
+    document.body.appendChild(h);
+    h.animate([{ transform:'translateY(0) rotate(0)', opacity:1 }, { transform:`translateY(${innerHeight + 80}px) rotate(${Math.random()*80 - 40}deg)`, opacity:.9 }],
+      { duration: 2200 + Math.random() * 1800, delay: Math.random() * 900, easing:'ease-in' }).onfinish = () => h.remove();
+  }
+}
+function mildaHello() {
+  if ($('#hello')) return;
+  const d = document.createElement('div'); d.id = 'hello';
+  d.innerHTML = `<div class="h">❤️</div><h2>Labas, Mažule! 😘</h2><p>Ar pasiruošus<b>PLANAVIMUI?</b>XDDD</p><button>Taip! 💪❤️</button>`;
+  d.querySelector('button').onclick = () => { ls.set('rutina.hello', '1'); heartRain(40); d.style.transition = 'opacity .5s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 500); };
+  document.body.appendChild(d);
+  setTimeout(() => heartRain(24), 400);
+}
+
 // =============== Vaizdai ===============
 function header() {
   const h = new Date().getHours();
@@ -682,7 +754,8 @@ function renderSettings(main) {
       <div class="row end" style="margin:0"><button data-set="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>↑</button><button data-set="down" data-i="${i}" ${i === state.acts.length - 1 ? 'disabled' : ''}>↓</button><button class="btn-danger" data-set="del" data-i="${i}">Šalinti</button></div></div>`;
   });
   h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div>
-    <h2>Kita</h2><div class="btns"><button class="btn-danger" data-set="reset">Ištrinti viską ir pradėti iš naujo</button></div></div>`;
+    <h2>Kita</h2><div class="card"><div class="row" style="margin:0;align-items:center"><span style="flex:1;font-weight:700">Versija ${APP_VERSION}</span><button class="btn-soft" data-set="update">🔄 Patikrinti atnaujinimus</button></div></div>
+    <div class="btns"><button class="btn-danger" data-set="reset">Ištrinti viską ir pradėti iš naujo</button></div></div>`;
   main.innerHTML = h;
 }
 
@@ -999,7 +1072,10 @@ $('#main').addEventListener('click', e => {
   if (t.dataset.nav) { view.date = addDays(view.date, +t.dataset.nav); view.warn = null; render(); }
   else if (t.dataset.date) { view.date = t.dataset.date; render(); }
   else if (t.dataset.item) itemSheet(t.dataset.item);
-  else if (t.dataset.me) { ls.set('rutina.me', t.dataset.me); render(); toast('Labas, ' + person(t.dataset.me).name + '! 👋'); }
+  else if (t.dataset.me) {
+    ls.set('rutina.me', t.dataset.me); render();
+    if (t.dataset.me === 'b' && !ls.get('rutina.hello')) mildaHello(); else toast('Labas, ' + person(t.dataset.me).name + '! 👋');
+  }
   else if (t.dataset.act === 'ai') openChat();
   else if (t.dataset.act === 'work') workSheet();
   else if (t.dataset.act === 'gen') { generateWeek(weekStart(view.date)); render(); toast('🔀 Savaitė perdėliota'); }
@@ -1007,6 +1083,7 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.set === 'create') Sync.join(newRoomCode(), true);
   else if (t.dataset.set === 'join') { const r = roomFromText($('#joinlink').value); if (!r) toast('Nuoroda neatpažinta'); else if (confirm('Prisijungti prie bendro plano? Šio telefono planas bus pakeistas bendru.')) Sync.join(r, false); }
   else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
+  else if (t.dataset.set === 'update') checkUpdate(true);
   else if (t.dataset.set === 'leave') { if (confirm('Atjungti šį telefoną nuo bendro plano?')) { Sync.leave(); render(); } }
   else if (t.dataset.set) {
     const i = +t.dataset.i, A = state.acts;
@@ -1033,8 +1110,12 @@ $('#main').addEventListener('change', e => {
   if (m) { history.replaceState(null, '', location.pathname); if (CONFIG.url && m[1] !== Sync.room) { await Sync.join(m[1], false); toast('Prisijungta prie bendro plano 👫'); } }
   if (Sync.enabled()) await Sync.pull();
   render();
+  announceUpdate();
+  if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello();
+  setTimeout(() => checkUpdate(false), 3000);
   setInterval(() => { if (!document.hidden) { Sync.pull(); if (view.tab === 'day' && !sheetEl.classList.contains('open')) renderDay($('#main')); } }, 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull(); render(); } });
+  setInterval(() => { if (!document.hidden) checkUpdate(false); }, 10 * 60000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull(); render(); checkUpdate(false); } });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
