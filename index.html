@@ -328,6 +328,44 @@ body.kb #toast{bottom:calc(var(--kb,0px) + 80px)}
 .bars i{flex:1;border-radius:4px 4px 2px 2px;min-height:4px}
 .bars-x{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin:2px 0 6px}
 .sheet-card>*{flex-shrink:0}
+/* 🗺️ Savaitės žemėlapis */
+.wmap{background:var(--card);border-radius:20px;padding:12px 12px 10px;margin-bottom:12px;box-shadow:var(--shadow2)}
+.wm-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px}
+.wm-head b{font:800 15px var(--font)}
+.wm-head span{display:flex;gap:10px}
+.wm-key{font-style:normal;font-size:12px;font-weight:700;display:flex;align-items:center;gap:4px;color:var(--muted)}
+.wm-axis,.wm-row{display:grid;grid-template-columns:30px 1fr;gap:6px;align-items:center}
+.wm-ticks{position:relative;height:14px}
+.wm-ticks span{position:absolute;transform:translateX(-50%);font-size:10px;color:var(--muted);font-weight:700}
+.wm-row{padding:3px 0;border-radius:10px;cursor:pointer}
+.wm-row.today{background:color-mix(in srgb,#a855f7 10%,transparent)}
+.wm-row.past{opacity:.55}
+.wm-day{text-align:center;line-height:1}
+.wm-day b{display:block;font-size:12px}
+.wm-day small{font-size:10px;color:var(--muted)}
+.wm-row.today .wm-day b{color:#a855f7}
+.wm-lanes{position:relative;height:30px;background:var(--card2);border-radius:7px;overflow:hidden}
+.wm-lane{position:absolute;left:0;right:0;height:14px}
+.wm-lane.l0{top:0}.wm-lane.l1{top:16px}
+.wm-lanes i{position:absolute;top:0;bottom:0;font-style:normal}
+.wm-sleep{background:repeating-linear-gradient(135deg,color-mix(in srgb,#6366f1 18%,transparent) 0 3px,transparent 3px 6px)}
+.wm-work{background:color-mix(in srgb,#94a3b8 45%,transparent)}
+.wm-it{background:var(--c);border-radius:4px;font-size:9px;line-height:14px;text-align:center;overflow:hidden;box-shadow:0 0 0 1px var(--card2) inset;z-index:2;cursor:pointer}
+.wm-it.both{line-height:30px;font-size:12px;z-index:3}
+.wm-it.planned{opacity:.85}
+.wm-it.skipped{background:#94a3b8;opacity:.4}
+.wm-it.done{box-shadow:0 0 0 1.5px #fff inset}
+.wm-free{border:1.5px dashed #a855f7;border-radius:5px;z-index:1;background:color-mix(in srgb,#a855f7 10%,transparent)}
+.wm-now{width:2px;background:#ef4444;z-index:4;margin-left:-1px}
+.wm-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11px;color:var(--muted);margin-top:8px}
+.wm-legend span{display:flex;align-items:center;gap:4px}
+.wm-legend .wm-it{position:static;display:inline-block;width:14px;height:10px}
+.wm-allday{left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(90deg,#0369a1,#0ea5e9);border-radius:7px;cursor:pointer}
+.allday{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:18px;margin-bottom:12px;color:#fff;background:linear-gradient(135deg,var(--c),var(--c2));box-shadow:var(--shadow);cursor:pointer}
+.allday .e{font-size:28px}
+.allday div{flex:1;min-width:0}
+.allday b{display:block;font-size:16px}
+.allday small{opacity:.9;font-size:12.5px}
 /* 👀 Dabar */
 .nowstrip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
 .nowc{display:flex;gap:8px;align-items:center;text-align:left;padding:9px 10px;border-radius:16px;background:var(--card);box-shadow:var(--shadow2);border-left:4px solid var(--c,var(--line));min-width:0}
@@ -519,8 +557,12 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.2';
+const APP_VERSION = '2.3';
 const WHATS_NEW = [
+  '🧠 Išmanesnis asistentas: „darbo dienomis 9 am–11 am“, „su Milda“, „1,5 val“, „rytoj 10“, „lapkričio 25“…',
+  '✈️ Kelionės dienos: „skrydis 27 d. iš Lomboko į Kuala Lumpūrą“ – tą dieną veiklų nededa',
+  '🗺️ Savaitės žemėlapis: visa jūsų abiejų savaitė viename ekrane',
+  '💜 Matosi bendras laisvas laikas, darbas ir miegas',
   '👀 Viršuje matosi, ką kiekvienas veikia DABAR – paspaudus, to žmogaus diena',
   '✅ „Ar padarėte?“ – vienu paspaudimu ✓ arba ✕ praėjusioms veikloms',
   '🌅 Vakarienė, saulėlydis, žvaigždės – siūlomos logišku paros laiku',
@@ -643,7 +685,7 @@ function photoFromFile(file) {
 }
 const avs = (who, cls='sm') => `<span class="pair">${who.map(p => av(p, cls)).join('')}</span>`;
 const itemMeta = it => {
-  if (it.kind === 'event') return { emoji: it.emoji || '📌', name: it.title || 'Įvykis', color:'#475569' };
+  if (it.kind === 'event') return { emoji: it.emoji || '📌', name: it.title || 'Įvykis', color: it.color || (it.allDay ? '#0ea5e9' : '#475569') };
   const a = actById(it.actId) || { emoji:'•', name:'(pašalinta)', color:'#94a3b8' };
   return { emoji:a.emoji, name:a.name, color:a.color };
 };
@@ -668,6 +710,8 @@ function findSlot(win, dur, pids, date, minStart, excludeId) {
   for (; t + dur <= we; t += STEP) if (isFree(pids, date, t, t + dur, excludeId)) return t;
   return null;
 }
+// ✈️ Kelionės diena (visos dienos įvykis su block) – tą dieną automatinių veiklų nededam
+const blockedDay = (d, pids) => state.items.some(i => i.allDay && i.block && i.date === d && overlaps(i.who, pids));
 const countOn = (actId, pids, date, excludeId) => state.items.filter(it => it.id !== excludeId && it.actId === actId && it.date === date && overlaps(it.who, pids)).length;
 
 function generateWeek(ws) {
@@ -692,12 +736,14 @@ function generateWeek(ws) {
           let best = null;
           for (const [d] of order) {
             if (act.perWeek <= 7 && countOn(act.id, pids, d) > 0) continue;
+            if (blockedDay(d, pids)) continue;
             const b = Surf.best(d, act.dur, pids, minStartFor(d), null, act); if (b && (!best || b.sc > best.sc)) best = { ...b, d };
           }
           if (best) { state.items.push({ id: uid(), kind:'auto', actId: act.id, who: [...pids], date: best.d, start: best.t, dur: act.dur, status:'planned' }); ok = true; }
         }
         if (!ok) for (const [d] of order) {
           if (act.perWeek <= 7 && countOn(act.id, pids, d) > 0) continue;
+          if (blockedDay(d, pids)) continue;
           const t = findSlot(act, act.dur, pids, d, minStartFor(d));
           if (t != null) { state.items.push({ id: uid(), kind:'auto', actId: act.id, who: [...pids], date: d, start: t, dur: act.dur, status:'planned' }); ok = true; break; }
         }
@@ -712,7 +758,7 @@ function rescheduleOtherDay(it, onlyDate) {
   const act = actById(it.actId);
   const win = act || { from:'07:00', to:'22:00' };
   const ws = weekStart(it.date);
-  let cands = onlyDate ? [onlyDate] : [...Array(7)].map((_, i) => addDays(it.date, i + 1));
+  let cands = (onlyDate ? [onlyDate] : [...Array(7)].map((_, i) => addDays(it.date, i + 1))).filter(d => !blockedDay(d, it.who));
   if (act && act === surfAct() && Surf.data) { // 🏄 surf – geriausi bangų langai (pirmiausia ta pati savaitė)
     let best = null;
     for (const d of cands) {
@@ -872,7 +918,7 @@ function icsDownload(items, name) {
   let s = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Musu rutina//LT\r\nCALSCALE:GREGORIAN\r\n';
   items.forEach(it => {
     const m = itemMeta(it);
-    s += 'BEGIN:VEVENT\r\nUID:' + it.id + '@rutina\r\nDTSTAMP:' + stamp + '\r\nDTSTART:' + dt(it.date, it.start) + '\r\nDTEND:' + dt(it.date, Math.min(it.start + it.dur, 1439)) +
+    s += 'BEGIN:VEVENT\r\nUID:' + it.id + '@rutina\r\nDTSTAMP:' + stamp + (it.allDay ? '\r\nDTSTART;VALUE=DATE:' + it.date.replace(/-/g, '') + '\r\nDTEND;VALUE=DATE:' + addDays(it.date, 1).replace(/-/g, '') : '\r\nDTSTART:' + dt(it.date, it.start) + '\r\nDTEND:' + dt(it.date, Math.min(it.start + it.dur, 1439))) +
          '\r\nSUMMARY:' + (m.emoji + ' ' + m.name + ' (' + whoLabel(it.who) + ')').replace(/[,;]/g, ' ') +
          '\r\nBEGIN:VALARM\r\nTRIGGER:-PT15M\r\nACTION:DISPLAY\r\nDESCRIPTION:' + m.name.replace(/[,;]/g, ' ') + '\r\nEND:VALARM\r\nEND:VEVENT\r\n';
   });
@@ -1284,7 +1330,7 @@ function nowStrip() {
 function askDone() {
   if (view.date !== today()) return '';
   const n = nowMin(), y = addDays(today(), -1), seen = new Set();
-  const L = state.items.filter(i => i.status === 'planned' && ((i.date === today() && i.start + i.dur <= n) || i.date === y))
+  const L = state.items.filter(i => i.status === 'planned' && !i.allDay && ((i.date === today() && i.start + i.dur <= n) || i.date === y))
     .sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start)
     .filter(i => { const k = (i.actId || i.title) + i.date + i.start; if (seen.has(k)) return false; seen.add(k); return true; }).slice(-4);
   if (!L.length) return '';
@@ -1303,7 +1349,7 @@ function quickMark(ids, kind) {
 }
 function heroCard() {
   const d = view.date, n = nowMin(), F = ls.get('rutina.filter');
-  const its = state.items.filter(it => it.date === d && it.status !== 'skipped' && (!F || it.who.includes(F))).sort((a, b) => a.start - b.start);
+  const its = state.items.filter(it => it.date === d && it.status !== 'skipped' && !it.allDay && (!F || it.who.includes(F))).sort((a, b) => a.start - b.start);
   const done = its.filter(it => it.status === 'done').length;
   const bar = its.length ? `<div class="bar"><i style="width:${Math.round(done / its.length * 100)}%"></i></div><div class="meta" style="margin-top:6px">Atlikta ${done} iš ${its.length}</div>` : '';
   if (d === today()) {
@@ -1351,7 +1397,7 @@ function renderDay(main) {
     if (s < t1) tl += `<div class="blk sleep" style="top:${y(s)}px;height:${((t1 - s) * PX).toFixed(1)}px;left:${left}%;width:50%">😴 ${toHM(s)}</div>`;
     workRanges(p.id, view.date).forEach(([a, b]) => { tl += `<div class="blk work" data-act="work" style="top:${y(a)}px;height:${((b - a) * PX).toFixed(1)}px;left:${left}%;width:50%">💻 Darbas<br>${toHM(a)}–${toHM(b)}</div>`; });
   });
-  state.items.filter(it => it.date === view.date).sort((a, b) => a.start - b.start).forEach(it => {
+  state.items.filter(it => it.date === view.date && !it.allDay).sort((a, b) => a.start - b.start).forEach(it => {
     const m = itemMeta(it);
     const both = it.who.length === 2, left = both ? 0 : (it.who[0] === 'a' ? 0 : 50), width = both ? 100 : 50;
     const hgt = Math.max(it.dur * PX, 26);
@@ -1366,6 +1412,7 @@ function renderDay(main) {
 // Laisvi bendri langai (abu nemiega, nedirba ir neturi plano)
 function freeGaps(date, min = 45) {
   const pids = ['a', 'b'];
+  if (blockedDay(date, pids)) return [];
   const from = Math.max(minStartFor(date), ...pids.map(p => awake(p)[0]));
   if (from === Infinity) return [];
   const end = Math.min(...pids.map(p => awake(p)[1]));
@@ -1384,7 +1431,8 @@ function agenda(d) {
   const seg = `<div class="seg mini fseg">${[['all', '👫 Mūsų diena'], ...state.people.map(p => [p.id, (p.id === Me() ? '🙋 ' : '') + p.name])].map(([v, n]) => `<button data-filter="${v}" class="${(F || 'all') === v ? 'on' : ''}">${esc(n)}</button>`).join('')}</div>`;
   const sid = surfAct()?.id;
   // ta pati veikla tuo pačiu metu abiem – viena kortelė
-  state.items.filter(it => it.date === d && (!F || it.who.includes(F))).forEach(it => {
+  const allDay = state.items.filter(it => it.date === d && it.allDay && (!F || it.who.includes(F)));
+  state.items.filter(it => it.date === d && !it.allDay && (!F || it.who.includes(F))).forEach(it => {
     const k = [it.kind, it.actId || it.title, it.start, it.dur, it.status].join('|');
     (groups[k] = groups[k] || []).push(it);
   });
@@ -1407,7 +1455,8 @@ function agenda(d) {
   const wake = PP.map(p => `${esc(p.name)} ${p.wake}`).join(' · '), sleep = PP.map(p => `${esc(p.name)} ${p.sleep}`).join(' · ');
   const body = rows.length ? rows.map(r => r.html).join('') : '<div class="empty" style="text-align:center;padding:20px">Šiai dienai nieko nėra 🌴</div>';
   const hint = !ls.get('rutina.swipehint') && rows.length ? (ls.set('rutina.swipehint', '1'), '<div class="hint" style="text-align:center">💡 Brūkštelėkite veiklą → atlikta, ← perkelti. Dieną braukite ← →</div>') : '';
-  return `${seg}${hint}<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>
+  const banners = allDay.map(it => { const m = itemMeta(it); return `<div class="allday" data-item="${it.id}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><b>${esc(m.name)}</b><small>Visa diena${it.block ? ' · kelionės diena – kitų veiklų nededu' : ''}</small></div>${avs(it.who)}</div>`; }).join('');
+  return `${seg}${hint}${banners}<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>
     <button class="add-big" data-act="add">＋ Pridėti veiklą</button>`;
 }
 
@@ -1450,7 +1499,7 @@ function weekStats(ws) {
 function renderWeek(main) {
   const ws = weekStart(view.date); ensureWeek(ws);
   const days = [...Array(7)].map((_, i) => addDays(ws, i));
-  let h = weekNav(ws) + goalsBlock(ws) + warnBox();
+  let h = weekNav(ws) + weekMap(ws) + goalsBlock(ws) + warnBox();
   days.forEach((d, i) => {
     const its = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start);
     h += `<div class="card"><h3>${DAYS_LONG[i]} <span style="color:var(--muted);font-weight:600">${fmtDate(d)}</span>${d === today() ? '<span class="tag">šiandien</span>' : ''}</h3>`;
@@ -1458,7 +1507,7 @@ function renderWeek(main) {
     its.forEach(it => {
       const m = itemMeta(it);
       h += `<div class="wrow ${it.status === 'done' ? 'done' : ''}" data-item="${it.id}" style="${cvars(m.color)}"><span class="ic">${m.emoji}</span>
-        <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}</small></span>${avs(it.who)}</div>`;
+        <span class="tx"><b>${esc(m.name)}</b><small>${it.allDay ? 'Visa diena' : toHM(it.start) + '–' + toHM(it.start + it.dur)}</small></span>${avs(it.who)}</div>`;
     });
     h += '</div>';
   });
@@ -1466,6 +1515,37 @@ function renderWeek(main) {
   main.innerHTML = h;
 }
 
+// 🗺️ Savaitės žemėlapis: 7 dienos × 2 juostos (Paulius / Milda), 6–24 val.
+function weekMap(ws) {
+  const H0 = 6 * 60, H1 = 24 * 60, P = m => ((Math.max(H0, Math.min(H1, m)) - H0) / (H1 - H0) * 100).toFixed(2);
+  const blk = (cls, a, b, extra = '', inner = '') => b > a && b > H0 && a < H1 ? `<i class="${cls}" style="left:${P(a)}%;width:${(P(b) - P(a)).toFixed(2)}%;${extra}">${inner}</i>` : '';
+  let h = `<div class="wmap"><div class="wm-head"><b>🗺️ Savaitės žemėlapis</b><span>${state.people.map((p, i) => `<em class="wm-key k${i}">${av(p.id, 'sm')} ${esc(p.name)}</em>`).join('')}</span></div>
+    <div class="wm-axis"><div></div><div class="wm-ticks">${[6, 9, 12, 15, 18, 21, 24].map(x => `<span style="left:${P(x * 60)}%">${x}</span>`).join('')}</div></div>`;
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    let lanes = '';
+    state.people.forEach((p, li) => {
+      const [w, s] = awake(p.id);
+      let L = blk('wm-sleep', H0, w) + blk('wm-sleep', s, H1);
+      workRanges(p.id, d).forEach(([a, b]) => L += blk('wm-work', a, b));
+      state.items.filter(it => it.date === d && !it.allDay && it.who.length === 1 && it.who[0] === p.id).forEach(it => {
+        const m = itemMeta(it); L += `<i class="wm-it ${it.status}" data-item="${it.id}" style="left:${P(it.start)}%;width:${(P(it.start + it.dur) - P(it.start)).toFixed(2)}%;--c:${m.color}">${it.dur >= 75 ? m.emoji : ''}</i>`;
+      });
+      lanes += `<div class="wm-lane l${li}">${L}</div>`;
+    });
+    // bendros veiklos – per abi juostas
+    state.items.filter(it => it.date === d && it.allDay).forEach(it => { const m = itemMeta(it); lanes += `<i class="wm-allday" data-item="${it.id}">${m.emoji} ${esc(m.name)}</i>`; });
+    state.items.filter(it => it.date === d && !it.allDay && it.who.length === 2).forEach(it => {
+      const m = itemMeta(it); lanes += `<i class="wm-it both ${it.status}" data-item="${it.id}" style="left:${P(it.start)}%;width:${(P(it.start + it.dur) - P(it.start)).toFixed(2)}%;--c:${m.color}">${it.dur >= 60 ? m.emoji : ''}</i>`;
+    });
+    if (d >= today()) freeGaps(d, 60).forEach(([a, b]) => lanes += blk('wm-free', a, b));
+    if (d === today()) { const n = nowMin(); if (n > H0) lanes += `<i class="wm-now" style="left:${P(n)}%"></i>`; }
+    h += `<div class="wm-row ${d === today() ? 'today' : ''} ${d < today() ? 'past' : ''}" data-goday="${d}"><div class="wm-day"><b>${DAYS[i]}</b><small>${parseYmd(d).getDate()}</small></div><div class="wm-lanes">${lanes}</div></div>`;
+  }
+  h += `<div class="wm-legend"><span><i class="wm-it" style="--c:#a855f7"></i>Veikla</span><span><i class="wm-it both" style="--c:#f59e0b;position:static;display:inline-block;width:14px;height:10px"></i>Kartu</span><span><i class="wm-work" style="position:static;display:inline-block;width:14px;height:10px"></i>Darbas</span><span><i class="wm-sleep" style="position:static;display:inline-block;width:14px;height:10px"></i>Miegas</span><span><i class="wm-free" style="position:static;display:inline-block;width:14px;height:10px"></i>Laisva kartu</span></div>
+    <div class="hint" style="margin:6px 0 0;text-align:center">Paspauskite dieną – atsidarys jos sąrašas, veiklą – pati veikla</div></div>`;
+  return h;
+}
 function goalsBlock(ws) {
   const rows = weekStats(ws);
   const goal = rows.reduce((s, r) => s + r.goal, 0) || 1, done = rows.reduce((s, r) => s + Math.min(r.done, r.goal), 0);
@@ -1572,7 +1652,7 @@ function itemSheet(ids) {
   const allWho = state.people.map(p => p.id).filter(id => group.some(x => x.who.includes(id)));
   const past = it.date < today(), done = it.status === 'done';
   openSheet(`<div class="sh-hero" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><h3>${esc(m.name)}</h3>
-      <small>${dayName(it.date)}, ${fmtDate(it.date)} · ${toHM(it.start)}–${toHM(it.start + it.dur)}</small><div style="margin-top:4px">${avs(allWho)}</div></div></div>
+      <small>${dayName(it.date)}, ${fmtDate(it.date)} · ${it.allDay ? 'visa diena' : toHM(it.start) + '–' + toHM(it.start + it.dur)}</small><div style="margin-top:4px">${avs(allWho)}</div></div></div>
     <div class="tiles">
       <button class="tile ${done ? 't-undo' : 't-ok'}" data-sheet="done"><span>${done ? '↩︎' : '✓'}</span>${done ? 'Neatlikta' : 'Atlikta!'}</button>
       ${!done && !past ? `<button class="tile t-move" data-sheet="move"><span>↪︎</span>Ne šiandien – perkelti</button>` : `<button class="tile t-undo" data-sheet="close"><span>✕</span>Uždaryti</button>`}
@@ -1713,8 +1793,11 @@ function dateWord(s) {
     if (new RegExp('kit\\w*\\s+' + WD[i]).test(s)) d = addDays(d, 7);
     return d;
   }
-  const m = s.match(/\b(\d{1,2})\s*d\b/);
-  if (m) { const n = new Date(); let d = new Date(n.getFullYear(), n.getMonth(), +m[1]); if (ymd(d) < today()) d = new Date(n.getFullYear(), n.getMonth() + 1, +m[1]); return ymd(d); }
+  const MON = ['saus', 'vas', 'kov', 'bal', 'geg', 'birz', 'liep', 'rugp', 'rugs', 'spal', 'lapkr', 'gruod'];
+  const mm = s.match(/\b(saus|vas|kov|bal|geg|birz|liep|rugp|rugs|spal|lapkr|gruod)\w*\s+(\d{1,2})\b/) || s.match(/\b(\d{1,2})\s*(?:d\.?\s*)?(saus|vas|kov|bal|geg|birz|liep|rugp|rugs|spal|lapkr|gruod)\w*/);
+  if (mm) { const [mon, day] = isNaN(mm[1]) ? [mm[1], +mm[2]] : [mm[2], +mm[1]]; const n = new Date(); let d = new Date(n.getFullYear(), MON.indexOf(mon), day); if (ymd(d) < today()) d.setFullYear(d.getFullYear() + 1); return ymd(d); }
+  const m = s.match(/\b(\d{1,2})\s*(?:d\b|d\.|dien\w*|-?(?:a|ia|ta|ja)\b)/);
+  if (m && +m[1] >= 1 && +m[1] <= 31) { const n = new Date(); let d = new Date(n.getFullYear(), n.getMonth(), +m[1]); if (ymd(d) < today()) d = new Date(n.getFullYear(), n.getMonth() + 1, +m[1]); return ymd(d); }
   if (/\bsiandien/.test(s)) return today();
   return null;
 }
@@ -1739,6 +1822,11 @@ function parseTime(t) {
     if (isDur) { if (!r.dur) r.dur = Math.round(num * 60); } else if (r.start == null) r.start = num * 60;
   }
   if (r.start == null) { m = t.match(/\b(\d{1,2})\s*-\s*(a|ta|ia|ja)\b/); if (m) r.start = +m[1] * 60; }
+  // valanda be „val“: „rytoj 10 susitikimas“, „apie 15“, „nuo 9“
+  if (r.start == null) {
+    m = t.match(/\b(?:rytoj|ryt|poryt|siandien\w*|\w+dien[iy]\w*|apie|nuo|per|po)\s+(\d{1,2})\b(?!\s*(?:d\b|d\.|dien|min|val|h\b|[:.]\d|-|sav|kart|zmon|saus|vas|kov|bal|geg|birz|liep|rugp|rugs|spal|lapkr|gruod))/);
+    if (m && +m[1] >= 5 && +m[1] <= 23) r.start = +m[1] * 60;
+  }
   if (r.start == null) {
     if (/\bryte\b|\bryto\b/.test(t)) { r.start = 9 * 60; r.soft = true; }
     else if (/per pietus|pietums/.test(t)) { r.start = 13 * 60; r.soft = true; }
@@ -1753,7 +1841,9 @@ function parseWho(t) {
   const [A, B] = state.people;
   const a = norm(A.name).slice(0, 4), b = norm(B.name).slice(0, 4);
   const ha = a.length >= 3 && t.includes(' ' + a), hb = b.length >= 3 && t.includes(' ' + b);
-  if (/\b(abu|abudu|abi|abidvi|mes|mums|mudu|mudviem|musu|turim|turime|einam|eisim|darom)\b/.test(t) || (ha && hb)) return ['a', 'b'];
+  if (/\b(abu|abudu|abi|abidvi|mes|mums|mudu|mudviem|musu|turim|turime|einam|eisim|darom|dirbam|dirbsim|keliaujam|skrendam|valgom|einame|kartu su)\b/.test(t) || (ha && hb)) return ['a', 'b'];
+  // „su Milda“ / „su Pauliumi“ – kartu su rašančiuoju
+  if ((hb && new RegExp('\\bsu\\s+' + b).test(t)) || (ha && new RegExp('\\bsu\\s+' + a).test(t))) return ['a', 'b'];
   if (ha) return ['a']; if (hb) return ['b'];
   if (/\b(as|man|turiu|mano|einu|eisiu)\b/.test(t) && Me()) return [Me()];
   return null;
@@ -1769,7 +1859,7 @@ function findAct(t) {
   }
   return best;
 }
-const STOP = /^(siandien\w*|rytoj\w*|ryt|rit|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
+const STOP = /^(saus\w*|vasar\w*|kov\w*|bal\w*|geg\w*|birz\w*|liep\w*|rugp\w*|rugs\w*|spal\w*|lapkr\w*|gruod\w*|dien\w*|siandien\w*|rytoj\w*|ryt|rit|poryt\w*|pirmad\w*|antrad\w*|treciad\w*|ketvirtad\w*|penktad\w*|sestad\w*|sekmad\w*|kit\w*|bus|turiu|turim|turime|yra|pas|reikia|man|mums|mes|abu|abudu|kartu|ir|i|per|ryte|ryto|vakare|pietus|pietums|po|pietu|popiet|nuo|iki|apie|truks|trukme|val\w*|h|min|d|ant|uz|as|mano|irasyk|itrauk\w*|pridek\w*|ideki\w*|prasau|nezinau|kiek|laiko|tures|gal)$/;
 function titleFrom(raw) {
   const names = state.people.map(p => norm(p.name).slice(0, 4));
   const words = raw.replace(/[!?,]/g, ' ').split(/\s+/).filter(w => {
@@ -1786,7 +1876,7 @@ function titleFrom(raw) {
   return s ? s[0].toUpperCase() + s.slice(1) : 'Susitikimas';
 }
 const EMOJI = [[/susitik|meet/, '🤝'], [/gydytoj|dantist|daktar|klinik/, '🩺'], [/skambut|call|zoom|teams|pokalb/, '📞'], [/kirpykl|kirpim|grozi|manikiur/, '💇'],
-  [/vakarien|piet|pusryci|restoran|kavin|kava/, '🍽️'], [/gimtadien|svent|vakarel/, '🎉'], [/kelion|skryd|lektuv|oro uost|autobus/, '✈️'], [/pirkin|parduotuv|turg/, '🛒'], [/kin|filma/, '🎬'], [/masaz|spa/, '💆']];
+  [/vakarien|piet|pusryci|restoran|kavin|kava/, '🍽️'], [/gimtadien|svent|vakarel/, '🎉'], [/kelion|skryd|skrend|lektuv|oro uost|autobus/, '✈️'], [/pirkin|parduotuv|turg/, '🛒'], [/kin|filma/, '🎬'], [/masaz|spa/, '💆']];
 const emojiFor = t => (EMOJI.find(([re]) => re.test(norm(t))) || [0, '📌'])[1];
 
 function dayList(date) {
@@ -1798,8 +1888,17 @@ function dayList(date) {
 function handle(raw) {
   raw = raw.trim(); if (!raw) return;
   chat.msgs.push({ from:'me', html: esc(raw) });
-  const t = ' ' + norm(raw).replace(/[!,]/g, ' ') + ' ';
+  // „9 am“, „11am“, „2:30 pm“ → 24 val. formatas
+  const t = (' ' + norm(raw).replace(/!/g, ' ').replace(/,(?!\d)/g, ' ') + ' ').replace(/(\d{1,2})(?:[:.](\d{2}))?\s*(am|pm)\b/g, (m, h, mm, ap) => { let H = +h % 12; if (ap === 'pm') H += 12; return String(H).padStart(2, '0') + ':' + (mm || '00'); });
   const dI = parseDate(t), tm = parseTime(t), who = parseWho(t), act = findAct(t);
+  if (/perdelio\w* savait/.test(t)) { snapUndo(); generateWeek(weekStart(today())); logAct('perdėliojo savaitę 🔀'); render(); return botSay('🔀 Perdėliojau likusią savaitę pagal naują grafiką. Galite atšaukti apačioje.'); }
+  // ✈️ Kelionės / skrydžiai be laiko – visos dienos įvykis
+  if (/(skryd|skrend|lektuv|isvyk|keliaujam|kelione|kelion\w* dien|perskrid)/.test(t)) {
+    const route = raw.match(/((?:iš\s+[^\d,.!?]+?\s+)?į\s+[^\d,.!?]+)/i);
+    const ttl = (/(skryd|skrend|lėktuv|lektuv)/i.test(raw) ? 'Skrydis' : 'Kelionė') + (route ? ' ' + route[1].trim() : '');
+    if (tm.start != null) return propose({ kind:'event', title: ttl, emoji: /(skryd|skrend|lektuv)/.test(t) ? '✈️' : '🧳', color:'#0ea5e9', date: dI.date, start: tm.start, dur: tm.dur || 180, durKnown: !!tm.dur, who: who || ['a', 'b'] });
+    return propose({ kind:'event', allDay: true, block: true, title: ttl, emoji: /(skryd|skrend|lektuv)/.test(t) ? '✈️' : '🧳', color:'#0ea5e9', date: dI.found ? dI.date : (dI.target || dI.date), start: 0, dur: 0, durKnown: true, who: who || ['a', 'b'] });
+  }
   // ❓ Klausimai „kaip…?“ – atsakymas iš vadovo
   if (/(\bkaip\b|\bkur\b|ka reiskia|kas yra|kam reikia|paaiskink|ka daryti|nesuprantu|nezinau kaip|ka moki|ka gali|pagalb|\bhelp\b|funkcij|instrukc)/.test(t) && !/^\s*(problema|ideja|pasiulymas)\s*:/.test(t)) {
     const h = helpMatch(t);
@@ -1833,7 +1932,7 @@ function handle(raw) {
   if (/pagalb|ka moki|help|kaip naud/.test(t)) return botSay('Galiu: įtraukti įvykį („rytoj 10:00 zoom 30 min“), perkelti („šiandien nesportuojam“, „perkelk surf į šeštadienį“), pažymėti ✓ („atlikom gym“) ar parodyti planą („kas rytoj?“).');
   if ((/\?/.test(raw) || /\b(kas|ka) (siandien|rytoj|poryt|veik|turim|laukia)|planas|koks rytoj|kokia diena/.test(t)) && tm.start == null) return botSay(dayList(dI.date));
   const skip = /(nesport|nenor|neisim|neeisim|neis\b|neisiu|neeisiu|atsauk|perkel|praleid|nebus|negal|ne siandien|nespes|nesp|neturim laiko)/.test(t);
-  if (/(darbas|dirbu|dirbam|dirbsiu|dirbsim|nedirb)/.test(t) && !act) return workChat(t, dI, tm, who);
+  if (/(darbas|darbo laik|dirbu|dirbam|dirba\b|dirbs\w*|nedirb)/.test(t) && !act) return workChat(t, dI, tm, who);
   if (act && skip) return skipChat(act, dI, tm, who, t);
   if (act && /(atlik|padar|buvom|buvau|nuejom|nuejau|baig|isbuv|sportavom|surfinom)/.test(t)) return doneChat(act, dI, who);
   if (act) return propose({ kind:'act', actId: act.id, emoji: act.emoji, title: act.name, color: act.color, date: dI.date, start: tm.start, dur: tm.dur || act.dur, durKnown: true, who: who || groupsFor(act)[0], soft: tm.soft });
@@ -1882,7 +1981,27 @@ function doneChat(act, dI, who) {
 function workChat(t, dI, tm, who) {
   const pids = who || (Me() ? [Me()] : ['a', 'b']);
   const val = /nedirb/.test(t) ? '' : (tm.start != null ? toHM(tm.start) + '-' + toHM(Math.min(1440, tm.end || tm.start + (tm.dur || 240))) : null);
-  if (val === null) return botSay('Nurodykite darbo laiką, pvz. „rytoj dirbu 10-15“ arba „penktadienį nedirbu“.');
+  if (val === null) return botSay('Nurodykite darbo laiką, pvz. „rytoj dirbu 10-15“, „darbo dienomis dirbu 9 am – 11 am“ arba „penktadienį nedirbu“.');
+  // 🔁 Nuolatinis grafikas: „darbo dienomis“, „kasdien“, „pirmadieniais“, „savaitgaliais“…
+  let days = null;
+  if (/darbo dien|savaitdien|pr\s*-\s*pn|pirmadien\w*\s+(iki|-)\s+penktadien/.test(t)) days = [0, 1, 2, 3, 4];
+  else if (/savaitgal/.test(t)) days = [5, 6];
+  else if (/(kiekvien\w*\s+dien|kasdien|kas dien|visas dienas)/.test(t)) days = [0, 1, 2, 3, 4, 5, 6];
+  const plural = WD.map((w, i) => new RegExp(w + '\\w*iais\\b').test(t) ? i : -1).filter(i => i >= 0);
+  if (plural.length) days = plural;
+  if (!days && /(kiekvien|kas savait|visada|nuolat|paprastai)/.test(t)) days = [dayIdx(dI.date)];
+  if (days) {
+    pids.forEach(p => days.forEach(i => {
+      state.work[p][DAYKEYS[i]] = val;
+      Object.keys(state.workOverride).forEach(k => { const [pp, dd] = k.split('|'); if (pp === p && dayIdx(dd) === i) delete state.workOverride[k]; });
+    }));
+    const dl = days.length === 5 && days.every((x, i) => x === i) ? 'darbo dienomis (Pr–Pn)' : days.length === 7 ? 'kasdien' : days.length === 2 && days[0] === 5 ? 'savaitgaliais' : days.map(i => DAYS[i]).join(', ');
+    logAct(`nustatė nuolatinį darbo laiką: ${dl} ${val || 'nedirba'}`);
+    const ms = [...Array(14)].map((_, i) => addDays(today(), i)).filter(d => days.includes(dayIdx(d))).flatMap(d => fixDay(d));
+    render();
+    return botSay(`💻 Nuolatinis grafikas – <b>${esc(pids.map(p => person(p).name).join(' ir '))}</b>: ${dl} ${val ? '<b>dirba ' + val.replace('-', '–') + '</b>' : '<b>nedirba</b> 🎉'}. Pritaikiau visoms savaitėms.${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}
+      <br><span class="note">Atsilaisvino laiko? Programa gali sudėlioti daugiau veiklų.</span><div class="pchips" style="margin-top:8px"><button data-sugg="Perdėlioti savaitę">🔀 Perdėlioti savaitę</button></div>`);
+  }
   pids.forEach(p => state.workOverride[p + '|' + dI.date] = val);
   logAct(`pakeitė darbo laiką (${dayName(dI.date).toLowerCase()}: ${val || 'nedirba'})`);
   const ms = afterChange([dI.date]);
@@ -1939,6 +2058,7 @@ function propChange(el) {
 document.addEventListener('input', e => { const el = e.target; if (el.dataset?.pf === 'title') { const p = chat.props[el.dataset.pid]; if (p) p.title = el.value; } });
 function conflicts(p) {
   const out = [];
+  if (p.allDay) return out;
   p.who.forEach(pid => workRanges(pid, p.date).forEach(([a, b]) => { if (p.start < b && p.start + p.dur > a) out.push('💻 ' + person(pid).name + ' dirba ' + toHM(a) + '–' + toHM(b)); }));
   state.items.forEach(it => {
     if (it.id === p.moveId || it.date !== p.date || !overlaps(it.who, p.who)) return;
@@ -1948,7 +2068,7 @@ function conflicts(p) {
   return out;
 }
 function propCard(p) {
-  const head = `<div class="ph" style="${cvars(p.color)}"><span class="e">${p.emoji}</span><div><b>${esc(p.title || 'Nauja veikla')}</b><small>${dayName(p.date)}, ${fmtDate(p.date)} · ${toHM(p.start)}–${toHM(p.start + p.dur)}</small></div></div>`;
+  const head = `<div class="ph" style="${cvars(p.color)}"><span class="e">${p.emoji}</span><div><b>${esc(p.title || 'Nauja veikla')}</b><small>${dayName(p.date)}, ${fmtDate(p.date)} · ${p.allDay ? 'visa diena' : toHM(p.start) + '–' + toHM(p.start + p.dur)}</small></div></div>`;
   if (p.state !== 'open') return `<div class="prop closed" style="${cvars(p.color)}">${head}<div class="note">${p.state === 'added' ? '✅ Įtraukta' + (p.moved ? ' · pastumta: ' + esc(p.moved) : '') : '✕ Atšaukta'}</div></div>`;
   const [A, B] = state.people;
   const whoBtn = (ids, label) => `<button data-pa="who" data-v="${ids.join(',')}" data-pid="${p.id}" class="${sameWho(p.who, ids) ? 'on' : ''}">${label}</button>`;
@@ -1961,11 +2081,13 @@ function propCard(p) {
     ${mc ? `<div class="lbl">ŠIOS SAVAITĖS PLANE JAU YRA ${DAYS[dayIdx(mc.date)].toUpperCase()} ${toHM(mc.start)}</div><div class="pchips">
       <button data-pa="mv" data-v="1" data-pid="${p.id}" class="${p.moveId ? 'on' : ''}">↪︎ Perkelti jį čia</button><button data-pa="mv" data-v="0" data-pid="${p.id}" class="${!p.moveId ? 'on' : ''}">＋ Papildomai</button></div>` : ''}
     <div class="lbl">KAS</div><div class="pchips">${whoBtn(['a'], esc(A.name))}${whoBtn(['b'], esc(B.name))}${whoBtn(['a', 'b'], 'Abu 👫')}</div>
+    ${p.allDay ? `<div class="lbl">DATA</div><div class="pchips"><input type="date" data-pf="date" data-pid="${p.id}" value="${p.date}"></div>
+      <div class="note">🧳 Visos dienos įvykis – tą dieną programa nedėlios sporto, surf ir kitų veiklų${p.who.length === 2 ? ' jums abiem' : ''}. Jei žinote laiką, parašykite pvz. „skrydis 27 d. 14:30 3 val“.</div>` : `
     <div class="lbl">PRADŽIA</div><div class="pchips"><button data-pa="shift" data-v="-30" data-pid="${p.id}">−30</button><input type="time" data-pf="start" data-pid="${p.id}" value="${toHM(p.start)}"><button data-pa="shift" data-v="30" data-pid="${p.id}">+30</button>
       <input type="date" data-pf="date" data-pid="${p.id}" value="${p.date}"></div>
     <div class="lbl">TRUKMĖ ${!p.durKnown ? '<span class="note" style="font-weight:500">– nežinote? Palieku 1 val, vėliau galėsite pakeisti</span>' : ''}</div>
-    <div class="pchips">${durs.map(d => `<button data-pa="dur" data-v="${d}" data-pid="${p.id}" class="${p.dur === d ? 'on' : ''}">${fmtDur(d)}</button>`).join('')}</div>
-    ${p.kind === 'event' ? `<div class="lbl">🔁 KARTOTI KAS SAVAITĘ</div><div class="pchips">${[[0, 'Ne'], [4, '4 savaites'], [8, '8 savaites'], [12, '12 savaičių']].map(([v, n]) => `<button data-pa="rep" data-v="${v}" data-pid="${p.id}" class="${(p.repeat || 0) === v ? 'on' : ''}">${n}</button>`).join('')}</div>` : ''}
+    <div class="pchips">${durs.map(d => `<button data-pa="dur" data-v="${d}" data-pid="${p.id}" class="${p.dur === d ? 'on' : ''}">${fmtDur(d)}</button>`).join('')}</div>`}
+    ${p.kind === 'event' && !p.allDay ? `<div class="lbl">🔁 KARTOTI KAS SAVAITĘ</div><div class="pchips">${[[0, 'Ne'], [4, '4 savaites'], [8, '8 savaites'], [12, '12 savaičių']].map(([v, n]) => `<button data-pa="rep" data-v="${v}" data-pid="${p.id}" class="${(p.repeat || 0) === v ? 'on' : ''}">${n}</button>`).join('')}</div>` : ''}
     ${cf.length ? `<div class="conf">⚠️ ${cf.map(esc).join('<br>⚠️ ')}</div>` : ''}
     <div class="btns"><button class="btn-grad" data-pa="add" data-pid="${p.id}">✓ Įtraukti</button><button class="btn-soft" data-pa="cancel" data-pid="${p.id}">Atšaukti</button></div></div>`;
 }
@@ -1977,12 +2099,14 @@ function applyProp(p, btn) {
   else {
     snapUndo();
     const series = p.repeat ? uid() : undefined;
-    state.items.push(it = { id: uid(), kind:'event', title: p.title, emoji: p.emoji, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned', series });
+    state.items.push(it = { id: uid(), kind:'event', title: p.title, emoji: p.emoji, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned', series, ...(p.allDay ? { allDay: true, block: !!p.block } : {}) });
     for (let k = 1; k <= (p.repeat || 0); k++) state.items.push({ ...it, id: uid(), date: addDays(p.date, 7 * k) });
+    // kelionės diena – tos dienos automatines veiklas perkeliam kitur
+    if (p.block) state.items.filter(x => x.date === p.date && x.kind === 'auto' && x.status === 'planned' && !x.pinned && overlaps(x.who, p.who)).forEach(x => { if (!rescheduleOtherDay(x)) state.items = state.items.filter(y => y !== x); });
   }
   const ms = fixDay(p.date);
   p.state = 'added'; p.moved = ms.join(', ');
-  logAct(`${p.kind === 'act' && p.moveId ? 'perkėlė' : 'pridėjo'} ${p.emoji} ${p.title} → ${whenShort(p.date, p.start)}`, it?.id);
+  logAct(`${p.kind === 'act' && p.moveId ? 'perkėlė' : 'pridėjo'} ${p.emoji} ${p.title} → ${p.allDay ? dayName(p.date) + ' ' + fmtDate(p.date) + ' (visa diena)' : whenShort(p.date, p.start)}`, it?.id);
   view.date = p.date;
   const r = btn.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top);
   if (p.origin === 'sheet') { closeSheet(); view.tab = 'day'; render(); haptic(); toastUndo('✓ Pridėta: ' + p.emoji + ' ' + p.title + (p.repeat ? ` (🔁 ${p.repeat + 1}×)` : '') + (ms.length ? ' · pastumta: ' + ms.join(', ') : '')); return; }
@@ -2015,7 +2139,8 @@ $('#main').addEventListener('click', e => {
   }
   if (Date.now() - (view.noClick || 0) < 450) return; // ką tik buvo braukimas
   const hb = e.target.closest('[data-help]'); if (hb) return guideSheet(+hb.dataset.help);
-  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat],[data-filter],[data-quick]'); if (!t) return;
+  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat],[data-filter],[data-quick],[data-goday]'); if (!t) return;
+  if (t.dataset.goday) { view.date = t.dataset.goday; view.tab = 'day'; haptic(); render(); window.scrollTo({ top: 0 }); return; }
   if (t.dataset.addat) return addSheet(view.date, +t.dataset.addat);
   if (t.dataset.quick) { const [ids, k] = t.dataset.quick.split('|'); return quickMark(ids, k); }
   if (t.dataset.act === 'surf') return surfSheet();
@@ -2358,7 +2483,7 @@ const Surf = {
     return `${o.h.toFixed(1)} m · ${Math.round(o.p)} s · vėjas ${Math.round(o.w)} km/h ${compass(o.wd)}${diff < 50 ? ' (offshore 👌)' : diff < 100 ? ' (šoninis)' : ' (onshore)'} · potvynis ${this.tide(date, start)}`; },
   // geriausias laisvas langas dienai
   best(date, dur, pids, minStart, excludeId, act) {
-    if (!this.data?.[date]) return null;
+    if (!this.data?.[date] || blockedDay(date, pids)) return null;
     const from = Math.max(toMin(act?.from || '06:00'), 6 * 60), to = Math.min(toMin(act?.to || '18:00') || 1080, 18 * 60);
     let best = null;
     for (let t = Math.ceil(Math.max(from, minStart || 0) / STEP) * STEP; t + dur <= to; t += 30) {
