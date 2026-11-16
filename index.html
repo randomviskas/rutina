@@ -275,8 +275,8 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.2';
-const WHATS_NEW = 'Jūsų nuotraukos vietoj raidžių 📸';
+const APP_VERSION = '1.3';
+const WHATS_NEW = 'Matosi, kas prisijungęs prie bendro plano 👫';
 
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
@@ -587,6 +587,14 @@ function announceUpdate() {
   if (prev && prev !== APP_VERSION) setTimeout(() => { toast('✨ Atnaujinta į v' + APP_VERSION + ': ' + WHATS_NEW); confetti(innerWidth / 2, 120); }, 600);
 }
 
+// =============== Kas prisijungęs ===============
+function markSeen() {
+  const me = Me(); if (!me || !Sync.enabled()) return;
+  state.seen = state.seen || {};
+  if (!state.seen[me] || Date.now() - state.seen[me] > 10 * 60000) { state.seen[me] = Date.now(); save(); }
+}
+const fmtAgo = ts => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'ką tik' : m < 60 ? 'prieš ' + m + ' min' : m < 1440 ? 'prieš ' + Math.round(m / 60) + ' val' : 'prieš ' + Math.round(m / 1440) + ' d.'; };
+
 // =============== Mildos pasisveikinimas ❤️ ===============
 function heartRain(n = 30) {
   for (let i = 0; i < n; i++) {
@@ -753,7 +761,9 @@ function renderSettings(main) {
     <div class="hint" style="margin:8px 0 0">Asistentas žinos, kas rašo („turiu susitikimą“ – įtrauks tik jums).</div></div>`;
   h += '<h2>👫 Bendras planas</h2><div class="card">';
   if (!CONFIG.url) h += '<div class="hint" style="margin:0">Sinchronizavimas dar neįjungtas – kol kas planas saugomas tik šiame įrenginyje.</div>';
-  else if (Sync.room) h += `<div class="hint" style="margin-top:0">✅ Prijungta. Antras telefonas: pridėkite programą į pradžios ekraną, atidarykite ją ir įklijuokite šią nuorodą. Nuoroda – kaip slaptažodis.</div>
+  else if (Sync.room) h += `<div style="font:800 17px var(--font);margin-bottom:8px">Plano kodas: <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">${esc(Sync.room.slice(0, 4).toUpperCase())}</span></div>` +
+      state.people.map(p => { const s = state.seen?.[p.id]; return `<div class="wrow" style="cursor:default">${av(p.id)}<span class="tx"><b>${esc(p.name)}</b><small>${s ? '✅ prisijungęs · ' + fmtAgo(s) : '⏳ dar neprisijungęs'}</small></span></div>`; }).join('') +
+      `<div class="hint">Abu turi būti ✅. Jei kuris ⏳ – nusiųskite jam šią nuorodą. Tame telefone: Daugiau → įklijuoti nuorodą → Prisijungti → „Šis telefonas“ pasirinkti savo vardą.</div>
       <div class="row"><input readonly id="roomlink" value="${esc(Sync.link())}"></div>
       <div class="btns"><button class="btn-grad" data-set="share">📤 Siųsti nuorodą</button><button class="btn-danger" data-set="leave">Atjungti</button></div>`;
   else h += `<div class="hint" style="margin-top:0">Vienas paspaudžia „Sukurti“ ir atsiunčia nuorodą kitam. Kitas ją įklijuoja čia.</div>
@@ -1099,7 +1109,7 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.date) { view.date = t.dataset.date; render(); }
   else if (t.dataset.item) itemSheet(t.dataset.item);
   else if (t.dataset.me) {
-    ls.set('rutina.me', t.dataset.me); render();
+    ls.set('rutina.me', t.dataset.me); markSeen(); render();
     if (t.dataset.me === 'b' && !ls.get('rutina.hello')) mildaHello(); else toast('Labas, ' + person(t.dataset.me).name + '! 👋');
   }
   else if (t.dataset.act === 'ai') openChat();
@@ -1141,13 +1151,14 @@ $('#main').addEventListener('change', e => {
   const m = location.hash.match(/k=([A-Za-z0-9_-]{18,})/);
   if (m) { history.replaceState(null, '', location.pathname); if (CONFIG.url && m[1] !== Sync.room) { await Sync.join(m[1], false); toast('Prisijungta prie bendro plano 👫'); } }
   if (Sync.enabled()) await Sync.pull();
+  markSeen();
   render();
   announceUpdate();
   if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello();
   setTimeout(() => checkUpdate(false), 3000);
   setInterval(() => { if (!document.hidden) { Sync.pull(); if (view.tab === 'day' && !sheetEl.classList.contains('open')) renderDay($('#main')); } }, 60000);
   setInterval(() => { if (!document.hidden) checkUpdate(false); }, 10 * 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull(); render(); checkUpdate(false); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull().then(markSeen); render(); checkUpdate(false); } });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
