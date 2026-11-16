@@ -255,6 +255,27 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 .pick span{font-size:28px}
 .prop>input{border-radius:12px}
 .area{cursor:copy}
+.bdg{position:absolute;top:2px;right:18%;min-width:18px;height:18px;border-radius:9px;background:#ef4444;color:#fff;font:800 11px var(--font);display:none;place-items:center;padding:0 4px;font-style:normal}
+.mhead{display:flex;align-items:center;gap:12px;margin:8px 0 12px}
+.mhead b{font:800 18px var(--font);display:block}
+.mhead small{color:var(--muted);font-size:12px}
+.msgs{display:flex;flex-direction:column;gap:6px;min-height:50vh}
+.mday{align-self:center;font-size:12px;color:var(--muted);font-weight:700;margin:10px 0 4px}
+.mrow{display:flex;gap:8px;align-items:flex-end;max-width:85%}
+.mrow.mine{align-self:flex-end}
+.mb{background:var(--card);padding:9px 13px;border-radius:20px;border-bottom-left-radius:6px;font-size:16px;line-height:1.35;box-shadow:var(--shadow2);word-break:break-word}
+.mb small{display:block;font-size:10px;color:var(--muted);margin-top:2px;text-align:right}
+.mrow.mine .mb{background:var(--grad);color:#fff;border-radius:20px;border-bottom-right-radius:6px}
+.mrow.mine .mb small{color:rgba(255,255,255,.8)}
+.mcomp{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom));margin-top:12px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:8px;border-radius:30px;box-shadow:var(--shadow)}
+.cmts{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
+.cmts .lbl{font-size:12px;font-weight:700;color:var(--muted)}
+.cmt{display:flex;gap:8px;font-size:15px}
+.cmt small{color:var(--muted);font-size:11px}
+.goals.mini{grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:14px}
+.goals.mini .goal{padding:8px 4px;gap:4px}
+.goals.mini .ring{width:52px;height:52px}
+.goals.mini .ring>span{width:40px;height:40px;font-size:18px}
 #hello{position:fixed;inset:0;z-index:80;background:linear-gradient(160deg,#ff1744 0%,#d50000 55%,#ff4081 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:32px;animation:in .4s ease;overflow:hidden}
 #hello .h{font-size:96px;animation:beat 1s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(0,0,0,.25))}
@@ -279,7 +300,7 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
   <button data-tab="day"><b>📅</b>Diena</button>
   <button data-tab="week"><b>🗓️</b>Savaitė</button>
   <button class="fab" data-tab="ai" aria-label="Asistentas">✨</button>
-  <button data-tab="goals"><b>🏆</b>Tikslai</button>
+  <button data-tab="msgs" style="position:relative"><b>💬</b>Žinutės<i class="bdg" id="bdg"></i></button>
   <button data-tab="settings"><b>⚙️</b>Daugiau</button>
 </nav>
 <div class="sheet" id="sheet"></div>
@@ -300,8 +321,8 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.4';
-const WHATS_NEW = 'Paprastesnė diena, ＋ Pridėti veiklą, laisvas laikas kartu 🗓️';
+const APP_VERSION = '1.5';
+const WHATS_NEW = '💬 Žinutės, komentarai prie veiklų ir greitesnis sinchronizavimas';
 
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
@@ -497,7 +518,10 @@ function ensureWeek(ws) {
 const CONFIG = { url: 'https://eawvlenuwwxdoabszzqm.supabase.co', key: 'sb_publishable_rbZrYgQrrg64kaAS2v9kHw_xYjFvN0V' };
 const Sync = {
   room: ls.get('rutina.room'), version: +(ls.get('rutina.ver') || 0), dirty: ls.get('rutina.dirty') === '1', timer: null, busy: false,
+  base: ls.get('rutina.base'), tries: 0,
   enabled() { return !!(CONFIG.url && CONFIG.key && this.room); },
+  setBase(s) { this.base = s; ls.set('rutina.base', s); },
+  adopt(r) { if (r && r.room && r.room !== this.room) { this.room = r.room; ls.set('rutina.room', r.room); } },
   setVersion(v) { this.version = v; ls.set('rutina.ver', String(v)); },
   setDirty(d) { this.dirty = d; ls.set('rutina.dirty', d ? '1' : null); },
   async rpc(fn, body) {
@@ -516,16 +540,28 @@ const Sync = {
     try {
       const sent = lastSaved;
       const r = await this.rpc('rutina_put', { p_room: this.room, p_data: state, p_version: this.version });
-      if (r.ok) { this.setVersion(r.version); if (lastSaved === sent) this.setDirty(false); this.status('ok'); }
-      else { this.apply(r.data, r.version); toast('🔄 ' + otherName() + ' ką tik pakeitė planą – rodau naujausią. Jei kas dingo, pakartokite.'); }
+      this.adopt(r);
+      if (r.ok) { this.setVersion(r.version); this.setBase(sent); this.tries = 0; if (lastSaved === sent) this.setDirty(false); this.status('ok'); }
+      else {
+        // Kitas telefonas spėjo pakeisti – sujungiam abiejų pakeitimus ir siunčiam iš naujo
+        const prev = state;
+        const merged = mergeStates(this.base ? JSON.parse(this.base) : null, state, r.data);
+        this.setBase(JSON.stringify(r.data)); this.setVersion(r.version);
+        state = merged; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved);
+        notifyNew(prev, state); softRender();
+        this.busy = false;
+        if (++this.tries < 4) return this.push();
+        this.tries = 0;
+      }
     } catch (e) { this.status('err'); }
     this.busy = false;
   },
   apply(data, version) {
     this.setVersion(version); this.setDirty(false);
     if (data && data.people) {
-      state = data; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved);
-      if (!$('#sheet').classList.contains('open') && !(view.tab === 'settings' && document.activeElement?.dataset?.k)) render();
+      const prev = state;
+      state = data; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved); this.setBase(JSON.stringify(data));
+      notifyNew(prev, state); softRender();
     }
     this.status('ok');
   },
@@ -536,6 +572,7 @@ const Sync = {
     try {
       const r = await this.rpc('rutina_get', { p_room: this.room });
       this.busy = false;
+      this.adopt(r);
       if (!r) { this.setVersion(0); this.setDirty(true); return this.push(); }
       if (r.version !== this.version) this.apply(r.data, r.version); else this.status('ok');
     } catch (e) { this.busy = false; this.status('err'); }
@@ -544,6 +581,50 @@ const Sync = {
   leave() { this.room = null; ls.set('rutina.room', null); this.setVersion(0); this.setDirty(false); this.status(''); },
   link() { return location.origin + location.pathname + '#k=' + this.room; },
 };
+// Trijų versijų sujungimas: bazė (paskutinė bendra), mano ir kito telefono
+const LISTS = ['items', 'messages', 'comments', 'feedback'];
+function mergeById(b = [], l = [], r = []) {
+  const B = new Map((b || []).map(x => [x.id, JSON.stringify(x)])), L = new Map((l || []).map(x => [x.id, x])), R = new Map((r || []).map(x => [x.id, x]));
+  const out = [];
+  for (const id of new Set([...L.keys(), ...R.keys()])) {
+    const lx = L.get(id), rx = R.get(id), bx = B.get(id);
+    if (lx && rx) out.push(bx !== undefined && JSON.stringify(lx) === bx ? rx : lx);
+    else if (lx) { if (bx === undefined || JSON.stringify(lx) !== bx) out.push(lx); }
+    else if (rx) { if (bx === undefined || JSON.stringify(rx) !== bx) out.push(rx); }
+  }
+  return out;
+}
+function mergeStates(base, local, remote) {
+  if (!remote || !remote.people) return local;
+  const m = { ...remote }, same = (x, y) => JSON.stringify(x) === JSON.stringify(y);
+  for (const k of new Set([...Object.keys(local), ...Object.keys(remote)])) {
+    if (LISTS.includes(k)) m[k] = mergeById(base?.[k], local[k], remote[k]);
+    else if (k === 'seen') { m.seen = { ...(remote.seen || {}) }; for (const [p, t] of Object.entries(local.seen || {})) m.seen[p] = Math.max(t, m.seen[p] || 0); }
+    else if (k === 'workOverride') {
+      m.workOverride = { ...(remote.workOverride || {}) };
+      for (const kk of new Set([...Object.keys(local.workOverride || {}), ...Object.keys(base?.workOverride || {})])) {
+        const lv = local.workOverride?.[kk], bv = base?.workOverride?.[kk];
+        if (lv !== bv) { if (lv === undefined) delete m.workOverride[kk]; else m.workOverride[kk] = lv; }
+      }
+    }
+    else m[k] = base && !same(local[k], base[k]) ? local[k] : remote[k];
+  }
+  return m;
+}
+function notifyNew(prev, next) {
+  const me = Me();
+  const ids = new Set((prev.messages || []).map(x => x.id));
+  const fresh = (next.messages || []).filter(x => !ids.has(x.id) && x.by !== me);
+  if (fresh.length && view.tab !== 'msgs') { const x = fresh[fresh.length - 1]; toast('💬 ' + person(x.by).name + ': ' + x.text.slice(0, 70)); }
+  const cids = new Set((prev.comments || []).map(x => x.id));
+  const cf = (next.comments || []).filter(x => !cids.has(x.id) && x.by !== me);
+  if (cf.length && !fresh.length) { const x = cf[cf.length - 1], it = next.items.find(i => i.id === x.itemId); toast('💬 ' + person(x.by).name + (it ? ' (' + itemMeta(it).name + ')' : '') + ': ' + x.text.slice(0, 60)); }
+}
+function softRender() {
+  const typing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && document.activeElement.id !== 'msgin';
+  if (!$('#sheet').classList.contains('open') && !typing) { const y = scrollY; render(); if (view.tab !== 'msgs') scrollTo(0, y); }
+  else badge();
+}
 const otherName = () => { const me = Me(); return me ? person(me === 'a' ? 'b' : 'a').name : 'Kitas telefonas'; };
 const newRoomCode = () => { const a = new Uint8Array(18); crypto.getRandomValues(a); return Array.from(a, b => 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b % 56]).join(''); };
 const roomFromText = t => { const m = String(t).match(/(?:k=)?([A-Za-z0-9_-]{18,})\s*$/); return m ? m[1] : null; };
@@ -584,11 +665,16 @@ function confetti(x = innerWidth / 2, y = innerHeight / 2) {
 }
 
 // =============== Atnaujinimai ===============
-async function checkUpdate(manual) {
+async function checkUpdate(manual, auto) {
   try {
     const r = await fetch(location.pathname + '?v=' + Date.now(), { cache:'no-store' });
     const m = (await r.text()).match(/const APP_VERSION = '([^']+)'/);
-    if (m && m[1] !== APP_VERSION) { showUpdate(m[1]); return true; }
+    if (m && m[1] !== APP_VERSION) {
+      // atidarant programą – atsinaujina pati, jei niekas nerašoma
+      const busy = sheetEl.classList.contains('open') || chatEl.classList.contains('open') || /INPUT|TEXTAREA/.test(document.activeElement?.tagName || '');
+      if (auto && !busy) { toast('✨ Atnaujinama į v' + m[1] + '…'); setTimeout(doUpdate, 700); return true; }
+      showUpdate(m[1]); return true;
+    }
     if (manual) toast('Turite naujausią versiją ✓ (v' + APP_VERSION + ')');
   } catch (e) { if (manual) toast('Nepavyko patikrinti – nėra interneto'); }
   return false;
@@ -660,8 +746,44 @@ function render() {
   const main = $('#main');
   if (view.tab === 'day') renderDay(main);
   else if (view.tab === 'week') renderWeek(main);
-  else if (view.tab === 'goals') renderGoals(main);
+  else if (view.tab === 'msgs') renderMsgs(main);
   else renderSettings(main);
+  badge();
+  save();
+}
+function badge() {
+  const me = Me(), readAt = +(ls.get('rutina.readAt') || 0);
+  const n = (state.messages || []).filter(m => m.by !== me && m.at > readAt).length;
+  const b = $('#bdg'); if (b) { b.textContent = n > 9 ? '9+' : n || ''; b.style.display = n && view.tab !== 'msgs' ? 'grid' : 'none'; }
+}
+function renderMsgs(main) {
+  const me = Me();
+  if (!me) { main.innerHTML = `<div class="card" style="margin-top:12px"><h3>💬 Žinutės</h3><div class="hint" style="margin:0">Pirma skiltyje <b>⚙️ Daugiau → „Šis telefonas“</b> pasirinkite savo vardą.</div></div>`; return; }
+  const other = person(me === 'a' ? 'b' : 'a');
+  const ms = (state.messages || []).slice().sort((a, b) => a.at - b.at).slice(-200);
+  let h = `<div class="mhead">${av(other.id, 'lg')}<div><b>${esc(other.name)}</b><small>${state.seen?.[other.id] ? 'buvo ' + fmtAgo(state.seen[other.id]) : ''}</small></div></div><div class="msgs">`;
+  let last = '';
+  ms.forEach(m => {
+    const dt = new Date(m.at), d = ymd(dt);
+    if (d !== last) { h += `<div class="mday">${dayName(d)}, ${fmtDate(d)}</div>`; last = d; }
+    const mine = m.by === me;
+    h += `<div class="mrow ${mine ? 'mine' : ''}">${mine ? '' : av(m.by, 'sm')}<div class="mb">${esc(m.text)}<small>${toHM(dt.getHours() * 60 + dt.getMinutes())}</small></div></div>`;
+  });
+  if (!ms.length) h += `<div class="empty" style="text-align:center;padding:40px 10px">Parašykite pirmą žinutę ${esc(other.name)} 💌</div>`;
+  h += `</div><form id="msgform" class="composer mcomp" autocomplete="off"><input id="msgin" placeholder="Žinutė ${esc(other.name)}…" enterkeyhint="send"><button class="btn-grad" aria-label="Siųsti">↑</button></form>`;
+  main.innerHTML = h;
+  ls.set('rutina.readAt', String(Date.now()));
+  requestAnimationFrame(() => scrollTo(0, document.body.scrollHeight));
+}
+function sendMsg(text) {
+  text = text.trim(); if (!text || !Me()) return;
+  state.messages = state.messages || [];
+  state.messages.push({ id: uid(), by: Me(), text: text.slice(0, 1000), at: Date.now() });
+  render(); $('#msgin')?.focus();
+}
+function saveFeedback(text) {
+  state.feedback = state.feedback || [];
+  state.feedback.push({ id: uid(), by: Me() || '?', text: text.slice(0, 2000), at: Date.now(), ver: APP_VERSION });
   save();
 }
 const weekNav = ws => `<div class="wkhead"><button data-nav="-7" aria-label="Ankstesnė savaitė">‹</button><div>${weekLabel(ws)}</div><button data-nav="7" aria-label="Kita savaitė">›</button></div>`;
@@ -753,7 +875,7 @@ function agenda(d) {
     const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id)));
     rows.push({ t: it.start, html: `<div class="ag-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
       <div class="ag-card ${it.status === 'done' ? 'done' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
-      <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}</small></span>${avs(who)}</div></div>` });
+      <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}</small></span>${avs(who)}</div></div>` });
   });
   const wk = {};
   state.people.forEach(p => workRanges(p.id, d).forEach(([a, b]) => { (wk[a + '-' + b] = wk[a + '-' + b] || { a, b, who: [] }).who.push(p.id); }));
@@ -806,7 +928,7 @@ function weekStats(ws) {
 function renderWeek(main) {
   const ws = weekStart(view.date); ensureWeek(ws);
   const days = [...Array(7)].map((_, i) => addDays(ws, i));
-  let h = weekNav(ws) + warnBox();
+  let h = weekNav(ws) + goalsBlock(ws) + warnBox();
   days.forEach((d, i) => {
     const its = state.items.filter(it => it.date === d).sort((a, b) => a.start - b.start);
     h += `<div class="card"><h3>${DAYS_LONG[i]} <span style="color:var(--muted);font-weight:600">${fmtDate(d)}</span>${d === today() ? '<span class="tag">šiandien</span>' : ''}</h3>`;
@@ -822,6 +944,19 @@ function renderWeek(main) {
   main.innerHTML = h;
 }
 
+function goalsBlock(ws) {
+  const rows = weekStats(ws);
+  const goal = rows.reduce((s, r) => s + r.goal, 0) || 1, done = rows.reduce((s, r) => s + Math.min(r.done, r.goal), 0);
+  const pct = Math.round(done / goal * 100);
+  const mood = pct >= 100 ? 'Tobula savaitė! 🏆' : pct >= 70 ? 'Puikiai sekasi! 🔥' : pct >= 40 ? 'Gerai einasi 💪' : pct > 0 ? 'Geras startas 🌱' : 'Savaitė prasideda ✨';
+  let h = `<div class="score"><div class="ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${mood}</h2><p>Atlikta ${done} iš ${goal} savaitės tikslų</p></div></div><div class="goals mini">`;
+  rows.forEach(r => {
+    const d = Math.min(100, Math.round(r.done / r.goal * 100)), p = Math.min(100, Math.round(r.planned / r.goal * 100));
+    h += `<div class="goal ${r.done >= r.goal ? 'full' : ''}" style="--c:${r.act.color}"><div class="ring" style="--d:${d};--p:${p}"><span>${r.act.emoji}</span></div>
+      <small>${r.pids.length === 1 ? esc(person(r.pids[0]).name[0]) + ' · ' : ''}${r.done}/${r.goal}</small></div>`;
+  });
+  return h + '</div>';
+}
 function renderGoals(main) {
   const ws = weekStart(view.date); ensureWeek(ws);
   const rows = weekStats(ws);
@@ -884,6 +1019,11 @@ function renderSettings(main) {
       <div class="row end" style="margin:0"><button data-set="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>↑</button><button data-set="down" data-i="${i}" ${i === state.acts.length - 1 ? 'disabled' : ''}>↓</button><button class="btn-danger" data-set="del" data-i="${i}">Šalinti</button></div></div>`;
   });
   h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div>
+    <h2>🛠️ Problemos ir idėjos</h2><div class="card">
+      <div class="hint" style="margin-top:0">Kas neveikia ar ką norėtumėte pagerinti? Užrašykite – viskas kaupiama ir bus peržiūrėta kito atnaujinimo metu. Galite rašyti ir ✨ asistentui, pvz. „problema: …“ ar „idėja: …“.</div>
+      <div class="row"><input id="fbtext" placeholder="pvz. norėtume priminimų prieš surf"><button class="btn-grad" data-set="fb" style="flex:none">Siųsti</button></div>
+      ${(state.feedback || []).slice(-5).reverse().map(f => `<div class="wrow" style="cursor:default">${f.by && person(f.by) ? av(f.by, 'sm') : '📝'}<span class="tx"><b style="font-weight:600">${esc(f.text)}</b><small>${fmtAgo(f.at)} · v${esc(f.ver)}</small></span></div>`).join('')}
+    </div>
     <h2>Kita</h2><div class="card"><div class="row" style="margin:0;align-items:center"><span style="flex:1;font-weight:700">Versija ${APP_VERSION}</span><button class="btn-soft" data-set="update">🔄 Patikrinti atnaujinimus</button></div></div>
     <div class="btns"><button class="btn-danger" data-set="reset">Ištrinti viską ir pradėti iš naujo</button></div></div>`;
   main.innerHTML = h;
@@ -909,7 +1049,15 @@ function itemSheet(ids) {
     </div>
     <div class="row" style="margin:0"><label>Diena<input type="date" id="f-date" value="${it.date}"></label><label>Pradžia<input type="time" id="f-start" value="${toHM(it.start)}"></label><label style="flex:0 0 78px">Min.<input type="number" inputmode="numeric" step="15" min="15" id="f-dur" value="${it.dur}"></label></div>
     <div class="btns"><button class="btn-soft" data-sheet="retime">🕐 Išsaugoti laiką</button><button class="btn-danger" data-sheet="del">🗑 ${it.kind === 'auto' ? 'Praleisti' : 'Ištrinti'}</button></div>
-    <button class="btn-soft" data-sheet="ics1">📲 Į Apple kalendorių (su priminimu)</button>`);
+    <button class="btn-soft" data-sheet="ics1">📲 Į Apple kalendorių (su priminimu)</button>
+    ${commentsBlock(group)}`);
+}
+function commentsOf(group) { const ids = new Set(group.map(x => x.id)); return (state.comments || []).filter(c => ids.has(c.itemId)).sort((a, b) => a.at - b.at); }
+function commentsBlock(group) {
+  const cs = commentsOf(group);
+  return `<div class="cmts"><div class="lbl">💬 KOMENTARAI</div>
+    ${cs.map(c => `<div class="cmt">${av(c.by, 'sm')}<div><b>${esc(person(c.by)?.name || '?')}</b> <small>${fmtAgo(c.at)}</small><div>${esc(c.text)}</div></div></div>`).join('') || '<div class="note">Dar nėra. Pvz. „pasiimk rankšluostį 🏄“</div>'}
+    <div class="row" style="margin:4px 0 0"><input id="f-cmt" placeholder="Parašyk komentarą…" enterkeyhint="send"><button class="btn-grad" data-sheet="comment" style="flex:none">↑</button></div></div>`;
 }
 function workSheet() {
   openSheet(`<h3 style="margin:0">💻 Darbas – ${dayName(view.date)}, ${fmtDate(view.date)}</h3>
@@ -932,6 +1080,14 @@ sheetEl.addEventListener('click', e => {
   const a = b.dataset.sheet, it = sheetItem, G = sheetGroup.length ? sheetGroup : [it];
   if (a === 'close') return closeSheet();
   if (a === 'ics1') { icsDownload(G, 'rutina-' + it.date); return; }
+  if (a === 'comment') {
+    const tx = $('#f-cmt').value.trim(); if (!tx) return;
+    if (!Me()) return toast('Pirma „Daugiau“ → „Šis telefonas“ pasirinkite savo vardą');
+    state.comments = state.comments || [];
+    state.comments.push({ id: uid(), itemId: it.id, by: Me(), text: tx.slice(0, 500), at: Date.now() });
+    save(); const box = sheetEl.querySelector('.cmts'); if (box) box.outerHTML = commentsBlock(G); render();
+    return;
+  }
   if (a === 'done') {
     const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
     const r = b.getBoundingClientRect(); if (st === 'done') confetti(r.left + r.width / 2, r.top);
@@ -1065,6 +1221,10 @@ function handle(raw) {
   chat.msgs.push({ from:'me', html: esc(raw) });
   const t = ' ' + norm(raw).replace(/[!,]/g, ' ') + ' ';
   const dI = parseDate(t), tm = parseTime(t), who = parseWho(t), act = findAct(t);
+  if (/(problem|neveik|klaid|\bbug|stringa|nesigauna|nepatogu|ideja|idej|pasiulym|patobulin|upgrade|butu faina|butu gerai|butu smagu|norim kad|noreciau kad|noretume)/.test(t)) {
+    saveFeedback(raw);
+    return botSay('📝 Užrašiau į patobulinimų sąrašą. Kai kitą kartą tobulinsime programą, viskas bus peržiūrėta. Visus įrašus matote skiltyje <b>Daugiau → Problemos ir idėjos</b>.');
+  }
   if (/pagalb|ka moki|help|kaip naud/.test(t)) return botSay('Galiu: įtraukti įvykį („rytoj 10:00 zoom 30 min“), perkelti („šiandien nesportuojam“, „perkelk surf į šeštadienį“), pažymėti ✓ („atlikom gym“) ar parodyti planą („kas rytoj?“).');
   if ((/\?/.test(raw) || /\b(kas|ka) (siandien|rytoj|poryt|veik|turim|laukia)|planas|koks rytoj|kokia diena/.test(t)) && tm.start == null) return botSay(dayList(dI.date));
   const skip = /(nesport|nenor|neisim|neeisim|neis\b|neisiu|neeisiu|atsauk|perkel|praleid|nebus|negal|ne siandien|nespes|nesp|neturim laiko)/.test(t);
@@ -1247,6 +1407,7 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.set === 'join') { const r = roomFromText($('#joinlink').value); if (!r) toast('Nuoroda neatpažinta'); else if (confirm('Prisijungti prie bendro plano? Šio telefono planas bus pakeistas bendru.')) Sync.join(r, false); }
   else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
   else if (t.dataset.set === 'update') checkUpdate(true);
+  else if (t.dataset.set === 'fb') { const v = $('#fbtext').value.trim(); if (!v) return toast('Parašykite, kas negerai ar ką pridėti'); saveFeedback(v); render(); toast('📝 Užrašyta – ačiū!'); }
   else if (t.dataset.set === 'nophoto') { delete state.people[+t.dataset.i].photo; render(); }
   else if (t.dataset.set === 'leave') { if (confirm('Atjungti šį telefoną nuo bendro plano?')) { Sync.leave(); render(); } }
   else if (t.dataset.set) {
@@ -1282,10 +1443,16 @@ $('#main').addEventListener('change', e => {
   render();
   announceUpdate();
   if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello();
-  setTimeout(() => checkUpdate(false), 3000);
-  setInterval(() => { if (!document.hidden) { Sync.pull(); if (view.tab === 'day' && !sheetEl.classList.contains('open')) renderDay($('#main')); } }, 60000);
+  setTimeout(() => checkUpdate(false, true), 1500);
+  let tick = 0;
+  setInterval(() => {
+    if (document.hidden) return; tick++;
+    if (view.tab === 'msgs' || chatEl.classList.contains('open') === false && tick % 4 === 0) Sync.pull();
+    if (tick % 12 === 0 && view.tab === 'day' && !sheetEl.classList.contains('open')) softRender();
+  }, 5000);
+  $('#main').addEventListener('submit', e => { if (e.target.id === 'msgform') { e.preventDefault(); sendMsg($('#msgin').value); } });
   setInterval(() => { if (!document.hidden) checkUpdate(false); }, 10 * 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull().then(markSeen); render(); checkUpdate(false); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull().then(markSeen); render(); checkUpdate(false, true); } });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
