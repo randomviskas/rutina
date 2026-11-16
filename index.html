@@ -230,6 +230,31 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 #upd{position:fixed;left:12px;right:12px;top:calc(env(safe-area-inset-top) + 78px);z-index:45;display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;border-radius:18px;
   background:var(--grad);color:#fff;font-weight:700;font-size:14px;box-shadow:0 10px 28px rgba(168,85,247,.45);max-width:560px;margin:0 auto;animation:in .3s ease}
 #upd span{flex:1}
+.ag{display:flex;flex-direction:column;gap:8px}
+.ag-row{display:flex;gap:10px;align-items:stretch}
+.ag-t{width:48px;flex:none;text-align:right;font:700 14px var(--font);padding-top:11px;font-variant-numeric:tabular-nums}
+.ag-t small{display:block;color:var(--muted);font-weight:600;font-size:11px}
+.ag-card{flex:1;min-width:0;border-radius:18px;padding:11px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,var(--c),var(--c2));box-shadow:0 4px 14px color-mix(in srgb,var(--c) 30%,transparent);transition:transform .12s}
+.ag-card:active{transform:scale(.98)}
+.ag-card .e{font-size:26px}
+.ag-card .tx{flex:1;min-width:0}
+.ag-card .tx b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-card .tx small{opacity:.9;font-size:13px}
+.ag-card.done{filter:saturate(.35);opacity:.7}
+.ag-card.done .tx b::after{content:" ✓"}
+.ag-card.work{background:repeating-linear-gradient(-45deg,var(--work) 0 8px,var(--workS) 8px 16px);color:var(--muted);box-shadow:none;padding:9px 14px;font-size:14px;font-weight:600;justify-content:space-between}
+.ag-card.gap{background:none;border:2px dashed color-mix(in srgb,#a855f7 45%,transparent);color:var(--muted);box-shadow:none;padding:9px 14px;font-size:14px;justify-content:space-between}
+.ag-card.gap b{color:#a855f7}
+.ag-now{display:flex;align-items:center;gap:8px;color:var(--danger);font-weight:800;font-size:12px;padding-left:12px}
+.ag-now::after{content:"";flex:1;border-top:2px solid var(--danger)}
+.ag-edge{color:var(--muted);font-size:13px;font-weight:600;padding:2px 0 2px 58px}
+.add-big{width:100%;margin-top:14px;padding:15px;border-radius:18px;border:2px dashed #a855f7;background:none;color:#a855f7;font-weight:800;font-size:16px}
+.pick{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pick button{border-radius:18px;padding:14px 6px;color:#fff;font-weight:700;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:4px;background:linear-gradient(135deg,var(--c),var(--c2))}
+.pick span{font-size:28px}
+.prop>input{border-radius:12px}
+.area{cursor:copy}
 #hello{position:fixed;inset:0;z-index:80;background:linear-gradient(160deg,#ff1744 0%,#d50000 55%,#ff4081 100%);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:32px;animation:in .4s ease;overflow:hidden}
 #hello .h{font-size:96px;animation:beat 1s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(0,0,0,.25))}
@@ -275,8 +300,8 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.3';
-const WHATS_NEW = 'Matosi, kas prisijungęs prie bendro plano 👫';
+const APP_VERSION = '1.4';
+const WHATS_NEW = 'Paprastesnė diena, ＋ Pridėti veiklą, laisvas laikas kartu 🗓️';
 
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
@@ -524,20 +549,24 @@ const newRoomCode = () => { const a = new Uint8Array(18); crypto.getRandomValues
 const roomFromText = t => { const m = String(t).match(/(?:k=)?([A-Za-z0-9_-]{18,})\s*$/); return m ? m[1] : null; };
 
 // =============== .ics eksportas ===============
-function exportIcs(ws) {
-  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+function icsDownload(items, name) {
   const stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   const dt = (date, m) => date.replace(/-/g, '') + 'T' + toHM(m).replace(':', '') + '00';
   let s = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Musu rutina//LT\r\nCALSCALE:GREGORIAN\r\n';
-  state.items.filter(it => days.includes(it.date)).forEach(it => {
+  items.forEach(it => {
     const m = itemMeta(it);
     s += 'BEGIN:VEVENT\r\nUID:' + it.id + '@rutina\r\nDTSTAMP:' + stamp + '\r\nDTSTART:' + dt(it.date, it.start) + '\r\nDTEND:' + dt(it.date, Math.min(it.start + it.dur, 1439)) +
-         '\r\nSUMMARY:' + (m.emoji + ' ' + m.name + ' (' + whoLabel(it.who) + ')').replace(/[,;]/g, ' ') + '\r\nEND:VEVENT\r\n';
+         '\r\nSUMMARY:' + (m.emoji + ' ' + m.name + ' (' + whoLabel(it.who) + ')').replace(/[,;]/g, ' ') +
+         '\r\nBEGIN:VALARM\r\nTRIGGER:-PT15M\r\nACTION:DISPLAY\r\nDESCRIPTION:' + m.name.replace(/[,;]/g, ' ') + '\r\nEND:VALARM\r\nEND:VEVENT\r\n';
   });
   s += 'END:VCALENDAR\r\n';
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([s], { type:'text/calendar' })); a.download = 'rutina-' + ws + '.ics';
+  a.href = URL.createObjectURL(new Blob([s], { type:'text/calendar' })); a.download = name + '.ics';
   document.body.appendChild(a); a.click(); a.remove();
+}
+function exportIcs(ws) {
+  const days = [...Array(7)].map((_, i) => addDays(ws, i));
+  icsDownload(state.items.filter(it => days.includes(it.date)), 'rutina-' + ws);
 }
 
 // =============== Efektai ===============
@@ -668,8 +697,9 @@ function renderDay(main) {
     return `<button class="${d === view.date ? 'on' : ''} ${d === today() ? 'today' : ''}" data-date="${d}"><span>${DAYS[i]}</span><b>${parseYmd(d).getDate()}</b><i>${dots}</i></button>`;
   }).join('') + '</div>';
   h += heroCard();
-  h += `<div class="chiprow"><button data-act="ai">✨ Įtraukti</button><button data-act="work">💻 Darbas šią dieną</button><button data-act="gen">🔀 Perdėlioti savaitę</button><button data-act="ics">📲 Į kalendorių</button></div>`;
-  h += warnBox();
+  const tlMode = ls.get('rutina.mode') === 'tl';
+  h += `<div class="chiprow"><button class="btn-grad" data-act="add">＋ Pridėti</button><button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Laiko juosta'}</button><button data-act="work">💻 Darbas šią dieną</button></div>`;
+  if (!tlMode) { main.innerHTML = h + agenda(view.date); return; }
   h += `<div class="cols"><div></div>${state.people.map(p => `<div>${av(p.id, 'sm')} ${esc(p.name)}</div>`).join('')}</div>`;
 
   const t0 = Math.max(0, Math.floor(Math.min(...state.people.map(p => toMin(p.wake))) / 60) * 60 - 60);
@@ -677,7 +707,7 @@ function renderDay(main) {
   const y = m => ((m - t0) * PX).toFixed(1);
   let tl = `<div class="tl" style="height:${(t1 - t0) * PX}px">`;
   for (let m = t0; m < t1; m += 60) tl += `<div class="hr" style="top:${y(m)}px"><span>${toHM(m)}</span></div>`;
-  tl += '<div class="area">';
+  tl += `<div class="area" data-t0="${t0}" data-px="${PX}">`;
   state.people.forEach((p, ci) => {
     const [w, s] = awake(p.id), left = ci * 50;
     if (w > t0) tl += `<div class="blk sleep" style="top:0;height:${y(w)}px;left:${left}%;width:50%">🌙 iki ${toHM(w)}</div>`;
@@ -692,8 +722,72 @@ function renderDay(main) {
       <div data-item="${it.id}"><b>${m.emoji} ${esc(m.name)}</b>${hgt > 40 ? `<small>${toHM(it.start)}–${toHM(it.start + it.dur)}${both ? ' · abu' : ''}</small>` : ''}</div></div>`;
   });
   if (view.date === today()) { const n = nowMin(); if (n > t0) tl += `<div class="now" style="top:${y(n)}px"></div>`; }
-  tl += '</div></div>';
+  tl += '</div></div><div class="hint" style="text-align:center;margin-top:8px">Paspauskite tuščią vietą – pridėsite veiklą tuo laiku</div>';
   main.innerHTML = h + tl;
+}
+
+// Laisvi bendri langai (abu nemiega, nedirba ir neturi plano)
+function freeGaps(date, min = 45) {
+  const pids = ['a', 'b'];
+  const from = Math.max(minStartFor(date), ...pids.map(p => awake(p)[0]));
+  if (from === Infinity) return [];
+  const end = Math.min(...pids.map(p => awake(p)[1]));
+  const out = []; let s = null, t = Math.ceil(from / STEP) * STEP;
+  for (; t + STEP <= end; t += STEP) {
+    const f = isFree(pids, date, t, t + STEP);
+    if (f && s == null) s = t;
+    if (!f && s != null) { if (t - s >= min) out.push([s, t]); s = null; }
+  }
+  if (s != null && t - s >= min) out.push([s, t]);
+  return out;
+}
+// Paprastas dienos sąrašas
+function agenda(d) {
+  const rows = [], groups = {};
+  // ta pati veikla tuo pačiu metu abiem – viena kortelė
+  state.items.filter(it => it.date === d).forEach(it => {
+    const k = [it.kind, it.actId || it.title, it.start, it.dur, it.status].join('|');
+    (groups[k] = groups[k] || []).push(it);
+  });
+  Object.values(groups).forEach(g => {
+    const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id)));
+    rows.push({ t: it.start, html: `<div class="ag-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
+      <div class="ag-card ${it.status === 'done' ? 'done' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
+      <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}</small></span>${avs(who)}</div></div>` });
+  });
+  const wk = {};
+  state.people.forEach(p => workRanges(p.id, d).forEach(([a, b]) => { (wk[a + '-' + b] = wk[a + '-' + b] || { a, b, who: [] }).who.push(p.id); }));
+  Object.values(wk).forEach(w => rows.push({ t: w.a, html: `<div class="ag-row"><div class="ag-t">${toHM(w.a)}</div>
+    <div class="ag-card work" data-act="work"><span>💻 Darbas ${toHM(w.a)}–${toHM(w.b)}</span>${avs(w.who)}</div></div>` }));
+  freeGaps(d).forEach(([a, b]) => rows.push({ t: a + 0.1, html: `<div class="ag-row"><div class="ag-t">${toHM(a)}</div>
+    <div class="ag-card gap" data-addat="${a}"><span><b>＋ Laisva kartu</b> ${toHM(a)}–${toHM(b)}</span><small>${fmtDur(b - a)}</small></div></div>` }));
+  if (d === today()) { const n = nowMin(); rows.push({ t: n - 0.2, html: `<div class="ag-now">dabar ${toHM(n)}</div>` }); }
+  rows.sort((x, y) => x.t - y.t);
+  const wake = state.people.map(p => `${esc(p.name)} ${p.wake}`).join(' · '), sleep = state.people.map(p => `${esc(p.name)} ${p.sleep}`).join(' · ');
+  const body = rows.length ? rows.map(r => r.html).join('') : '<div class="empty" style="text-align:center;padding:20px">Šiai dienai nieko nėra 🌴</div>';
+  return `<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>
+    <button class="add-big" data-act="add">＋ Pridėti veiklą</button>`;
+}
+
+// ＋ Pridėti: pasirinkti veiklą → patikslinti → įtraukti
+function addSheet(date, start) {
+  view.addCtx = { date: date || view.date, start: start ?? null };
+  openSheet(`<h3 style="margin:0">＋ Ką pridėti?</h3>
+    <div class="hint" style="margin:0">${dayName(view.addCtx.date)}, ${fmtDate(view.addCtx.date)}${start != null ? ' · nuo ' + toHM(start) : ' · laiką parinksiu pats'}</div>
+    <div class="pick">${state.acts.map(a => `<button data-pick="${a.id}" style="${cvars(a.color)}"><span>${a.emoji}</span>${esc(a.name)}</button>`).join('')}
+      <button data-pick="event" style="${cvars('#475569')}"><span>📌</span>Kita veikla</button></div>`);
+}
+function pickAdd(id) {
+  const ctx = view.addCtx || { date: view.date, start: null }, me = Me();
+  let p;
+  if (id === 'event') p = { kind:'event', title:'', emoji:'📌', color:'#475569', date: ctx.date, start: ctx.start, dur: 60, durKnown: false, who: me ? [me] : ['a', 'b'], origin:'sheet' };
+  else {
+    const a = actById(id); if (!a) return;
+    p = { kind:'act', actId: a.id, emoji: a.emoji, title: a.name, color: a.color, date: ctx.date, start: ctx.start, dur: a.dur, durKnown: true, who: a.who === 'each' ? [me || 'a'] : groupsFor(a)[0], origin:'sheet' };
+  }
+  if (!prepProp(p)) return toast(ctx.date < today() ? 'Ši diena jau praėjo' : 'Tą dieną laisvo laiko nerandu – pasirinkite kitą dieną ar laiką');
+  sheetEl.querySelector('.sheet-card').innerHTML = `<div class="grab"></div><div id="propbox">${propCard(p)}</div>`;
+  if (id === 'event') setTimeout(() => sheetEl.querySelector('[data-pf=title]')?.focus(), 60);
 }
 
 function weekStats(ws) {
@@ -799,20 +893,23 @@ function renderSettings(main) {
 const sheetEl = $('#sheet');
 function openSheet(html) { sheetEl.innerHTML = `<div class="sheet-card"><div class="grab"></div>${html}</div>`; requestAnimationFrame(() => sheetEl.classList.add('open')); }
 function closeSheet() { sheetEl.classList.remove('open'); setTimeout(() => { if (!sheetEl.classList.contains('open')) sheetEl.innerHTML = ''; }, 300); }
-let sheetItem = null;
+let sheetItem = null, sheetGroup = [];
 
-function itemSheet(id) {
-  const it = state.items.find(x => x.id === id); if (!it) return;
-  sheetItem = it; const m = itemMeta(it);
+function itemSheet(ids) {
+  const group = String(ids).split(',').map(id => state.items.find(x => x.id === id)).filter(Boolean);
+  const it = group[0]; if (!it) return;
+  sheetItem = it; sheetGroup = group; const m = itemMeta(it);
+  const allWho = state.people.map(p => p.id).filter(id => group.some(x => x.who.includes(id)));
   const past = it.date < today(), done = it.status === 'done';
   openSheet(`<div class="sh-hero" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><h3>${esc(m.name)}</h3>
-      <small>${dayName(it.date)}, ${fmtDate(it.date)} · ${toHM(it.start)}–${toHM(it.start + it.dur)}</small><div style="margin-top:4px">${avs(it.who)}</div></div></div>
+      <small>${dayName(it.date)}, ${fmtDate(it.date)} · ${toHM(it.start)}–${toHM(it.start + it.dur)}</small><div style="margin-top:4px">${avs(allWho)}</div></div></div>
     <div class="tiles">
       <button class="tile ${done ? 't-undo' : 't-ok'}" data-sheet="done"><span>${done ? '↩︎' : '✓'}</span>${done ? 'Neatlikta' : 'Atlikta!'}</button>
       ${!done && !past ? `<button class="tile t-move" data-sheet="move"><span>↪︎</span>Ne šiandien – perkelti</button>` : `<button class="tile t-undo" data-sheet="close"><span>✕</span>Uždaryti</button>`}
     </div>
     <div class="row" style="margin:0"><label>Diena<input type="date" id="f-date" value="${it.date}"></label><label>Pradžia<input type="time" id="f-start" value="${toHM(it.start)}"></label><label style="flex:0 0 78px">Min.<input type="number" inputmode="numeric" step="15" min="15" id="f-dur" value="${it.dur}"></label></div>
-    <div class="btns"><button class="btn-soft" data-sheet="retime">🕐 Išsaugoti laiką</button><button class="btn-danger" data-sheet="del">🗑 ${it.kind === 'auto' ? 'Praleisti' : 'Ištrinti'}</button></div>`);
+    <div class="btns"><button class="btn-soft" data-sheet="retime">🕐 Išsaugoti laiką</button><button class="btn-danger" data-sheet="del">🗑 ${it.kind === 'auto' ? 'Praleisti' : 'Ištrinti'}</button></div>
+    <button class="btn-soft" data-sheet="ics1">📲 Į Apple kalendorių (su priminimu)</button>`);
 }
 function workSheet() {
   openSheet(`<h3 style="margin:0">💻 Darbas – ${dayName(view.date)}, ${fmtDate(view.date)}</h3>
@@ -826,27 +923,31 @@ function afterChange(dates, prefix) {
   if (prefix || msgs.length) toast([prefix, ...msgs].filter(Boolean).join(' · '));
   return msgs;
 }
+sheetEl.addEventListener('change', e => propChange(e.target));
 sheetEl.addEventListener('click', e => {
   if (e.target === sheetEl) return closeSheet();
+  const pk = e.target.closest('[data-pick]'); if (pk) return pickAdd(pk.dataset.pick);
+  const pa = e.target.closest('[data-pa]'); if (pa) return propClick(pa);
   const b = e.target.closest('[data-sheet]'); if (!b) return;
-  const a = b.dataset.sheet, it = sheetItem;
+  const a = b.dataset.sheet, it = sheetItem, G = sheetGroup.length ? sheetGroup : [it];
   if (a === 'close') return closeSheet();
+  if (a === 'ics1') { icsDownload(G, 'rutina-' + it.date); return; }
   if (a === 'done') {
-    it.status = it.status === 'done' ? 'planned' : 'done';
-    const r = b.getBoundingClientRect(); if (it.status === 'done') confetti(r.left + r.width / 2, r.top);
-    closeSheet(); render(); if (it.status === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
+    const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
+    const r = b.getBoundingClientRect(); if (st === 'done') confetti(r.left + r.width / 2, r.top);
+    closeSheet(); render(); if (st === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
   }
   if (a === 'move') {
-    const m = itemMeta(it); const ok = rescheduleOtherDay(it); closeSheet(); render();
+    const m = itemMeta(it); const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean); closeSheet(); render();
     toast(ok ? `${m.emoji} Perkelta → ${dayName(it.date)} ${toHM(it.start)}` : 'Per artimiausią savaitę laisvo laiko nerasta 😕');
   }
   if (a === 'retime') {
     const d = $('#f-date').value, s = toMin($('#f-start').value), du = Math.max(15, +$('#f-dur').value || it.dur);
     if (!d) return;
-    const old = it.date; it.date = d; it.start = s; it.dur = du; it.pinned = true;
+    const old = it.date; G.forEach(x => Object.assign(x, { date: d, start: s, dur: du, pinned: true }));
     closeSheet(); afterChange([d, old], '🕐 Laikas pakeistas');
   }
-  if (a === 'del') { state.items = state.items.filter(x => x !== it); closeSheet(); render(); toast('Pašalinta'); }
+  if (a === 'del') { state.items = state.items.filter(x => !G.includes(x)); closeSheet(); render(); toast('Pašalinta'); }
   if (a === 'save-work' || a === 'reset-work') {
     state.people.forEach(p => { const k = p.id + '|' + view.date; if (a === 'reset-work') delete state.workOverride[k]; else state.workOverride[k] = $('#f-work-' + p.id).value.trim(); });
     closeSheet(); afterChange([view.date], '💻 Darbo laikas atnaujintas');
@@ -1021,20 +1122,46 @@ function workChat(t, dI, tm, who) {
   botSay(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(dI.date)}: ${val ? 'dirba ' + val.replace('-', '–') : 'nedirba 🎉'}${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
 }
 
-function propose(p) {
+function prepProp(p) {
   p.id = uid(); p.state = 'open';
   if (p.kind === 'act') {
-    const cand = state.items.filter(x => x.actId === p.actId && x.status === 'planned' && weekStart(x.date) === weekStart(p.date) && x.date >= today() && overlaps(x.who, p.who))
+    const cand = state.items.filter(x => x.actId === p.actId && x.status === 'planned' && weekStart(x.date) === weekStart(p.date) && x.date >= today() && sameWho(x.who, p.who))
       .sort((a, b) => (a.date === p.date ? -1 : 0) - (b.date === p.date ? -1 : 0) || a.date.localeCompare(b.date));
-    if (cand[0]) p.moveId = cand[0].id;
+    if (cand[0]) p.moveId = p.moveCand = cand[0].id;
   }
   if (p.start == null) {
-    const s = findSlot({ from:'08:00', to:'22:00' }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
-    if (s == null) { botSay(`${dayName(p.date)} laisvo ${fmtDur(p.dur)} lango nerandu 😕 Nurodykite laiką, pvz. „${dayName(p.date).toLowerCase()} 15:00“.`); return; }
+    const act = p.kind === 'act' && actById(p.actId);
+    let s = act ? findSlot(act, p.dur, p.who, p.date, minStartFor(p.date), p.moveId) : null;
+    if (s == null) s = findSlot({ from:'08:00', to:'22:00' }, p.dur, p.who, p.date, minStartFor(p.date), p.moveId);
+    if (s == null) return null;
     p.start = s; p.suggested = true;
   }
-  chat.props[p.id] = p; chat.msgs.push({ prop: p.id }); renderChat();
+  chat.props[p.id] = p;
+  return p;
 }
+function propose(p) {
+  if (!prepProp(p)) return botSay(`${dayName(p.date)} laisvo ${fmtDur(p.dur)} lango nerandu 😕 Nurodykite laiką, pvz. „${dayName(p.date).toLowerCase()} 15:00“.`);
+  chat.msgs.push({ prop: p.id }); renderChat();
+}
+function rerenderProp(p) { if (p.origin === 'sheet') { const el = $('#propbox'); if (el) el.innerHTML = propCard(p); } else renderChat(); }
+function propClick(c) {
+  const p = chat.props[c.dataset.pid]; if (!p || p.state !== 'open') return;
+  const a = c.dataset.pa;
+  if (a === 'who') { p.who = c.dataset.v.split(','); if (p.moveCand) { const mc = state.items.find(x => x.id === p.moveCand); if (!mc || !sameWho(mc.who, p.who)) p.moveId = p.moveCand = null; } }
+  if (a === 'dur') { p.dur = +c.dataset.v; p.durKnown = true; }
+  if (a === 'shift') { p.start = Math.max(0, Math.min(1440 - p.dur, p.start + +c.dataset.v)); p.suggested = p.soft = false; }
+  if (a === 'mv') p.moveId = c.dataset.v === '1' ? p.moveCand : null;
+  if (a === 'cancel') { p.state = 'cancelled'; if (p.origin === 'sheet') return closeSheet(); }
+  if (a === 'add') return applyProp(p, c);
+  rerenderProp(p);
+}
+function propChange(el) {
+  const p = chat.props[el.dataset.pid]; if (!p || !el.dataset.pf || el.dataset.pf === 'title') return;
+  if (el.dataset.pf === 'start' && el.value) { p.start = toMin(el.value); p.suggested = false; p.soft = false; }
+  if (el.dataset.pf === 'date' && el.value) p.date = el.value;
+  rerenderProp(p);
+}
+document.addEventListener('input', e => { const el = e.target; if (el.dataset?.pf === 'title') { const p = chat.props[el.dataset.pid]; if (p) p.title = el.value; } });
 function conflicts(p) {
   const out = [];
   p.who.forEach(pid => workRanges(pid, p.date).forEach(([a, b]) => { if (p.start < b && p.start + p.dur > a) out.push('💻 ' + person(pid).name + ' dirba ' + toHM(a) + '–' + toHM(b)); }));
@@ -1046,16 +1173,18 @@ function conflicts(p) {
   return out;
 }
 function propCard(p) {
-  const head = `<div class="ph" style="${cvars(p.color)}"><span class="e">${p.emoji}</span><div><b>${esc(p.title)}</b><small>${dayName(p.date)}, ${fmtDate(p.date)} · ${toHM(p.start)}–${toHM(p.start + p.dur)}</small></div></div>`;
+  const head = `<div class="ph" style="${cvars(p.color)}"><span class="e">${p.emoji}</span><div><b>${esc(p.title || 'Nauja veikla')}</b><small>${dayName(p.date)}, ${fmtDate(p.date)} · ${toHM(p.start)}–${toHM(p.start + p.dur)}</small></div></div>`;
   if (p.state !== 'open') return `<div class="prop closed" style="${cvars(p.color)}">${head}<div class="note">${p.state === 'added' ? '✅ Įtraukta' + (p.moved ? ' · pastumta: ' + esc(p.moved) : '') : '✕ Atšaukta'}</div></div>`;
   const [A, B] = state.people;
   const whoBtn = (ids, label) => `<button data-pa="who" data-v="${ids.join(',')}" data-pid="${p.id}" class="${sameWho(p.who, ids) ? 'on' : ''}">${label}</button>`;
   const durs = [30, 60, 90, 120, 180];
   const cf = conflicts(p);
-  const mv = p.moveId && state.items.find(x => x.id === p.moveId);
+  const mc = p.moveCand && state.items.find(x => x.id === p.moveCand);
   return `<div class="prop" style="${cvars(p.color)}">${head}
-    ${p.suggested ? '<div class="note">💡 Laiko nenurodėte – parinkau artimiausią laisvą. Galite pakeisti.</div>' : p.soft ? '<div class="note">💡 Parinkau apytikslį laiką – pakeiskite, jei reikia.</div>' : ''}
-    ${mv && mv.date !== p.date || (mv && mv.start !== p.start) ? `<div class="note">↪︎ Perkelsiu iš ${dayName(mv.date)} ${toHM(mv.start)}</div>` : ''}
+    ${p.kind === 'event' ? `<div class="lbl">PAVADINIMAS</div><input data-pf="title" data-pid="${p.id}" value="${esc(p.title)}" placeholder="pvz. Susitikimas, gydytojas, vakarienė">` : ''}
+    ${p.suggested ? '<div class="note">💡 Parinkau artimiausią laisvą laiką. Galite pakeisti.</div>' : p.soft ? '<div class="note">💡 Parinkau apytikslį laiką – pakeiskite, jei reikia.</div>' : ''}
+    ${mc ? `<div class="lbl">ŠIOS SAVAITĖS PLANE JAU YRA ${DAYS[dayIdx(mc.date)].toUpperCase()} ${toHM(mc.start)}</div><div class="pchips">
+      <button data-pa="mv" data-v="1" data-pid="${p.id}" class="${p.moveId ? 'on' : ''}">↪︎ Perkelti jį čia</button><button data-pa="mv" data-v="0" data-pid="${p.id}" class="${!p.moveId ? 'on' : ''}">＋ Papildomai</button></div>` : ''}
     <div class="lbl">KAS</div><div class="pchips">${whoBtn(['a'], esc(A.name))}${whoBtn(['b'], esc(B.name))}${whoBtn(['a', 'b'], 'Abu 👫')}</div>
     <div class="lbl">PRADŽIA</div><div class="pchips"><button data-pa="shift" data-v="-30" data-pid="${p.id}">−30</button><input type="time" data-pf="start" data-pid="${p.id}" value="${toHM(p.start)}"><button data-pa="shift" data-v="30" data-pid="${p.id}">+30</button>
       <input type="date" data-pf="date" data-pid="${p.id}" value="${p.date}"></div>
@@ -1066,13 +1195,16 @@ function propCard(p) {
 }
 function applyProp(p, btn) {
   let it;
+  if (p.kind === 'event') { p.title = (p.title || '').trim() || 'Įvykis'; if (p.emoji === '📌') p.emoji = emojiFor(p.title); }
   if (p.kind === 'act' && p.moveId && (it = state.items.find(x => x.id === p.moveId))) Object.assign(it, { date: p.date, start: p.start, dur: p.dur, who: [...p.who], pinned: true, status:'planned' });
   else if (p.kind === 'act') state.items.push(it = { id: uid(), kind:'auto', actId: p.actId, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned', pinned: true });
   else state.items.push(it = { id: uid(), kind:'event', title: p.title, emoji: p.emoji, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned' });
   const ms = fixDay(p.date);
   p.state = 'added'; p.moved = ms.join(', ');
-  view.date = p.date; render(); renderChat();
+  view.date = p.date;
   const r = btn.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top);
+  if (p.origin === 'sheet') { closeSheet(); view.tab = 'day'; render(); toast('✓ Pridėta: ' + p.emoji + ' ' + p.title + (ms.length ? ' · pastumta: ' + ms.join(', ') : '')); return; }
+  render(); renderChat();
   botSay(['Įtraukta! 🙌', 'Padaryta ✨', 'Užrašiau 📝', 'Yra! 🎯'][Math.floor(Math.random() * 4)] + (ms.length ? ' Kad tilptų, pastūmiau: ' + esc(ms.join(', ')) : ''));
 }
 chatEl.addEventListener('click', e => {
@@ -1080,21 +1212,9 @@ chatEl.addEventListener('click', e => {
   const c = e.target.closest('[data-chat],[data-sugg],[data-pa]'); if (!c) return;
   if (c.dataset.chat === 'close') return closeChat();
   if (c.dataset.sugg) { handle(c.dataset.sugg); return; }
-  const p = chat.props[c.dataset.pid]; if (!p || p.state !== 'open') return;
-  const a = c.dataset.pa;
-  if (a === 'who') p.who = c.dataset.v.split(',');
-  if (a === 'dur') { p.dur = +c.dataset.v; p.durKnown = true; }
-  if (a === 'shift') p.start = Math.max(0, Math.min(1440 - p.dur, p.start + +c.dataset.v));
-  if (a === 'cancel') p.state = 'cancelled';
-  if (a === 'add') return applyProp(p, c);
-  renderChat();
+  propClick(c);
 });
-chatEl.addEventListener('change', e => {
-  const el = e.target, p = chat.props[el.dataset.pid]; if (!p || !el.dataset.pf) return;
-  if (el.dataset.pf === 'start' && el.value) { p.start = toMin(el.value); p.suggested = false; p.soft = false; }
-  if (el.dataset.pf === 'date' && el.value) p.date = el.value;
-  renderChat();
-});
+chatEl.addEventListener('change', e => propChange(e.target));
 $('#composer').addEventListener('submit', e => { e.preventDefault(); const v = $('#ask').value; $('#ask').value = ''; handle(v); });
 
 // =============== Paspaudimai ===============
@@ -1104,7 +1224,14 @@ $('#tabs').addEventListener('click', e => {
   view.tab = b.dataset.tab; render(); window.scrollTo({ top: 0 });
 });
 $('#main').addEventListener('click', e => {
-  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me]'); if (!t) return;
+  if (e.target.classList?.contains('area')) {
+    const r = e.target.getBoundingClientRect(), t0 = +e.target.dataset.t0, px = +e.target.dataset.px;
+    return addSheet(view.date, Math.round((t0 + (e.clientY - r.top) / px) / STEP) * STEP);
+  }
+  const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat]'); if (!t) return;
+  if (t.dataset.addat) return addSheet(view.date, +t.dataset.addat);
+  if (t.dataset.act === 'add') return addSheet(view.date);
+  if (t.dataset.act === 'mode') { ls.set('rutina.mode', ls.get('rutina.mode') === 'tl' ? null : 'tl'); return render(); }
   if (t.dataset.nav) { view.date = addDays(view.date, +t.dataset.nav); view.warn = null; render(); }
   else if (t.dataset.date) { view.date = t.dataset.date; render(); }
   else if (t.dataset.item) itemSheet(t.dataset.item);
