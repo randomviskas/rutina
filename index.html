@@ -171,7 +171,7 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 .btns button{flex:1 1 auto}
 
 /* ---------- Lapai (sheets) ---------- */
-.sheet{position:fixed;inset:0;z-index:50;background:rgba(10,5,30,.4);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.sheet{position:fixed;top:0;left:0;right:0;bottom:var(--kb,0px);z-index:50;background:rgba(10,5,30,.4);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .sheet.open{opacity:1;pointer-events:auto}
 .sheet-card{background:var(--card);width:100%;max-width:560px;border-radius:28px 28px 0 0;padding:10px 16px calc(18px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:10px;
   transform:translateY(100%);transition:transform .3s cubic-bezier(.2,.8,.2,1);max-height:92vh;overflow:auto}
@@ -191,7 +191,8 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 .sheet-card label{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:4px;font-weight:600}
 
 /* ---------- Asistentas ---------- */
-#chat .sheet-card{height:88vh;padding-bottom:calc(10px + env(safe-area-inset-bottom));gap:8px}
+body.kb .sheet-card{max-height:calc(var(--vvh,100vh) - 12px);border-radius:24px 24px 0 0;padding-bottom:10px}
+#chat .sheet-card{height:min(88vh, calc(var(--vvh,100vh) - 12px));padding-bottom:calc(10px + env(safe-area-inset-bottom));gap:8px}
 .chat-head{display:flex;align-items:center;gap:10px}
 .chat-head .bot{width:40px;height:40px;border-radius:14px;background:var(--grad);display:grid;place-items:center;font-size:22px}
 .chat-head b{font:800 18px var(--font);flex:1}
@@ -267,7 +268,35 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 .mb small{display:block;font-size:10px;color:var(--muted);margin-top:2px;text-align:right}
 .mrow.mine .mb{background:var(--grad);color:#fff;border-radius:20px;border-bottom-right-radius:6px}
 .mrow.mine .mb small{color:rgba(255,255,255,.8)}
-.mcomp{position:sticky;bottom:calc(92px + env(safe-area-inset-bottom));margin-top:12px;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:8px;border-radius:30px;box-shadow:var(--shadow)}
+body.kb nav#tabs{display:none}
+body.kb main{padding-bottom:90px}
+body.kb .mcomp{bottom:calc(var(--kb,0px) + 8px)}
+#upfx{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;flex-direction:column;background:radial-gradient(circle at 50% 45%,#3b0764 0%,#0e0c18 70%);color:#fff;text-align:center;padding:30px}
+#upfx .uh{font-size:110px;animation:grow 1.5s ease-in forwards;filter:drop-shadow(0 0 30px rgba(236,72,153,.8))}
+@keyframes grow{0%{transform:scale(.6)}20%{transform:scale(1)}30%{transform:scale(.85)}45%{transform:scale(1.25)}55%{transform:scale(1)}75%{transform:scale(1.6)}85%{transform:scale(1.35)}100%{transform:scale(2.2)}}
+#upfx .uh.boom{animation:boom .35s ease-out forwards}
+@keyframes boom{to{transform:scale(4);opacity:0;filter:blur(8px)}}
+#upfx .flash{position:absolute;inset:0;background:#fff;opacity:0;animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.9}100%{opacity:0}}
+#upfx .ucard{animation:rise .6s cubic-bezier(.2,.9,.3,1.3) both;max-width:380px}
+@keyframes rise{from{transform:translateY(40px) scale(.8);opacity:0}}
+#upfx small{opacity:.8;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-size:12px}
+#upfx h2{font:900 52px var(--font);margin:4px 0 14px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+#upfx ul{list-style:none;padding:0;margin:0 0 22px;text-align:left;display:flex;flex-direction:column;gap:10px}
+#upfx li{background:rgba(255,255,255,.1);border-radius:16px;padding:12px 14px;font-size:16px;font-weight:600;animation:rise .5s both}
+#upfx button{background:var(--grad);color:#fff;font:900 18px var(--font);padding:15px 36px;border-radius:999px;box-shadow:0 10px 30px rgba(236,72,153,.5)}
+.p{position:fixed;z-index:91;pointer-events:none;font-size:24px}
+#bell{position:relative;width:40px;height:40px;border-radius:50%;padding:0;font-size:19px;background:var(--card);box-shadow:var(--shadow2);flex:none}
+#bell .bdg{top:-3px;right:-3px}
+.feedwrap{display:flex;flex-direction:column;gap:8px;overflow-y:auto;-webkit-overflow-scrolling:touch;max-height:calc(var(--vvh,100vh) * .8)}
+.feed{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;background:var(--card2);border-radius:16px;font-size:15px;line-height:1.35}
+.feed small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.feed.link{cursor:pointer}
+.feed.link::after{content:"›";margin-left:auto;color:var(--muted);font-size:20px;align-self:center}
+.abtn{display:flex;align-items:center;justify-content:center;border-radius:14px;padding:10px 14px;text-decoration:none;color:inherit;flex:1 1 auto}
+.abtn.btn-grad{color:#fff}
+.msgs{padding-bottom:90px}
+.mcomp{position:fixed;left:12px;right:12px;max-width:560px;margin:0 auto;bottom:calc(100px + env(safe-area-inset-bottom));z-index:25;background:var(--glass);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);padding:8px;border-radius:30px;box-shadow:var(--shadow)}
 .cmts{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:10px}
 .cmts .lbl{font-size:12px;font-weight:700;color:var(--muted)}
 .cmt{display:flex;gap:8px;font-size:15px}
@@ -293,6 +322,7 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <header class="top">
   <div class="hello"><small id="hiDate"></small><h1 id="hi">Mūsų rutina</h1></div>
   <div id="sync"></div>
+  <button id="bell" aria-label="Kas nutiko">🔔<i id="bellN" class="bdg"></i></button>
   <div class="pair" id="pair"></div>
 </header>
 <main id="main"></main>
@@ -321,8 +351,15 @@ nav#tabs .fab{width:62px;height:62px;border-radius:50%;margin:-26px auto 0;backg
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '1.5';
-const WHATS_NEW = '💬 Žinutės, komentarai prie veiklų ir greitesnis sinchronizavimas';
+const APP_VERSION = '1.6';
+const WHATS_NEW = [
+  '🔔 Pranešimai telefone: žinutės, komentarai, plano pakeitimai ir priminimai prieš veiklą',
+  '🔔 Viršuje – visų pakeitimų juosta: kas, ką ir kada',
+  '📅 Planas pats sinchronizuojasi į Apple kalendorių',
+  '⌨️ Klaviatūra nebeuždengia ir niekas neslankioja',
+  '📸 Jūsų nuotraukos plane WUHA',
+  '❤️ Štai toks atnaujinimų šou',
+];
 
 // =============== Pagalbinės ===============
 const $ = s => document.querySelector(s);
@@ -391,8 +428,10 @@ function migrate() {
   state.v = 2;
 }
 migrate();
-let lastSaved = JSON.stringify(state);
-const save = () => { const s = JSON.stringify(state); if (s === lastSaved) return; lastSaved = s; ls.set(KEY, s); Sync.schedule(); };
+// „lastBy“ – kas paskutinis keitė (pranešimams); į palyginimą neįeina, kad telefonai nesusirašinėtų be galo
+const body = st => JSON.stringify({ ...st, lastBy: undefined });
+let lastSaved = body(state);
+const save = () => { const s = body(state); if (s === lastSaved) return; lastSaved = s; if (Me()) state.lastBy = Me(); ls.set(KEY, JSON.stringify(state)); Sync.schedule(); };
 const view = { tab:'day', date: today(), warn: null };
 const Me = () => ls.get('rutina.me') || '';
 
@@ -547,7 +586,7 @@ const Sync = {
         const prev = state;
         const merged = mergeStates(this.base ? JSON.parse(this.base) : null, state, r.data);
         this.setBase(JSON.stringify(r.data)); this.setVersion(r.version);
-        state = merged; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved);
+        state = merged; migrate(); lastSaved = body(state); ls.set(KEY, JSON.stringify(state));
         notifyNew(prev, state); softRender();
         this.busy = false;
         if (++this.tries < 4) return this.push();
@@ -560,7 +599,7 @@ const Sync = {
     this.setVersion(version); this.setDirty(false);
     if (data && data.people) {
       const prev = state;
-      state = data; migrate(); lastSaved = JSON.stringify(state); ls.set(KEY, lastSaved); this.setBase(JSON.stringify(data));
+      state = data; migrate(); lastSaved = body(state); ls.set(KEY, JSON.stringify(state)); this.setBase(JSON.stringify(data));
       notifyNew(prev, state); softRender();
     }
     this.status('ok');
@@ -582,7 +621,7 @@ const Sync = {
   link() { return location.origin + location.pathname + '#k=' + this.room; },
 };
 // Trijų versijų sujungimas: bazė (paskutinė bendra), mano ir kito telefono
-const LISTS = ['items', 'messages', 'comments', 'feedback'];
+const LISTS = ['items', 'messages', 'comments', 'feedback', 'log'];
 function mergeById(b = [], l = [], r = []) {
   const B = new Map((b || []).map(x => [x.id, JSON.stringify(x)])), L = new Map((l || []).map(x => [x.id, x])), R = new Map((r || []).map(x => [x.id, x]));
   const out = [];
@@ -672,7 +711,7 @@ async function checkUpdate(manual, auto) {
     if (m && m[1] !== APP_VERSION) {
       // atidarant programą – atsinaujina pati, jei niekas nerašoma
       const busy = sheetEl.classList.contains('open') || chatEl.classList.contains('open') || /INPUT|TEXTAREA/.test(document.activeElement?.tagName || '');
-      if (auto && !busy) { toast('✨ Atnaujinama į v' + m[1] + '…'); setTimeout(doUpdate, 700); return true; }
+      if (auto && !busy) { doUpdate(); return true; }
       showUpdate(m[1]); return true;
     }
     if (manual) toast('Turite naujausią versiją ✓ (v' + APP_VERSION + ')');
@@ -688,6 +727,10 @@ function showUpdate(v) {
   document.body.appendChild(d);
 }
 async function doUpdate() {
+  // pulsuojanti širdis, kol kraunasi nauja versija (po perkrovimo – sprogimas)
+  if (!$('#upfx')) { const d = document.createElement('div'); d.id = 'upfx'; d.innerHTML = '<div class="uh">❤️</div><small style="margin-top:30px">Kraunama nauja versija…</small>'; document.body.appendChild(d); }
+  ls.set('rutina.fx', '1');
+  await new Promise(r => setTimeout(r, 900));
   try {
     const regs = (await navigator.serviceWorker?.getRegistrations?.()) || [];
     await Promise.all(regs.map(r => r.update().catch(() => {})));
@@ -699,13 +742,43 @@ async function doUpdate() {
 function announceUpdate() {
   const prev = ls.get('rutina.appver');
   ls.set('rutina.appver', APP_VERSION);
-  if (prev && prev !== APP_VERSION) setTimeout(() => { toast('✨ Atnaujinta į v' + APP_VERSION + ': ' + WHATS_NEW); confetti(innerWidth / 2, 120); }, 600);
+  if (prev && prev !== APP_VERSION) updateShow();
+}
+function particles(n, set, cx = innerWidth / 2, cy = innerHeight * .42) {
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement('span'); p.className = 'p'; p.textContent = set[i % set.length];
+    p.style.left = cx + 'px'; p.style.top = cy + 'px'; p.style.fontSize = (14 + Math.random() * 26) + 'px';
+    document.body.appendChild(p);
+    const a = Math.random() * Math.PI * 2, v = 120 + Math.random() * Math.max(innerWidth, innerHeight) * .6;
+    p.animate([{ transform:'translate(-50%,-50%) scale(.3)', opacity:1 }, { transform:`translate(${Math.cos(a) * v}px,${Math.sin(a) * v + 120}px) rotate(${Math.random() * 720 - 360}deg) scale(1)`, opacity:0 }],
+      { duration: 1100 + Math.random() * 900, easing:'cubic-bezier(.1,.8,.3,1)' }).onfinish = () => p.remove();
+  }
+}
+// Atnaujinimo šou: širdis pulsuoja → sprogsta → kas naujo
+function updateShow() {
+  let d = $('#upfx');
+  if (!d) { d = document.createElement('div'); d.id = 'upfx'; document.body.appendChild(d); }
+  d.innerHTML = '<div class="uh">❤️</div>';
+  const news = Array.isArray(WHATS_NEW) ? WHATS_NEW : [WHATS_NEW];
+  setTimeout(() => {
+    d.querySelector('.uh').classList.add('boom');
+    d.insertAdjacentHTML('beforeend', '<div class="flash"></div>');
+    particles(70, ['❤️','💖','✨','💗','⭐','🎉','💜']);
+    confetti(innerWidth / 2, innerHeight * .42);
+    setTimeout(() => {
+      d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2><ul>${news.map((x, i) => `<li style="animation-delay:${.15 + i * .12}s">${esc(x)}</li>`).join('')}</ul><button>Super! 🎉</button></div>`;
+      d.querySelector('button').onclick = () => { particles(30, ['❤️','✨','💖']); d.style.transition = 'opacity .4s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 400); };
+    }, 380);
+  }, ls.get('rutina.fx') ? 900 : 1500);
+  ls.set('rutina.fx', null);
 }
 
 // =============== Kas prisijungęs ===============
 function markSeen() {
   const me = Me(); if (!me || !Sync.enabled()) return;
   state.seen = state.seen || {};
+  const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  if (tz && state.tz !== tz) { state.tz = tz; save(); } // priminimams serveryje reikia jūsų laiko juostos
   if (!state.seen[me] || Date.now() - state.seen[me] > 10 * 60000) { state.seen[me] = Date.now(); save(); }
 }
 const fmtAgo = ts => { const m = Math.round((Date.now() - ts) / 60000); return m < 1 ? 'ką tik' : m < 60 ? 'prieš ' + m + ' min' : m < 1440 ? 'prieš ' + Math.round(m / 60) + ' val' : 'prieš ' + Math.round(m / 1440) + ' d.'; };
@@ -748,13 +821,15 @@ function render() {
   else if (view.tab === 'week') renderWeek(main);
   else if (view.tab === 'msgs') renderMsgs(main);
   else renderSettings(main);
-  badge();
+  badge(); bell();
   save();
 }
+$('#bell').addEventListener('click', feedSheet);
 function badge() {
   const me = Me(), readAt = +(ls.get('rutina.readAt') || 0);
   const n = (state.messages || []).filter(m => m.by !== me && m.at > readAt).length;
   const b = $('#bdg'); if (b) { b.textContent = n > 9 ? '9+' : n || ''; b.style.display = n && view.tab !== 'msgs' ? 'grid' : 'none'; }
+  try { if (n && view.tab !== 'msgs') navigator.setAppBadge?.(n); else navigator.clearAppBadge?.(); } catch (e) {}
 }
 function renderMsgs(main) {
   const me = Me();
@@ -780,6 +855,75 @@ function sendMsg(text) {
   state.messages = state.messages || [];
   state.messages.push({ id: uid(), by: Me(), text: text.slice(0, 1000), at: Date.now() });
   render(); $('#msgin')?.focus();
+}
+// =============== 🔔 Pranešimai (Web Push) ===============
+const PUSH_FN = 'https://eawvlenuwwxdoabszzqm.supabase.co/functions/v1/rutina-push';
+const isStandalone = () => !!(navigator.standalone || matchMedia('(display-mode: standalone)').matches);
+const pushSupported = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+const b64uToU8 = s => { s = s.replace(/-/g, '+').replace(/_/g, '/'); const b = atob(s + '='.repeat((4 - s.length % 4) % 4)); return Uint8Array.from(b, c => c.charCodeAt(0)); };
+async function enablePush(silent) {
+  const say = m => { if (!silent) toast(m); };
+  try {
+    if (!Me()) return say('Pirma viršuje pasirinkite „Šis telefonas“');
+    if (!Sync.enabled()) return say('Pirma prisijunkite prie bendro plano');
+    if (!pushSupported()) return say(isStandalone() ? 'Šis telefonas pranešimų nepalaiko' : 'Atidarykite programą per ikoną pradžios ekrane ir bandykite dar kartą');
+    const perm = silent ? Notification.permission : await Notification.requestPermission();
+    if (perm !== 'granted') return say('Pranešimai neleisti. iPhone: Nustatymai → Pranešimai → Rutina → Leisti');
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      const { key } = await (await fetch(PUSH_FN + '?vapid=1')).json();
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uToU8(key) });
+    }
+    await Sync.rpc('rutina_sub', { p_room: Sync.room, p_person: Me(), p_sub: sub.toJSON() });
+    ls.set('rutina.push', '1');
+    if (!silent) { render(); toast('🔔 Pranešimai įjungti!'); }
+  } catch (e) { say('Nepavyko įjungti: ' + String(e.message || e).slice(0, 90)); }
+}
+async function testPush() {
+  try { await Sync.rpc('rutina_test_push', { p_room: Sync.room, p_person: Me() }); toast('Išsiųsta – pranešimas turėtų ateiti per kelias sekundes 🔔'); }
+  catch (e) { toast('Nepavyko: ' + String(e.message || e).slice(0, 90)); }
+}
+function pushCard() {
+  const on = ls.get('rutina.push') && 'Notification' in window && Notification.permission === 'granted';
+  return `<h2>🔔 Pranešimai</h2><div class="card">
+    <div class="hint" style="margin-top:0">Gausite: 💬 žinutes ir komentarus, 🗓️ kai ${esc(otherName())} pakeičia planą, ⏰ priminimą 15 min prieš veiklą.</div>
+    ${on ? `<div class="row" style="margin:0;align-items:center"><span style="flex:1;font-weight:700">✅ Įjungta šiame telefone</span><button class="btn-soft" data-set="testpush">Išbandyti</button></div>`
+         : `<div class="btns"><button class="btn-grad" data-set="push">🔔 Įjungti pranešimus</button></div>
+            ${!isStandalone() ? '<div class="hint" style="margin:8px 0 0">⚠️ Veikia tik atidarius programą per ikoną pradžios ekrane (ne Safari).</div>' : ''}`}
+  </div>`;
+}
+// 📅 Apple kalendoriaus prenumerata – planas pats atsiranda ir atsinaujina kalendoriuje
+function calCard() {
+  if (!Sync.enabled()) return '';
+  const base = 'webcal://eawvlenuwwxdoabszzqm.supabase.co/functions/v1/rutina-push?ics=' + encodeURIComponent(Sync.room);
+  return `<h2>📅 Apple kalendorius</h2><div class="card">
+    <div class="hint" style="margin-top:0">Planas pats atsiras iPhone kalendoriuje ir atsinaujins. Paspauskite vieną kartą ir patvirtinkite <b>Subscribe</b>.</div>
+    <div class="btns"><a class="btn-grad abtn" href="${base}&p=${Me() || 'a'}">📅 Tik mano veiklos</a><a class="btn-soft abtn" href="${base}">👫 Visas planas</a></div>
+    <div class="hint" style="margin:8px 0 0">Dažniau atnaujinti: iPhone Nustatymai → Kalendorius → Paskyros → Prenumeruojami kalendoriai → Gauti kas 15 min.</div></div>`;
+}
+// =============== 🔔 Įvykių juosta: kas, ką ir kada pakeitė ===============
+const whenShort = (d, m) => `${dayName(d) === 'Šiandien' || dayName(d) === 'Rytoj' ? dayName(d).toLowerCase() : DAYS[dayIdx(d)]} ${toHM(m)}`;
+function logAct(text, itemId) {
+  state.log = (state.log || []).concat({ id: uid(), by: Me() || '?', at: Date.now(), text, itemId: itemId || null }).slice(-150);
+}
+function feedUnread() { const me = Me(), r = +(ls.get('rutina.logRead') || 0); return (state.log || []).filter(x => x.by !== me && x.at > r).length; }
+function bell() {
+  const n = feedUnread(), b = $('#bellN');
+  if (b) { b.textContent = n > 9 ? '9+' : n || ''; b.style.display = n ? 'grid' : 'none'; }
+}
+function feedSheet() {
+  const L = (state.log || []).slice().sort((a, b) => b.at - a.at);
+  let h = '<h3 style="margin:0">🔔 Kas nutiko</h3>', last = '';
+  if (!L.length) h += '<div class="empty" style="padding:20px 0">Kol kas tylu. Čia matysite visus pakeitimus: kas ką pridėjo, perkėlė, atliko ar pakomentavo.</div>';
+  L.forEach(x => {
+    const d = ymd(new Date(x.at));
+    if (d !== last) { h += `<div class="mday" style="align-self:flex-start">${dayName(d)}, ${fmtDate(d)}</div>`; last = d; }
+    const p = person(x.by);
+    h += `<div class="feed ${x.itemId ? 'link' : ''}" ${x.itemId ? `data-feeditem="${x.itemId}"` : ''}>${p ? av(x.by, 'sm') : '🤖'}<div><b>${esc(p?.name || '')}</b> ${esc(x.text)}<small>${fmtAgo(x.at)}</small></div></div>`;
+  });
+  openSheet(`<div class="feedwrap">${h}</div>`);
+  ls.set('rutina.logRead', String(Date.now())); bell();
 }
 function saveFeedback(text) {
   state.feedback = state.feedback || [];
@@ -988,6 +1132,7 @@ function renderSettings(main) {
   let h = '<div class="set">';
   h += `<h2>📱 Šis telefonas</h2><div class="card"><div class="seg">${state.people.map(p => `<button data-me="${p.id}" class="${me === p.id ? 'on' : ''}">${av(p.id, 'sm')} ${esc(p.name)}</button>`).join('')}</div>
     <div class="hint" style="margin:8px 0 0">Asistentas žinos, kas rašo („turiu susitikimą“ – įtrauks tik jums).</div></div>`;
+  h += pushCard() + calCard();
   h += '<h2>👫 Bendras planas</h2><div class="card">';
   if (!CONFIG.url) h += '<div class="hint" style="margin:0">Sinchronizavimas dar neįjungtas – kol kas planas saugomas tik šiame įrenginyje.</div>';
   else if (Sync.room) h += `<div style="font:800 17px var(--font);margin-bottom:8px">Plano kodas: <span style="background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent">${esc(Sync.room.slice(0, 4).toUpperCase())}</span></div>` +
@@ -1074,6 +1219,8 @@ function afterChange(dates, prefix) {
 sheetEl.addEventListener('change', e => propChange(e.target));
 sheetEl.addEventListener('click', e => {
   if (e.target === sheetEl) return closeSheet();
+  const fi = e.target.closest('[data-feeditem]');
+  if (fi) { if (state.items.some(x => x.id === fi.dataset.feeditem)) return itemSheet(fi.dataset.feeditem); return toast('Ši veikla jau pašalinta'); }
   const pk = e.target.closest('[data-pick]'); if (pk) return pickAdd(pk.dataset.pick);
   const pa = e.target.closest('[data-pa]'); if (pa) return propClick(pa);
   const b = e.target.closest('[data-sheet]'); if (!b) return;
@@ -1085,27 +1232,33 @@ sheetEl.addEventListener('click', e => {
     if (!Me()) return toast('Pirma „Daugiau“ → „Šis telefonas“ pasirinkite savo vardą');
     state.comments = state.comments || [];
     state.comments.push({ id: uid(), itemId: it.id, by: Me(), text: tx.slice(0, 500), at: Date.now() });
+    logAct(`pakomentavo ${itemMeta(it).emoji} ${itemMeta(it).name}: „${tx.slice(0, 80)}“`, it.id);
     save(); const box = sheetEl.querySelector('.cmts'); if (box) box.outerHTML = commentsBlock(G); render();
     return;
   }
   if (a === 'done') {
     const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
+    logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${itemMeta(it).emoji} ${itemMeta(it).name}`, it.id);
     const r = b.getBoundingClientRect(); if (st === 'done') confetti(r.left + r.width / 2, r.top);
     closeSheet(); render(); if (st === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
   }
   if (a === 'move') {
-    const m = itemMeta(it); const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean); closeSheet(); render();
+    const m = itemMeta(it); const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean);
+    if (ok) logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(it.date, it.start)}`, it.id);
+    closeSheet(); render();
     toast(ok ? `${m.emoji} Perkelta → ${dayName(it.date)} ${toHM(it.start)}` : 'Per artimiausią savaitę laisvo laiko nerasta 😕');
   }
   if (a === 'retime') {
     const d = $('#f-date').value, s = toMin($('#f-start').value), du = Math.max(15, +$('#f-dur').value || it.dur);
     if (!d) return;
     const old = it.date; G.forEach(x => Object.assign(x, { date: d, start: s, dur: du, pinned: true }));
+    logAct(`pakeitė laiką: ${itemMeta(it).emoji} ${itemMeta(it).name} → ${whenShort(d, s)}`, it.id);
     closeSheet(); afterChange([d, old], '🕐 Laikas pakeistas');
   }
-  if (a === 'del') { state.items = state.items.filter(x => !G.includes(x)); closeSheet(); render(); toast('Pašalinta'); }
+  if (a === 'del') { logAct(`pašalino ${itemMeta(it).emoji} ${itemMeta(it).name} (${whenShort(it.date, it.start)})`); state.items = state.items.filter(x => !G.includes(x)); closeSheet(); render(); toast('Pašalinta'); }
   if (a === 'save-work' || a === 'reset-work') {
     state.people.forEach(p => { const k = p.id + '|' + view.date; if (a === 'reset-work') delete state.workOverride[k]; else state.workOverride[k] = $('#f-work-' + p.id).value.trim(); });
+    logAct(`pakeitė darbo laiką (${dayName(view.date).toLowerCase()})`);
     closeSheet(); afterChange([view.date], '💻 Darbo laikas atnaujintas');
   }
 });
@@ -1256,13 +1409,14 @@ function skipChat(act, dI, tm, who, t) {
       else if (rescheduleOtherDay(it, dI.target)) res.push(`${act.emoji} ${esc(act.name)}${who} → <b>${dayName(it.date)} ${toHM(it.start)}</b>`);
       else res.push(`${act.emoji} ${esc(act.name)}${who} – ${dayName(dI.target).toLowerCase()} netelpa 😕`);
     }
+    its.forEach(it => logAct(`perkėlė ${act.emoji} ${act.name} → ${whenShort(it.date, it.start)}`, it.id));
     const ms = afterChange([dI.target]);
     const okN = res.filter(x => x.includes('→')).length;
     return botSay((okN ? 'Perkėliau ✅<br>' : 'Nepavyko perkelti – tą dieną nėra laisvo laiko. Parašykite su valanda, pvz. „perkelk gym į rytoj 7:00“.<br>') + res.join('<br>') + (ms.length ? '<br><span class="note">Pastumta: ' + esc(ms.join(', ')) + '</span>' : ''));
   }
   const its = state.items.filter(x => x.actId === act.id && x.date === dI.date && x.status === 'planned' && (!pids || overlaps(x.who, pids)));
   if (!its.length) return botSay(`${dayName(dI.date)} ${act.emoji} ${esc(act.name)} ir taip nesuplanuotas 👍`);
-  const res = its.map(it => rescheduleOtherDay(it) ? `${act.emoji} ${esc(act.name)} → <b>${dayName(it.date)} ${toHM(it.start)}</b>` : `${act.emoji} ${esc(act.name)} – šią savaitę vietos neradau, pašalinau`);
+  const res = its.map(it => rescheduleOtherDay(it) && (logAct(`perkėlė ${act.emoji} ${act.name} → ${whenShort(it.date, it.start)}`, it.id), true) ?`${act.emoji} ${esc(act.name)} → <b>${dayName(it.date)} ${toHM(it.start)}</b>` : `${act.emoji} ${esc(act.name)} – šią savaitę vietos neradau, pašalinau`);
   its.forEach(it => { if (it.date === dI.date) state.items = state.items.filter(x => x !== it); });
   render();
   botSay('Jokių problemų 😌 Perkėliau:<br>' + res.join('<br>'));
@@ -1270,7 +1424,7 @@ function skipChat(act, dI, tm, who, t) {
 function doneChat(act, dI, who) {
   const it = state.items.find(x => x.actId === act.id && x.date === dI.date && x.status === 'planned' && (!who || overlaps(x.who, who)));
   if (!it) return botSay(`${dayName(dI.date)} nerandu suplanuoto ${act.emoji} ${esc(act.name)}. Įtraukti kaip papildomą? Parašykite pvz. „${esc(act.name.toLowerCase())} šiandien 10:00“.`);
-  it.status = 'done'; render(); confetti(innerWidth / 2, innerHeight * .4);
+  it.status = 'done'; logAct(`pažymėjo ✓ ${act.emoji} ${act.name}`, it.id); render(); confetti(innerWidth / 2, innerHeight * .4);
   botSay(`Šaunuoliai! 🎉 ${act.emoji} <b>${esc(act.name)}</b> pažymėtas ✓`);
 }
 function workChat(t, dI, tm, who) {
@@ -1278,6 +1432,7 @@ function workChat(t, dI, tm, who) {
   const val = /nedirb/.test(t) ? '' : (tm.start != null ? toHM(tm.start) + '-' + toHM(Math.min(1440, tm.end || tm.start + (tm.dur || 240))) : null);
   if (val === null) return botSay('Nurodykite darbo laiką, pvz. „rytoj dirbu 10-15“ arba „penktadienį nedirbu“.');
   pids.forEach(p => state.workOverride[p + '|' + dI.date] = val);
+  logAct(`pakeitė darbo laiką (${dayName(dI.date).toLowerCase()}: ${val || 'nedirba'})`);
   const ms = afterChange([dI.date]);
   botSay(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(dI.date)}: ${val ? 'dirba ' + val.replace('-', '–') : 'nedirba 🎉'}${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
 }
@@ -1361,6 +1516,7 @@ function applyProp(p, btn) {
   else state.items.push(it = { id: uid(), kind:'event', title: p.title, emoji: p.emoji, who: [...p.who], date: p.date, start: p.start, dur: p.dur, status:'planned' });
   const ms = fixDay(p.date);
   p.state = 'added'; p.moved = ms.join(', ');
+  logAct(`${p.kind === 'act' && p.moveId ? 'perkėlė' : 'pridėjo'} ${p.emoji} ${p.title} → ${whenShort(p.date, p.start)}`, it?.id);
   view.date = p.date;
   const r = btn.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top);
   if (p.origin === 'sheet') { closeSheet(); view.tab = 'day'; render(); toast('✓ Pridėta: ' + p.emoji + ' ' + p.title + (ms.length ? ' · pastumta: ' + ms.join(', ') : '')); return; }
@@ -1401,12 +1557,14 @@ $('#main').addEventListener('click', e => {
   }
   else if (t.dataset.act === 'ai') openChat();
   else if (t.dataset.act === 'work') workSheet();
-  else if (t.dataset.act === 'gen') { generateWeek(weekStart(view.date)); render(); toast('🔀 Savaitė perdėliota'); }
+  else if (t.dataset.act === 'gen') { generateWeek(weekStart(view.date)); logAct('perdėliojo savaitę 🔀'); render(); toast('🔀 Savaitė perdėliota'); }
   else if (t.dataset.act === 'ics') exportIcs(weekStart(view.date));
   else if (t.dataset.set === 'create') Sync.join(newRoomCode(), true);
   else if (t.dataset.set === 'join') { const r = roomFromText($('#joinlink').value); if (!r) toast('Nuoroda neatpažinta'); else if (confirm('Prisijungti prie bendro plano? Šio telefono planas bus pakeistas bendru.')) Sync.join(r, false); }
   else if (t.dataset.set === 'share') { const link = Sync.link(); if (navigator.share) navigator.share({ title:'Mūsų rutina', text:'Mūsų bendras planas 👫', url: link }).catch(() => {}); else navigator.clipboard?.writeText(link).then(() => toast('Nuoroda nukopijuota'), () => $('#roomlink').select()); }
   else if (t.dataset.set === 'update') checkUpdate(true);
+  else if (t.dataset.set === 'push') enablePush(false);
+  else if (t.dataset.set === 'testpush') testPush();
   else if (t.dataset.set === 'fb') { const v = $('#fbtext').value.trim(); if (!v) return toast('Parašykite, kas negerai ar ką pridėti'); saveFeedback(v); render(); toast('📝 Užrašyta – ačiū!'); }
   else if (t.dataset.set === 'nophoto') { delete state.people[+t.dataset.i].photo; render(); }
   else if (t.dataset.set === 'leave') { if (confirm('Atjungti šį telefoną nuo bendro plano?')) { Sync.leave(); render(); } }
@@ -1442,6 +1600,19 @@ $('#main').addEventListener('change', e => {
   markSeen();
   render();
   announceUpdate();
+  // Klaviatūra (iPhone): žinome tikrą matomą aukštį ir paslepiame apatinę juostą
+  const vv = window.visualViewport;
+  const vvUpdate = () => {
+    if (!vv) return;
+    const kb = Math.max(0, innerHeight - vv.height - vv.offsetTop);
+    document.documentElement.style.setProperty('--kb', kb + 'px');
+    document.documentElement.style.setProperty('--vvh', vv.height + 'px');
+    document.body.classList.toggle('kb', kb > 80);
+  };
+  vv?.addEventListener('resize', vvUpdate); vv?.addEventListener('scroll', vvUpdate); vvUpdate();
+  document.addEventListener('focusin', e => { if (/INPUT|TEXTAREA/.test(e.target.tagName) && !/date|time|color|file|checkbox/.test(e.target.type)) document.body.classList.add('kb'); });
+  document.addEventListener('focusout', () => setTimeout(() => { if (!/INPUT|TEXTAREA/.test(document.activeElement?.tagName || '')) { document.body.classList.remove('kb'); vvUpdate(); } }, 120));
+  if (ls.get('rutina.push') && 'Notification' in window && Notification.permission === 'granted') setTimeout(() => enablePush(true), 4000);
   if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello();
   setTimeout(() => checkUpdate(false, true), 1500);
   let tick = 0;
