@@ -687,6 +687,12 @@ body.vd #toast.show{transform:translateX(-50%)}
 body.lite #vfab{background:var(--grad);box-shadow:0 0 0 4px var(--bg)}
 body.lite #vdock{box-shadow:0 4px 18px rgba(0,0,0,.14)}
 @media (prefers-reduced-motion: reduce){.vd-stop{animation:none}.vd-bars i{transition:none}}
+/* ---------- v2.18: vykstanti veikla – aiškiai „dabar“, ne praėjusi ---------- */
+.ag-card.now{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--c);margin:5px 4px 5px 0}
+.nowtag{display:inline-block;font-style:normal;font-weight:800;font-size:11px;background:rgba(255,255,255,.26);border-radius:999px;padding:1px 8px;margin-right:6px}
+.nowtag::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#fff;margin-right:5px;vertical-align:1px;animation:nowdot 1.6s ease-in-out infinite}
+@keyframes nowdot{50%{opacity:.25}}
+body.lite .nowtag::before{animation:none}
 /* ---------- 🏄 v2.16: tikras 3D surfas „gyvoje“ kortelėje ---------- */
 .s3d{display:none;flex:0 0 100%;height:118px;border-radius:12px;overflow:hidden;position:relative;background:#8fd3f4}
 .s3d.on{display:block;animation:gin .4s ease both}
@@ -771,8 +777,12 @@ body.lite #greet .gh{animation:none}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.17';
+const APP_VERSION = '2.18';
 const WHATS_NEW = [
+  '🏄 3D surfas matomas bet kurios dienos surfo kortelėje, ne tik artimiausioje veikloje',
+  '⏱️ Prasidėjusi veikla nebeatrodo praėjusi: žymė „vyksta · liko 25 min“, o „dabar“ linija – virš jos',
+];
+const WHATS_NEW_217 = [
   '💌 Mildą pasisveikinimas pasitinka kiekvieną kartą atidarius programą (ir grįžus po 10 min pertraukos)',
 ];
 const WHATS_NEW_216 = [
@@ -1987,18 +1997,29 @@ function agenda(d) {
   });
   // mini scenos – visose kortelėse, bet juda tik viena: tai, kas vyksta dabar, arba artimiausia šiandien
   const nowM = nowMin(), focus = d !== today() ? null : Object.values(groups).map(g => g[0]).filter(it => it.status === 'planned' && it.start + it.dur > nowM).sort((a, b) => a.start - b.start)[0];
+  // 🏄 3D scena – vienoje žiūrimos dienos surfo kortelėje: šiandien – dar nesibaigusioje, kitomis dienomis – pirmoje
+  const s3dAt = (() => {
+    if (!s3dOk()) return -1;
+    const c = Object.values(groups).map(g => g[0]).filter(it => sceneKey(it) === 'surf' && it.status !== 'done' && it.status !== 'skipped').sort((a, b) => a.start - b.start);
+    const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+    return ((d === today() && c.find(it => it.start + it.dur > nowM)) || c[0])?.start ?? -1;
+  })();
+  // v2.18: jau prasidėjusi, bet nesibaigusi veikla – „vyksta dabar“ (žymė + rėmelis), o „dabar“ linija keliama VIRŠ jos
+  const isNow = (a, b) => d === today() && a <= nowM && nowM < b;
+  let lineT = nowM - 0.2;
   Object.values(groups).forEach(g => {
-    const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id))), sc = scene(it);
+    const it = g[0], m = itemMeta(it), who =state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id))), sc = scene(it);
+    const on = it.status === 'planned' && isNow(it.start, it.start + it.dur); if (on) lineT = Math.min(lineT, it.start - 0.2);
     rows.push({ t: it.start, html: `<div class="ag-row sw-row" data-a="${it.start}" data-b="${it.start + it.dur}"><div class="ag-t">${toHM(it.start)}</div>
       <div class="ag-swipe"><span class="l">${it.status === 'done' ? '↩︎ Neatlikta' : '✓ Atlikta'}</span><span class="r">Perkelti ↪︎</span></div>
-      <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}${sc ? ' hasscn' : ''}${focus && it.start === focus.start ? ' live' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
-      <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}${it.actId === sid && Surf.data?.[d] ? ' · ' + Surf.stars(Surf.score(d, it.start, it.dur)) : ''}${it.series ? ' · 🔁' : ''}</small></span>${sc}${avs(who)}${focus && it.start === focus.start && sceneKey(it) === 'surf' && s3dOk() ? `<div class="s3d" data-who="${who.join(',')}"></div>` : ''}</div></div>` });
+      <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}${sc ? ' hasscn' : ''}${focus && it.start === focus.start ? ' live' : ''}${on ? ' now' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
+      <span class="tx"><b>${esc(m.name)}</b><small>${on ? `<i class="nowtag">vyksta · liko ${(r => r >= 60 ? Math.floor(r / 60) + ' val' + (r % 60 ? ' ' + r % 60 + ' min' : '') : r + ' min')(it.start + it.dur - nowM)}</i>` : ''}${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}${it.actId === sid && Surf.data?.[d] ? ' · ' + Surf.stars(Surf.score(d, it.start, it.dur)) : ''}${it.series ? ' · 🔁' : ''}</small></span>${sc}${avs(who)}${it.start === s3dAt && sceneKey(it) === 'surf' ? `<div class="s3d" data-who="${who.join(',')}"></div>` : ''}</div></div>` });
   });
   const wk = {};
   state.people.filter(p => !F || p.id === F).forEach(p => workRanges(p.id, d).forEach(([a, b]) => { (wk[a + '-' + b] = wk[a + '-' + b] || { a, b, who: [] }).who.push(p.id); }));
   Object.values(wk).forEach(w => rows.push({ t: w.a, html: `<div class="ag-row" data-a="${w.a}" data-b="${w.b}"><div class="ag-t">${toHM(w.a)}</div>
     <div class="ag-card work" data-act="work"><span>💻 Darbas ${toHM(w.a)}–${toHM(w.b)}</span>${avs(w.who)}</div></div>` }));
-  if (d === today()) { const n = nowMin(); rows.push({ t: n - 0.2, html: `<div class="ag-now">dabar ${toHM(n)}</div>` }); }
+  if (d === today()) { const n = nowMin(); rows.push({ t: lineT, html: `<div class="ag-now">dabar ${toHM(n)}</div>` }); }
   rows.sort((x, y) => x.t - y.t);
   const PP = state.people.filter(p => !F || p.id === F);
   const wake = PP.map(p => `${esc(p.name)} ${p.wake}`).join(' · '), sleep = PP.map(p => `${esc(p.name)} ${p.sleep}`).join(' · ');
