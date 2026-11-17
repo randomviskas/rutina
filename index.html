@@ -628,6 +628,9 @@ body.lite .ag-card.hasscn .e{display:inline}
 .ag-card.gap b{color:var(--text);font-weight:600}
 .add-big{border:1.5px dashed var(--line);color:var(--muted);font-weight:700;font-size:15px;padding:13px}
 .item>div{box-shadow:none}
+/* v2.14: patogesnis filtras pirštui; pranešimas neuždengia atidaryto lango */
+.seg.mini.fseg button{min-height:44px;font-size:14px}
+body:has(.sheet.open) #toast{bottom:auto;top:calc(env(safe-area-inset-top) + 14px)}
 /* ➕ Įterpimo kortelė (atsiranda tik palaikius tarpą tarp veiklų) */
 /* Kaip tikroje programoje: palaikius nerodomas teksto žymėjimas / Copy / „Save image“ – tik laukeliuose galima žymėti ir įklijuoti */
 html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -722,8 +725,13 @@ body.lite #vdock{box-shadow:0 4px 18px rgba(0,0,0,.14)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.13';
+const APP_VERSION = '2.14';
 const WHATS_NEW = [
+  '📅 Viršuje matosi, kurią dieną žiūrite: „Šiandien“, „Rytoj“ ar „Ketvirtadienis“',
+  '↩︎ „Atšaukti“ atsiranda ir pažymėjus ✓ Atlikta iš veiklos lango',
+  '🧹 Dienoje liko „＋ Pridėti“ ir „🎲 Ką veiksim?“: 💗 – Žinutėse, Stulpeliai – Daugiau → Išvaizda',
+];
+const WHATS_NEW_213 = [
   '➕ Įterpkite veiklą tarp kitų: palaikykite pirštą tarpe tarp dviejų veiklų – jis išsiplės su pasiūlymais',
 ];
 const WHATS_NEW_212 = [
@@ -1328,8 +1336,14 @@ function header() {
   const h = new Date().getHours();
   const g = h < 5 ? 'Labos nakties 🌙' : h < 11 ? 'Labas rytas ☀️' : h < 17 ? 'Laba diena 🌤️' : h < 22 ? 'Labas vakaras 🌆' : 'Labos nakties 🌙';
   const me = Me();
-  $('#hiDate').textContent = DAYS_LONG[dayIdx(today())] + ', ' + fmtDate(today()) + ' · ' + g;
-  $('#hi').textContent = me ? 'Labas, ' + person(me).name + '!' : state.people.map(p => p.name).join(' & ');
+  // v2.14: Dienos skirtuke antraštė rodo ŽIŪRIMĄ dieną (Šiandien / Rytoj / Ketvirtadienis), kituose – pasisveikinimą
+  if (view.tab === 'day') {
+    $('#hiDate').textContent = (view.date === today() || view.date === addDays(today(), 1) ? DAYS_LONG[dayIdx(view.date)] + ', ' : '') + fmtDate(view.date) + ' · ' + g;
+    $('#hi').textContent = dayName(view.date);
+  } else {
+    $('#hiDate').textContent = DAYS_LONG[dayIdx(today())] + ', ' + fmtDate(today()) + ' · ' + g;
+    $('#hi').textContent = me ? 'Labas, ' + person(me).name + '!' : state.people.map(p => p.name).join(' & ');
+  }
   $('#pair').innerHTML = state.people.map(p => av(p.id)).join('');
 }
 function render() {
@@ -1498,7 +1512,7 @@ const HELP = [
   { e:'🔔', t:'Kas yra varpelis viršuje?', k:['varpel','kas nutiko','istorij','pakeitim'],
     a:'<b>🔔</b> viršuje – visų pakeitimų juosta: kas ką pridėjo, perkėlė, atliko, pakomentavo. Raudonas skaičius – kiek naujų nuo kito žmogaus. Paspaudus įrašą atsidaro ta veikla.' },
   { e:'🕒', t:'Kuo skiriasi sąrašas ir laiko juosta?', k:['laiko juost','sarasas','stulpel','vaizd'],
-    a:'<b>Diena</b> skirtuke mygtukas <b>🕒 Laiko juosta / 📋 Sąrašas</b>. Sąrašas – paprasta diena (laisvi bendri langai matosi Savaitės žemėlapyje). Laiko juosta – du stulpeliai (Paulius / Milda); paspaudus tuščią vietą pridedate veiklą tuo laiku.' },
+    a:'<b>Daugiau → 🎨 Išvaizda → 📋 Diena sąrašu / 🕒 Stulpeliais</b>. Sąrašas – paprasta diena (laisvi bendri langai matosi Savaitės žemėlapyje). Laiko juosta – du stulpeliai (Paulius / Milda); paspaudus tuščią vietą pridedate veiklą tuo laiku.' },
   { e:'📸', t:'Kaip pakeisti nuotrauką?', k:['nuotrauk','avatar','foto'],
     a:'<b>⚙️ Daugiau → 😴 Miegas</b> skiltyje prie vardo – <b>📷 Keisti nuotrauką</b>. Ji automatiškai apkarpoma ir atsiranda abiejuose telefonuose.' },
   { e:'✨', t:'Ką moka asistentas?', k:['ka moki','asistent','padek','pagalb','help','ka gali'],
@@ -1516,7 +1530,7 @@ const HELP = [
   { e:'🔥', t:'Kas yra serijos, pasiekimai ir apžvalga?', k:['serij','streak','pasiekim','zenklel','apzvalg','mvp','statistik'],
     a:'<b>🔥 Serija</b> – kiek dienų iš eilės pažymėjote ✓ bent vieną bendrą veiklą. <b>🏅 Pasiekimai</b> – už 10× kartu, 5 surf, 7 d. seriją ir t.t. <b>📊 Savaitės apžvalga</b> (Savaitė → paspauskite procentus) – kiek atlikta, kiek laiko kartu, MVP, geriausia diena; galima pasidalinti. Svarbu: pažymėkite ✓ (brūkštelėkite veiklą →).' },
   { e:'❤️', t:'Kaip reaguoti į žinutę ir siųsti „Pagalvojau apie tave“?', k:['reakc','reaguo','sirdut','pagalvojau','ping','mate','perskait'],
-    a:'<b>Du kartus palieskite</b> (arba palaikykite) žinutę – pasirinkite ❤️😂👍😮😢🔥. Po jūsų žinute rodoma <b>„Matė ✓✓“</b>, kai kitas perskaitė. <b>💗</b> mygtukas (Žinutėse ir Dienoje) nusiunčia „Pagalvojau apie tave“ – kitam ekrane pasipila širdelės ir ateina pranešimas.' },
+    a:'<b>Du kartus palieskite</b> (arba palaikykite) žinutę – pasirinkite ❤️😂👍😮😢🔥. Po jūsų žinute rodoma <b>„Matė ✓✓“</b>, kai kitas perskaitė. <b>💗</b> mygtukas Žinutėse nusiunčia „Pagalvojau apie tave“ – kitam ekrane pasipila širdelės ir ateina pranešimas.' },
   { e:'↩︎', t:'Kaip atšaukti, kartoti, išsaugoti kopiją?', k:['atsauk','undo','kartot','pasikarto','kas savait','kopij','backup','atkurt'],
     a:'• <b>Atšaukti</b>: po veiksmo apačioje 5 s rodomas mygtukas <b>Atšaukti</b>.<br>• <b>Kartoti kas savaitę</b>: pridedant „📌 Kita veikla“ pasirinkite 🔁 4/8/12 savaičių. Ištrinti visą seriją – atidarius veiklą.<br>• <b>Kopija</b>: <b>⚙️ Daugiau → Kita → 💾 Atsisiųsti kopiją</b>, atkurti – 📂.' },
   { e:'✨', t:'Kaip iš naujo pritaikyti planą (vedlys)?', k:['vedly','pritaikyt','is naujo','nustatyt viska','pradzi'],
@@ -1596,7 +1610,7 @@ function renderDay(main) {
   h += askDone();
   h += surfStrip(view.date);
   const tlMode = ls.get('rutina.mode') === 'tl';
-  h += `<div class="chiprow"><button data-act="add">＋ Pridėti</button>${LITE() ? '' : '<button data-act="roulette">🎲 Ką veiksim?</button><button data-act="ping">💗 Pagalvojau</button>'}<button data-act="mode">${tlMode ? '📋 Sąrašas' : '🕒 Stulpeliai'}</button></div>`;
+  h += `<div class="chiprow"><button data-act="add">＋ Pridėti</button>${LITE() ? '' : '<button data-act="roulette">🎲 Ką veiksim?</button>'}</div>`;
   if (!tlMode) { main.innerHTML = h + agenda(view.date); return; }
   h += `<div class="cols"><div></div>${state.people.map(p => `<div>${av(p.id, 'sm')} ${esc(p.name)}</div>`).join('')}</div>`;
 
@@ -1894,6 +1908,7 @@ function renderSettings(main) {
   h += `<button class="guide-btn" data-set="guide"><span>📖</span><b>Kaip naudotis programa</b><small>Visos funkcijos paprastai – paspauskite</small></button>`;
   h += `<button class="guide-btn alt" data-act="wizard"><span>✨</span><b>Pritaikyti planą (vedlys)</b><small>Miegas, darbas, veiklos, surf – per 1 minutę</small></button>`;
   h += `<h2>🎨 Išvaizda</h2><div class="card lite-card"><div class="seg"><button data-set="lite0" class="${!LITE() ? 'on' : ''}">✨ Pilna</button><button data-set="lite1" class="${LITE() ? 'on' : ''}">🍃 Lite</button></div>
+    <div class="seg" style="margin-top:8px"><button data-set="mode0" class="${ls.get('rutina.mode') !== 'tl' ? 'on' : ''}">📋 Diena sąrašu</button><button data-set="mode1" class="${ls.get('rutina.mode') === 'tl' ? 'on' : ''}">🕒 Stulpeliais</button></div>
     <div class="hint" style="margin:8px 0 0">Lite – rami sąsaja be animacijų ir garsų. Tik šiam telefonui.</div></div>`;
   h += aiCard();
   h += `<h2>📱 Šis telefonas ${hq(8)}</h2><div class="card"><div class="seg">${state.people.map(p => `<button data-me="${p.id}" class="${me === p.id ? 'on' : ''}">${av(p.id, 'sm')} ${esc(p.name)}</button>`).join('')}</div>
@@ -2041,10 +2056,11 @@ sheetEl.addEventListener('click', e => {
     return;
   }
   if (a === 'done') {
+    snapUndo();
     const st = it.status === 'done' ? 'planned' : 'done'; G.forEach(x => x.status = st);
     logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${itemMeta(it).emoji} ${itemMeta(it).name}`, it.id);
     const r = b.getBoundingClientRect(); haptic(); if (st === 'done') { confetti(r.left + r.width / 2, r.top); chime(); }
-    closeSheet(); render(); if (st === 'done') toast('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
+    closeSheet(); render(); if (st === 'done') toastUndo('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
   }
   if (a === 'move') {
     snapUndo();
@@ -2863,6 +2879,7 @@ $('#main').addEventListener('click', e => {
   else if (t.dataset.set === 'update') checkUpdate(true);
   else if (t.dataset.set === 'guide') guideSheet();
   else if (t.dataset.set === 'lite0' || t.dataset.set === 'lite1') setLite(t.dataset.set === 'lite1');
+  else if (t.dataset.set === 'mode0' || t.dataset.set === 'mode1') { ls.set('rutina.mode', t.dataset.set === 'mode1' ? 'tl' : null); haptic(); render(); }
   else if (t.dataset.set === 'ai0' || t.dataset.set === 'ai1') { ls.set('rutina.ai', t.dataset.set === 'ai0' ? 'off' : null); AI.until = 0; AI.status = null; render(); toast(t.dataset.set === 'ai1' ? '🧠 AI asistentas įjungtas' : 'Asistentas veiks be AI (taisyklėmis)'); }
   else if (t.dataset.set === 'aitest') aiTest();
   else if (t.dataset.set === 'surfset') surfSettingsSheet();
