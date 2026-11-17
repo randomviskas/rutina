@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
     const file = form.get("file");
     if (room.length < 18 || !(file instanceof File) || file.size < 200) return json({ error: "bad_request" }, 400);
     if (file.size > MAX_BYTES) return json({ error: "too_long" }, 413);
-    const key = Deno.env.get("ELEVENLABS_API_KEY") || Deno.env.get("elewenlabs") || Deno.env.get("elevenlabs"); // raktas Supabase išsaugotas pavadinimu „elewenlabs“
+    const key = Deno.env.get("ELEVENLABS_API_KEY") || Deno.env.get("rutina-stt-2"); // raktas Supabase išsaugotas pavadinimu „rutina-stt-2“ („elewenlabs“ – klaidingas, ten rakto ID)
     if (!key) return json({ error: "no_key" });
     // apsauga: veikia tik su tikru plano kodu
     const { data: al } = await sb.from("rutina_alias").select("target").eq("room", room).maybeSingle();
@@ -39,11 +39,15 @@ Deno.serve(async (req) => {
     let r = await transcribe(key, file, MODEL);
     // jei modelio pavadinimas netinka – bandom senesnį
     if ((r.status === 400 || r.status === 422) && MODEL !== "scribe_v1") r = await transcribe(key, file, "scribe_v1");
-    if (r.status === 401) return json({ error: "bad_key" });
-    if (r.status === 429) return json({ error: "rate_limit" });
-    if (!r.ok) return json({ error: "api_" + r.status, message: (await r.text()).slice(0, 300) });
+    if (!r.ok) {
+      const message = (await r.text()).slice(0, 400);
+      console.log("stt_error", r.status, file.type, file.size, message); // matosi Supabase → Logs
+      return json({ error: r.status === 401 ? "bad_key" : r.status === 429 ? "rate_limit" : "api_" + r.status, message });
+    }
     const out = await r.json();
-    return json({ text: String(out.text ?? "").trim(), lang: out.language_code ?? null });
+    const text = String(out.text ?? "").trim();
+    console.log("stt_ok", file.type, file.size, text.length);
+    return json({ text, lang: out.language_code ?? null });
   } catch (e) {
     return json({ error: "server", message: String(e) }, 500);
   }
