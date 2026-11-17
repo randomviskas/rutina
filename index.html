@@ -675,8 +675,9 @@ body.lite .ag-card.hasscn .e{display:inline}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.10';
+const APP_VERSION = '2.11';
 const WHATS_NEW = [
+  '🧹 Diena dar švaresnė: viršuje nebėra dviejų būsenos kortelių („Miega / Dirba / Laisvas“) – iškart matosi planas',
   '🧹 Dar paprastesnė Diena: sąraše tik tikros veiklos – be „Laisva kartu“ eilučių ir antro „Pridėti“ mygtuko',
   '🗂️ „Daugiau“ trumpesnis: Miegas, Darbas ir Užsiėmimai suskleisti – paspauskite pavadinimą',
 ];
@@ -1534,7 +1535,6 @@ function renderDay(main) {
     return `<button class="${d === view.date ? 'on' : ''} ${d === today() ? 'today' : ''}" data-date="${d}"><span>${DAYS[i]}</span><b>${parseYmd(d).getDate()}</b><i>${dots}</i></button>`;
   }).join('') + '</div>';
   // v2.9: viršuje tik tai, ko reikia prieš planą – kas dabar, „ar padarėte?“, surf viena eilute, mygtukų eilutė
-  h += nowStrip();
   h += askDone();
   h += surfStrip(view.date);
   const tlMode = ls.get('rutina.mode') === 'tl';
