@@ -526,6 +526,16 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 body.kb.chatopen main,body.kb.chatopen header.top,body.kb.chatopen nav#tabs{visibility:hidden}
 html:has(body.kb.chatopen),body.kb.chatopen{background:var(--card)}
 body.kb.chatopen #chat{background:var(--card)}
+body.kb #chat .sheet-card{padding-bottom:6px}
+/* ---------- 🌊 Gyvas fonas veiklų kortelėse ---------- */
+.ag-card,.hero{position:relative;overflow:hidden}
+.ag-card>*:not(.fx){position:relative;z-index:1}
+.fx{position:absolute;left:0;bottom:0;width:calc(100% + 60px);pointer-events:none;z-index:0}
+.fxa{animation:fxw 3.2s linear infinite}.fxa.s2{animation-duration:5.5s}.fxa.s3{animation-duration:7s}
+@keyframes fxw{to{transform:translateX(-60px)}}
+.hero .fx{z-index:0}.hero>*:not(.fx):not(.big){position:relative;z-index:1}
+@media (prefers-reduced-motion: reduce){.fxa{animation:none}}
+body.lite .fx{display:none}
 /* ---------- 🧠 AI rašo… ---------- */
 .typing{display:inline-flex;gap:4px;padding:2px 0}
 .typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:pulse2 1s ease-in-out infinite}
@@ -617,8 +627,12 @@ body.lite .micbig{box-shadow:none;border:1px solid var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.7';
+const APP_VERSION = '2.8';
 const WHATS_NEW = [
+  '🌊 Gyvos kortelės: surf – plaukiančios bangos, sportas – pulsas, laikas kartu – švelni banga',
+  '⌨️ Mažesnis tarpas tarp laukelio ir klaviatūros',
+];
+const WHATS_NEW_27 = [
   '😴 Asistentas keičia kėlimosi ir miego laiką: „keliuosi 8:25“, „Milda eina miegoti 23:30“',
   '⌨️ Rašant asistentui – švarus fonas po klaviatūros juosta',
 ];
@@ -1464,7 +1478,7 @@ function heroCard() {
     if (it) {
       const m = itemMeta(it);
       const when = cur ? 'Dabar · liko ' + fmtDur(it.start + it.dur - n) : 'Toliau · po ' + fmtDur(it.start - n);
-      return `<div class="hero" style="${cvars(m.color)}" data-item="${it.id}"><small>${when}</small><h2>${esc(m.name)}</h2>
+      return `<div class="hero" style="${cvars(m.color)}" data-item="${it.id}">${fxBg(it, true)}<small>${when}</small><h2>${esc(m.name)}</h2>
         <div class="meta">${toHM(it.start)}–${toHM(it.start + it.dur)} · ${esc(whoLabel(it.who))}</div>${bar}<div class="big">${m.emoji}</div></div>`;
     }
     return `<div class="hero" style="${cvars('#a855f7')}"><small>Šiandien</small><h2>Diena baigta 🎉</h2><div class="meta">Mėgaukitės laisvu laiku</div>${bar}<div class="big">🌴</div></div>`;
@@ -1532,6 +1546,19 @@ function freeGaps(date, min = 45) {
   if (s != null && t - s >= min) out.push([s, t]);
   return out;
 }
+// 🌊 Gyvas fonas veiklų kortelėse: surf – bangos, sportas – pulsas, kartu/sau – švelni banga
+function fxBg(it, big) {
+  const id = it.actId || '', act = actById(id), key = id === 'surf' || /surf|bang/.test(norm(act?.name || '')) ? 'surf' : /gym|sport/.test(id) || /sport|gym|bego|joga/.test(norm(act?.name || '')) ? 'pulse' : it.kind === 'auto' ? 'soft' : '';
+  if (!key) return '';
+  // raštai kartojasi kas 60 vnt. – todėl slinkimas per 60 vnt. atrodo nenutrūkstamas
+  const wave = y => `M0 ${y}` + ' q15 -7 30 0 t30 0'.repeat(8) + ' V30 H0Z';
+  const h = big ? 34 : 24;
+  let g = '';
+  if (key === 'surf') g = `<g class="fxa s2"><path d="${wave(14)}" fill="#fff" opacity=".26"/></g><g class="fxa"><path d="${wave(19)}" fill="#fff" opacity=".34"/></g>`;
+  else if (key === 'pulse') g = `<g class="fxa"><path d="M0 16${' h32 l8 -9 l8 18 l8 -12 l4 3'.repeat(8)}" fill="none" stroke="#fff" stroke-width="1.8" opacity=".5"/></g>`;
+  else g = `<g class="fxa s3"><path d="${wave(20)}" fill="#fff" opacity=".2"/></g>`;
+  return `<svg class="fx" style="height:${h}px" viewBox="0 0 420 30" preserveAspectRatio="none" aria-hidden="true">${g}</svg>`;
+}
 // Paprastas dienos sąrašas
 function agenda(d) {
   const rows = [], groups = {}, F = ls.get('rutina.filter'); // filtras: visi / tik Paulius / tik Milda
@@ -1547,7 +1574,7 @@ function agenda(d) {
     const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id)));
     rows.push({ t: it.start, html: `<div class="ag-row sw-row"><div class="ag-t">${toHM(it.start)}<small>${fmtDur(it.dur)}</small></div>
       <div class="ag-swipe"><span class="l">${it.status === 'done' ? '↩︎ Neatlikta' : '✓ Atlikta'}</span><span class="r">Perkelti ↪︎</span></div>
-      <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
+      <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}">${it.status === 'planned' ? fxBg(it) : ''}<span class="e">${m.emoji}</span>
       <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}${it.actId === sid && Surf.data?.[d] ? ' · ' + Surf.stars(Surf.score(d, it.start, it.dur)) : ''}${it.series ? ' · 🔁' : ''}</small></span>${avs(who)}</div></div>` });
   });
   const wk = {};
