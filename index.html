@@ -687,6 +687,41 @@ body.vd #toast.show{transform:translateX(-50%)}
 body.lite #vfab{background:var(--grad);box-shadow:0 0 0 4px var(--bg)}
 body.lite #vdock{box-shadow:0 4px 18px rgba(0,0,0,.14)}
 @media (prefers-reduced-motion: reduce){.vd-stop{animation:none}.vd-bars i{transition:none}}
+/* ---------- 💞 v2.22: „Mudu“ – matoma Dienoje ---------- */
+.mudu{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:13px 14px 12px 16px;margin-bottom:12px;border-radius:20px;cursor:pointer;color:#fff;
+  background:linear-gradient(135deg,#ec4899 0%,#a855f7 100%);box-shadow:0 8px 22px rgba(236,72,153,.28)}
+.mudu.all{background:linear-gradient(135deg,#f472b6,#c084fc)}
+.mudu-t{flex:1;min-width:0}
+.mudu-t b{display:flex;align-items:center;gap:8px;font:800 17px var(--font)}
+.mudu-t b em{font-style:normal;font-size:12px;font-weight:800;background:rgba(255,255,255,.25);border-radius:999px;padding:2px 8px}
+.mudu-t small{display:block;font-size:12.5px;opacity:.92;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mudu-r{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.mudu-r button{height:56px;border-radius:16px;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.4);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:20px;position:relative;padding:0;color:#fff;transition:transform .15s}
+.mudu-r button i{font-style:normal;font-size:11px;font-weight:700;opacity:.95}
+.mudu-r button.on i{color:#be185d}
+.mudu-r button:active{transform:scale(.88)}
+.mudu-r button.on{background:#fff;border-color:#fff}
+.mudu-r button.on::after{content:"✓";position:absolute;right:-4px;top:-4px;width:16px;height:16px;border-radius:50%;background:#10b981;color:#fff;font-size:10px;font-weight:900;display:grid;place-items:center}
+.mudu-r button:not(.on) span{filter:grayscale(.3);opacity:.9}
+.id-entry.mudu-w{background:linear-gradient(135deg,color-mix(in srgb,#ec4899 22%,var(--card)),color-mix(in srgb,#a855f7 18%,var(--card)))}
+body.lite .mudu{background:color-mix(in srgb,#ec4899 14%,var(--card));color:var(--text);box-shadow:none}
+body.lite .mudu-r button{background:var(--card2);border-color:color-mix(in srgb,#ec4899 50%,transparent)}
+body.lite .mudu-r button.on{background:#ec4899;border-color:#ec4899}
+body.lite .mudu-r button{color:var(--text)}
+body.lite .mudu-r button.on{color:#fff}
+body.lite .mudu-r button.on i{color:#fff}
+/* ---------- v2.22: „Kas naujo“ langas slenka, mygtukas visada pasiekiamas ---------- */
+#upfx{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;justify-content:flex-start;
+  padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 20px);touch-action:pan-y}
+#upfx>:first-child{margin-top:auto}
+#upfx>:last-child{margin-bottom:auto}
+#upfx .ucard{width:100%;display:flex;flex-direction:column;align-items:center}
+#upfx h2{font-size:44px}
+#upfx ul{width:100%;margin-bottom:16px;gap:8px}
+#upfx li{font-size:15px;padding:10px 13px;line-height:1.35}
+#upfx .ucard>.ok{position:sticky;bottom:0;margin-top:4px}
+#upfx .more{background:none;box-shadow:none;color:#fff;opacity:.8;font:700 14px var(--font);padding:6px 10px;margin:-6px 0 12px;position:static}
+body:has(#upfx){overflow:hidden}
 /* ---------- ✋ v2.21: veiklų tempimas ---------- */
 .drag-ghost{position:fixed!important;z-index:90;margin:0;pointer-events:none;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 18px 40px rgba(0,0,0,.45)!important;transition:none!important;flex-wrap:wrap}
 .drag-ghost .drag-tag{flex:0 0 100%;font-style:normal;font-weight:800;font-size:14px;background:rgba(0,0,0,.28);border-radius:10px;padding:5px 10px;margin-top:4px}
@@ -892,8 +927,12 @@ body.lite #greet .gh{animation:none}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.21';
+const APP_VERSION = '2.22';
 const WHATS_NEW = [
+  '💞 „Mudu“ dabar matoma Dienoje: šiandienos ritualus pažymėkite vienu paspaudimu, o savaitės pratimai – Savaitėje',
+  '🔧 „Kas naujo“ langą galima slinkti, o mygtukas visada matosi; atnaujinimas nebeužstringa',
+];
+const WHATS_NEW_221 = [
   '💡 Mūsų idėjos: kaupkite, ką norite nuveikti kartu, ir suplanuokite, kai atsiras laiko (Diena → 💡 Idėjos)',
   '💞 „Mudu“: trumpi santykių pratimai pagal Gottmanų tyrimus – dienos pokalbis, savaitės pokalbis apie mus, pasimatymas, Love Map…',
   '💛 „Laikas kartu“ veikloje – pasiūlymai, ką tuo metu veikti',
@@ -1408,13 +1447,20 @@ async function doUpdate() {
   if (!$('#upfx')) { const d = document.createElement('div'); d.id = 'upfx'; d.innerHTML = '<div class="uh">❤️</div><small style="margin-top:30px">Kraunama nauja versija…</small>'; document.body.appendChild(d); }
   ls.set('rutina.fx', '1');
   await new Promise(r => setTimeout(r, 900));
+  // v2.22: telefone service worker kartais „užstringa“ – laukiam ne ilgiau kaip 4 s, tada perkraunam bet kuriuo atveju
+  const limit = ms => new Promise(r => setTimeout(r, ms));
   try {
-    const regs = (await navigator.serviceWorker?.getRegistrations?.()) || [];
-    await Promise.all(regs.map(r => r.update().catch(() => {})));
-    const ks = (await window.caches?.keys?.()) || [];
-    await Promise.all(ks.map(k => caches.delete(k)));
+    await Promise.race([(async () => {
+      const regs = (await navigator.serviceWorker?.getRegistrations?.()) || [];
+      await Promise.all(regs.map(r => r.update().catch(() => {})));
+      const ks = (await window.caches?.keys?.()) || [];
+      await Promise.all(ks.map(k => caches.delete(k)));
+    })(), limit(4000)]);
   } catch (e) {}
-  location.reload();
+  location.replace(location.pathname + '?u=' + Date.now()); // naujas adresas – telefonas tikrai parsisiųs naują versiją
+  // jei vis tiek nepersikrovė (pvz. nėra interneto) – nepaliekam užrakinto ekrano
+  setTimeout(() => { const d = $('#upfx'); if (!d) return; d.innerHTML = '<div class="ucard"><h2 style="font-size:28px">Nepavyko atnaujinti</h2><p style="opacity:.8">Patikrinkite internetą ir bandykite dar kartą.</p><button>Gerai</button></div>';
+    d.querySelector('button').onclick = () => { d.remove(); ls.set('rutina.fx', null); }; }, 9000);
 }
 function announceUpdate() {
   const prev = ls.get('rutina.appver');
@@ -1465,15 +1511,15 @@ function updateShow() {
   if (!d) { d = document.createElement('div'); d.id = 'upfx'; document.body.appendChild(d); }
   const news = Array.isArray(WHATS_NEW) ? WHATS_NEW : [WHATS_NEW];
   if (LITE()) { // 🍃 Lite – be širdies, garsų ir sprogimų: tik ramus sąrašas
-    d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2><ul>${news.map(x => `<li>${esc(x)}</li>`).join('')}</ul><button>Gerai</button></div>`;
-    d.querySelector('button').onclick = () => d.remove();
+    d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2>${newsList(news)}<button class="ok">Gerai</button></div>`;
+    newsMore(d); d.querySelector('.ok').onclick = () => d.remove();
     ls.set('rutina.fx', null); return;
   }
   d.innerHTML = '<div class="uh beat" role="button" aria-label="Paliesk širdį">❤️</div><small class="tap">Paliesk širdį 💥</small>';
   let done = false;
   const go = () => {
     if (done) return; done = true;
-    boomSound(); fanfare(); try { navigator.vibrate?.(60); } catch (e) {}
+    try { boomSound(); fanfare(); navigator.vibrate?.(60); } catch (e) {} // garsas neturi sustabdyti šou
     explode();
   };
   d.querySelector('.uh').addEventListener('click', go);
@@ -1488,12 +1534,19 @@ function updateShow() {
     particles(70, ['❤️','💖','✨','💗','⭐','🎉','💜']);
     confetti(innerWidth / 2, innerHeight * .42);
     setTimeout(() => {
-      d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2><ul>${news.map((x, i) => `<li style="animation-delay:${.15 + i * .12}s">${esc(x)}</li>`).join('')}</ul><button>Super! 🎉</button></div>`;
-      d.querySelector('button').onclick = () => { tone(1047, 0, .15, 'triangle', .12); tone(1568, .08, .25, 'triangle', .1); particles(30, ['❤️','✨','💖']); d.style.transition = 'opacity .4s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 400); };
+      d.innerHTML = `<div class="ucard"><small>Atnaujinta į</small><h2>v${APP_VERSION}</h2>${newsList(news, true)}<button class="ok">Super! 🎉</button></div>`;
+      newsMore(d);
+      d.querySelector('.ok').onclick = () => { try { tone(1047, 0, .15, 'triangle', .12); tone(1568, .08, .25, 'triangle', .1); particles(30, ['❤️','✨','💖']); } catch (e) {} d.style.transition = 'opacity .4s'; d.style.opacity = '0'; setTimeout(() => d.remove(), 400); };
     }, 380);
   };
   ls.set('rutina.fx', null);
 }
+// Naujienų sąrašas: pirmos 4 matomos, kitos – po „Rodyti dar“ (kad mygtukas visada matytųsi)
+function newsList(news, anim) {
+  const li = (x, i) => `<li${anim ? ` style="animation-delay:${.15 + Math.min(i, 4) * .12}s"` : ''}${i >= 4 ? ' hidden' : ''}>${esc(x)}</li>`;
+  return `<ul>${news.map(li).join('')}</ul>${news.length > 4 ? `<button class="more">＋ Rodyti dar ${news.length - 4}</button>` : ''}`;
+}
+function newsMore(d) { const b = d.querySelector('.more'); if (b) b.onclick = () => { d.querySelectorAll('li[hidden]').forEach(x => { x.hidden = false; x.style.animation = 'none'; }); b.remove(); }; }
 
 // =============== Kas prisijungęs ===============
 function markSeen() {
@@ -1902,6 +1955,7 @@ function renderDay(main) {
   }).join('') + '</div>';
   // v2.9: viršuje tik tai, ko reikia prieš planą – kas dabar, „ar padarėte?“, surf viena eilute, mygtukų eilutė
   h += askDone();
+  h += muduCard(view.date);
   h += surfStrip(view.date);
   const tlMode = ls.get('rutina.mode') === 'tl';
   h += `<div class="chiprow"><button data-act="add">＋ Pridėti</button><button data-act="ideas">💡 Idėjos${wishLeft() ? ` <i class="cnt">${wishLeft()}</i>` : ''}</button>${LITE() ? '' : '<button data-act="roulette">🎲 Ką veiksim?</button>'}</div>`;
@@ -2276,6 +2330,12 @@ function renderWeek(main) {
   const ws = weekStart(view.date); ensureWeek(ws);
   const days = [...Array(7)].map((_, i) => addDays(ws, i));
   let h = weekNav(ws) + weekMap(ws) + goalsBlock(ws) + warnBox();
+  { // 💞 Mudu šią savaitę – aukštai, kad matytųsi: kiek kasdienių ritualų ir savaitės pratimų padaryta
+    const wsT = parseYmd(ws).getTime(), weT = wsT + 7 * 864e5, inW = t => t >= wsT && t < weT;
+    const daily = REL.filter(x => x.f === 'day'), dn = daily.reduce((s, x) => s + (rels()[x.id]?.done || []).filter(inW).length, 0);
+    const wk = REL.filter(x => x.f === 'week').map(x => `${x.e} ${(rels()[x.id]?.done || []).some(inW) ? '✓' : '–'}`).join('  ');
+    h += `<button class="id-entry mudu-w" data-act="mudu"><span>💞</span><b>Mudu šią savaitę</b><small>Ritualų ${dn}/${daily.length * 7} · ${wk}</small><em>›</em></button>`;
+  }
   // v2.19: dienos – trumpomis eilutėmis (visa info yra Dienos skirtuke); paspaudus atsidaro ta diena
   h += '<div class="wdays">';
   days.forEach((d, i) => {
@@ -3347,7 +3407,12 @@ $('#main').addEventListener('click', e => {
   if (t.dataset.act === 'surf') return surfSheet();
   if (t.dataset.act === 'ping') return sendPing();
   if (t.dataset.act === 'roulette') return rouletteSheet(null);
-  if (t.dataset.act === 'ideas') { view.wcat = 'all'; return ideasSheet(); }
+  if (t.dataset.act === 'ideas') { view.wcat = 'all'; view.idTab = 'ideas'; return ideasSheet(); }
+  if (t.dataset.act === 'mudu') { const mb = e.target.closest('[data-mudu]');
+    if (mb) { const on = relToggleToday(mb.dataset.mudu), x = REL.find(q => q.id === mb.dataset.mudu); haptic();
+      if (on) { const r = mb.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); chime(); toast(`${x.e} ${x.t} ✓${REL.filter(q => q.f === 'day').every(q => relDoneToday(q.id)) ? ' · visi šiandienos ritualai! 💞' : ''}`); }
+      return render(); }
+    view.idTab = 'rel'; return ideasSheet(); }
   if (t.dataset.act === 'review') return reviewSheet(weekStart(view.date));
   if (t.dataset.act === 'wizard') return wizardStart();
   if (t.dataset.filter) { ls.set('rutina.filter', t.dataset.filter === 'all' ? null : t.dataset.filter); haptic(); return render(); }
@@ -3524,13 +3589,13 @@ const LOVEQ = ['Kokia buvo geriausia tavo vaikystės vasara?', 'Ko tu labiausiai
 // 💞 Santykių pratimai – pagal Johno ir Julie Gottmanų tyrimų idėjas (mūsų žodžiais, trumpai ir praktiškai)
 // f: day – kasdien (pažymima „Šiandien“ sąraše), week – kas savaitę (planuojama su kartojimu), once – kartą ar kas mėnesį
 const REL = [
-  { id:'talk', e:'☕', t:'Dienos pokalbis', f:'day', d:20, why:'Poros, kurios kasdien išsikalba apie dieną, geriau atlaiko stresą – ypač gyvenant toli nuo namų.',
+  { id:'talk', e:'☕', s0:'Pokalbis', t:'Dienos pokalbis', f:'day', d:20, why:'Poros, kurios kasdien išsikalba apie dieną, geriau atlaiko stresą – ypač gyvenant toli nuo namų.',
     s:['Kiekvienas po ~10 min pasakoja apie savo dieną: darbą, rūpesčius, kas nervino. Ne apie santykius.', 'Klausantis neskuba patarti – klausia ir parodo, kad supranta: „suprantu, kodėl tave tai erzina“.', 'Jūs – viena komanda prieš problemą, net jei kitas ir ne visai teisus.', 'Pabaigoje: „Ko tau dabar reikia – patarimo ar tiesiog apkabinimo?“'] },
-  { id:'ritual', e:'👋', t:'Atsisveikinimas ir sutikimas', f:'day', d:5, why:'Maži kasdieniai ritualai kaupia „emocinę sąskaitą“, iš kurios semiamasi sunkesniais laikais.',
+  { id:'ritual', e:'👋', s0:'Sutikimas', t:'Atsisveikinimas ir sutikimas', f:'day', d:5, why:'Maži kasdieniai ritualai kaupia „emocinę sąskaitą“, iš kurios semiamasi sunkesniais laikais.',
     s:['Ryte, prieš išsiskirdami: sužinokite vieną dalyką, kas šiandien laukia kito.', 'Susitikę: ilgesnis apkabinimas ar bučinys – bent 6 sekundės.', 'Vienas klausimas: „Kas šiandien buvo geriausia?“'] },
-  { id:'bids', e:'🙌', t:'Atsisukti į kitą', f:'day', d:2, why:'Laimingos poros daug dažniau atsiliepia į mažus kreipimusi („žiūrėk!“, juokelis, palietimas), o ne juos praleidžia.',
+  { id:'bids', e:'🙌', s0:'Dėmesys', t:'Atsisukti į kitą', f:'day', d:2, why:'Laimingos poros daug dažniau atsiliepia į mažus kreipimusi („žiūrėk!“, juokelis, palietimas), o ne juos praleidžia.',
     s:['Šiandien pastebėkite, kai kitas kreipiasi: ką nors parodo, pasakoja, juokauja ar paliečia.', 'Atsisukite: padėkite telefoną, atsakykite, paklauskite daugiau.', 'Vakare papasakokite vienas kitam po vieną tokią akimirką.'] },
-  { id:'thanks', e:'💬', t:'Dėkingumo žinutė', f:'day', d:2, why:'Pastebėti ir garsiai įvardinti gera – priešnuodis kritikai ir abejingumui.',
+  { id:'thanks', e:'💬', s0:'Ačiū', t:'Dėkingumo žinutė', f:'day', d:2, why:'Pastebėti ir garsiai įvardinti gera – priešnuodis kritikai ir abejingumui.',
     s:['Parašykite kitam vieną konkretų dalyką, kurį šiandien pastebėjote ir vertinate.', 'Ne „tu geras“, o „ačiū, kad ryte išvirei kavą, kai buvau pavargusi“.'], msg:true },
   { id:'meet', e:'🗓️', t:'Savaitės pokalbis apie mus', f:'week', d:45, why:'Reguliarus, ramus pokalbis apie santykius neleidžia smulkmenoms susikaupti į didelius ginčus.',
     s:['Pradėkite nuo gero: kiekvienas pasako 5 dalykus, už kuriuos šią savaitę dėkingas kitam.', 'Kas šią savaitę pavyko kartu? Kas buvo smagiausia?', 'Vienas dalykas, kuris kėlė įtampą. Kalbėkite apie save: „Aš jaučiausi… kai… Man reikėtų…“ – be kaltinimų.', 'Klausantis pakartoja savais žodžiais, ką išgirdo, ir tik tada atsako.', 'Ko kiekvienam reikia kitą savaitę: laiko sau, kartu, pagalbos?', 'Suplanuokite kitą pasimatymą 💛'] },
@@ -3622,6 +3687,25 @@ function relHtml() {
       <div class="id-sec">Kartą ar kas mėnesį</div>${REL.filter(x => x.f === 'once').map(card).join('')}
       <div class="hint" style="margin:6px 2px 0">Pasiūlymai atsiras ir 💛 „Laikas kartu“ veiklose – paspaudus jas Dienos sąraše.</div>
     </div>`;
+}
+// v2.22: „Mudu“ matoma Dienoje – šiandienos ritualai vienu paspaudimu + artimiausias savaitės pratimas
+function muduCard(d) {
+  if (d !== today()) { // kitą dieną – tik jei tą dieną suplanuotas santykių pratimas (jis ir taip matosi sąraše)
+    return '';
+  }
+  const daily = REL.filter(x => x.f === 'day'), n = daily.filter(x => relDoneToday(x.id)).length;
+  const nx = state.items.filter(x => x.relId && x.status === 'planned' && x.date >= today()).sort((a, b) => a.date.localeCompare(b.date) || a.start - b.start)[0];
+  const sug = !nx && relSuggest(1)[0];
+  const sub = n === daily.length ? 'Šiandien viskas padaryta – šaunuoliai! 🎉' : nx ? `📅 ${REL.find(q => q.id === nx.relId)?.t || nx.title} – ${nx.date === today() ? 'šiandien' : dayName(nx.date).toLowerCase()} ${toHM(nx.start)}` : sug ? `Šią savaitę: ${sug.e} ${sug.t}` : 'Maži ritualai vienas kitam';
+  return `<div class="mudu ${n === daily.length ? 'all' : ''}" data-act="mudu">
+    <div class="mudu-t"><b>💞 Mudu <em>${n}/${daily.length}</em></b><small>${esc(sub)}</small></div>
+    <div class="mudu-r">${daily.map(x => `<button data-mudu="${x.id}" class="${relDoneToday(x.id) ? 'on' : ''}" aria-label="${x.t}"><span>${x.e}</span><i>${x.s0}</i></button>`).join('')}</div>
+  </div>`;
+}
+function relToggleToday(id) {
+  const x = REL.find(q => q.id === id); if (!x) return;
+  if (relDoneToday(id)) { const r = rels()[id]; r.done = r.done.filter(t => ymd(new Date(t)) !== today()); save(); return false; }
+  relMark(id); return true;
 }
 function relSheet(id) {
   const x = REL.find(q => q.id === id); if (!x) return;
