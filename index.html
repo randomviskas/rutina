@@ -771,8 +771,11 @@ body.lite #greet .gh{animation:none}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.16';
+const APP_VERSION = '2.17';
 const WHATS_NEW = [
+  '💌 Mildą pasisveikinimas pasitinka kiekvieną kartą atidarius programą (ir grįžus po 10 min pertraukos)',
+];
+const WHATS_NEW_216 = [
   '🏄 Tikras 3D surfas: artimiausioje surfo veikloje lentininkai daro salto ir juokingai griūna (jei abu – plaukiat dviese)',
   '💌 Mildą atidarius programą pasitinka vis kitas pasisveikinimas – 30 skirtingų, su savo animacija',
   '👀 Visus galima peržiūrėti: Daugiau → Išvaizda → Mildos pasisveikinimai',
@@ -1462,12 +1465,14 @@ function greetShow(i) {
   const auto = setTimeout(close, 8000);
   d.addEventListener('click', close);
 }
-// Rodoma Mildai atidarius programą, bet ne dažniau kaip kas 3 val. (kad neįkyrėtų)
-function greetMaybe() {
+// v2.17: rodoma Mildai KIEKVIENĄ kartą atidarius programą (cold = paleidimas) ir grįžus po ≥10 min fone
+let greetHidAt = 0;
+document.addEventListener('visibilitychange', () => { if (document.hidden) greetHidAt = Date.now(); });
+function greetMaybe(cold) {
   if (Me() !== 'b' || !ls.get('rutina.hello') || document.hidden) return;
-  if ($('#upfx') || $('#hello') || $('#greet') || $('#wiz')) return;
-  if (Date.now() - (+ls.get('rutina.greetAt') || 0) < 3 * 3600000) return;
-  ls.set('rutina.greetAt', String(Date.now()));
+  if ($('#upfx') || $('#hello') || $('#greet')) return; // po atnaujinimo – tik „Kas naujo“ šou, be dubliavimo
+  if (!cold && (!greetHidAt || Date.now() - greetHidAt < 10 * 60000)) return;
+  greetHidAt = 0;
   greetShow(greetPick());
 }
 
@@ -3699,7 +3704,7 @@ addEventListener('hashchange', route);
   document.addEventListener('focusin', () => { vvUpdate(); setTimeout(vvUpdate, 350); });
   document.addEventListener('focusout', () => setTimeout(vvUpdate, 150));
   if (ls.get('rutina.push') && 'Notification' in window && Notification.permission === 'granted') setTimeout(() => enablePush(true), 4000);
-  if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello(); else setTimeout(greetMaybe, 700);
+  if (Me() === 'b' && !ls.get('rutina.hello')) mildaHello(); else setTimeout(() => greetMaybe(true), 700);
   setTimeout(() => checkUpdate(false, true), 1500);
   let tick = 0;
   setInterval(() => {
@@ -3718,7 +3723,7 @@ addEventListener('hashchange', route);
   $('#main').addEventListener('touchstart', e => { const mb = e.target.closest('.mb[data-mid]'); if (mb) lp = setTimeout(() => reactPicker(mb.dataset.mid, mb), 480); }, { passive: true });
   ['touchend', 'touchmove', 'touchcancel'].forEach(ev => $('#main').addEventListener(ev, () => clearTimeout(lp), { passive: true }));
   setInterval(() => { if (!document.hidden) checkUpdate(false); }, 10 * 60000);
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull().then(markSeen); render(); checkUpdate(false, true); setTimeout(greetMaybe, 500); } });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { Sync.pull().then(markSeen); render(); checkUpdate(false, true); setTimeout(() => greetMaybe(false), 500); } });
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 })();
 </script>
