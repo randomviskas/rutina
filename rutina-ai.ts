@@ -32,6 +32,8 @@ Rules:
 - Several requests in one message → several actions.
 - Messages are often dictated by voice: no punctuation, numbers as words ("vienuoliktos", "pusę dvylikos" = 11:30, "be penkiolikos trys" = 14:45 in the afternoon context), filler words. Interpret generously.
 - Work: "dirbu/dirbsiu/dirbam/dirbsim" with a date = set_work_day for that date (e.g. "rytoj dirbsiu nuo 11 iki 12" → set_work_day, ranges "11:00-12:00"). "dirbsiu su Milda/Pauliumi" or "dirbam" → who "both". "nedirbu" → ranges "".
+- Wake-up / bedtime ("keliuosi 8:25", "kėlimasis 7:30", "einu miegoti 23", "Milda keliasi 8") → set_sleep with wake and/or sleep for that person (people[].wake/sleep in context). You CAN change these – never say you can't.
+- Anything the app stores (work, wake/sleep, events, activities) can be changed through actions; only say something is impossible if no action fits, and then also save_feedback.
 - Bug reports or improvement ideas about the app itself ("neveikia…", "būtų gerai, kad programa…") → save_feedback with the text in title.
 - Follow-ups refer to the conversation: "po to / poto / paskui" = right after the item just discussed or added (same date, start = its end time). "po darbo" = right when that person's work ends that day (see work_weekly / work_overrides). "ten pat", "tą pačią dieną" = same date as before. Previous cards appear in history as "[kortelė: …]".
 - Never refuse because the day looks full: pick the most sensible time anyway (the app moves flexible auto activities). Meals: "valgyt/pavalgyt/valgom" → title "Pavalgyti" 🍽️, ~45–60 min (lunch 12–14, dinner 18–21) unless a duration is given.
@@ -50,7 +52,9 @@ const TOOL = {
         items: {
           type: "object",
           properties: {
-            type: { type: "string", enum: ["add_event", "add_activity", "move_item", "mark_done", "skip_item", "delete_item", "set_work_weekly", "set_work_day", "regenerate_week", "save_feedback"] },
+            type: { type: "string", enum: ["add_event", "add_activity", "move_item", "mark_done", "skip_item", "delete_item", "set_work_weekly", "set_work_day", "set_sleep", "regenerate_week", "save_feedback"] },
+            wake: { type: ["string", "null"], description: "set_sleep: new wake-up time HH:MM (null = unchanged)" },
+            sleep: { type: ["string", "null"], description: "set_sleep: new bedtime HH:MM (null = unchanged)" },
             item_id: { type: ["string", "null"] },
             act_id: { type: ["string", "null"] },
             title: { type: ["string", "null"] },

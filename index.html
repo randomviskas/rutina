@@ -522,6 +522,10 @@ body.scrolled header.top{padding-bottom:8px;box-shadow:0 1px 0 var(--line)}
 .hrt{position:fixed;z-index:81;pointer-events:none;font-size:26px}
 #upd button{background:#fff;color:#7c3aed;font-weight:800;border-radius:12px;padding:8px 14px}
 #upd .x{background:rgba(255,255,255,.2);color:#fff;padding:8px 10px}
+/* Asistentas + klaviatūra: po iOS juosta (⌃⌄✓) nebesimato puslapio kortelių – švarus fonas */
+body.kb.chatopen main,body.kb.chatopen header.top,body.kb.chatopen nav#tabs{visibility:hidden}
+html:has(body.kb.chatopen),body.kb.chatopen{background:var(--card)}
+body.kb.chatopen #chat{background:var(--card)}
 /* ---------- 🧠 AI rašo… ---------- */
 .typing{display:inline-flex;gap:4px;padding:2px 0}
 .typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:pulse2 1s ease-in-out infinite}
@@ -613,8 +617,12 @@ body.lite .micbig{box-shadow:none;border:1px solid var(--line)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.6';
+const APP_VERSION = '2.7';
 const WHATS_NEW = [
+  '😴 Asistentas keičia kėlimosi ir miego laiką: „keliuosi 8:25“, „Milda eina miegoti 23:30“',
+  '⌨️ Rašant asistentui – švarus fonas po klaviatūros juosta',
+];
+const WHATS_NEW_26 = [
   '🧠 AI asistentas įjungtas! Rašykite ar diktuokite laisvai – supranta kelis dalykus vienu sakiniu',
   '👫 „nedirbam“, „valgysim“, „važiuojam“ – planuoja jums abiem',
 ];
@@ -1874,13 +1882,13 @@ const chat = { msgs: [], props: {} };
 const chatEl = $('#chat');
 const SUGG = ['❓ Ką moki?', 'Kada geriausios bangos?', 'Ką veiksim?','Šiandien 13:00 susitikimas', 'Šiandien nesportuojam', 'Kas rytoj?', 'Rytoj surf 7:00', 'Kaip įjungti pranešimus?', 'Perkelk gym į rytoj', 'Kaip sujungti su Apple kalendoriumi?'];
 function openChat(voice) {
-  chatEl.inert = false; chatEl.classList.add('open');
+  chatEl.inert = false; chatEl.classList.add('open'); document.body.classList.add('chatopen');
   if (voice) { if (!chat.msgs.length) botSay('🎤 Klausau! Pasakykite lietuviškai, pvz. <b>„rytoj dirbsiu nuo 11 iki 12 su Milda“</b> arba <b>„penktadienį 18 val vakarienė“</b>.'); $('#sugg').innerHTML = SUGG.map(s => `<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join(''); return startMic(); }
   if (!chat.msgs.length) botSay(`Labas! 👋 Parašykite paprastai, pvz.:<br>• <b>šiandien 13 val susitikimas</b><br>• <b>rytoj surf 7:00</b><br>• <b>šiandien nesportuojam</b> – perkelsiu<br>• <b>atlikom gym</b> – pažymėsiu ✓<br>• <b>kas rytoj?</b><br>• <b>kaip įjungti pranešimus?</b> – paaiškinsiu bet kurią funkciją<br><span class="note">Galite ir padiktuoti – spauskite 🎤 klaviatūroje.</span><div class="pchips" style="margin-top:8px"><button data-sugg="Ką moki?">📖 Visos funkcijos</button></div>`);
   $('#sugg').innerHTML = SUGG.map(s => `<button type="button" data-sugg="${esc(s)}">${esc(s)}</button>`).join('');
   setTimeout(() => $('#ask').focus(), 320);
 }
-function closeChat() { if (REC) try { REC.abort(); } catch (e) {} chatEl.classList.remove('open'); chatEl.inert = true; $('#ask').blur(); }
+function closeChat() { if (REC) try { REC.abort(); } catch (e) {} document.body.classList.remove('chatopen'); chatEl.classList.remove('open'); chatEl.inert = true; $('#ask').blur(); }
 // =============== 🎤 Balsu (lietuviškai) ===============
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let REC = null;
@@ -2126,6 +2134,14 @@ function applyAI(res, raw) {
         if (val) chat.lastRef = { date, end: toMin(val.split(', ').pop().split('-')[1]) };
         logAct(`pakeitė darbo laiką (${dayName(date).toLowerCase()}: ${val || 'nedirba'})`);
         done.push(`💻 ${esc(pids.map(p => person(p).name).join(' ir '))} – ${dayName(date)}: ${val ? 'dirba ' + esc(val.replace(/-/g, '–')) : 'nedirba 🎉'}`);
+      } else if (a.type === 'set_sleep') {
+        const w = okT(a.wake), sl = okT(a.sleep); if (w == null && sl == null) continue;
+        const pids = who || (Me() ? [Me()] : ['a', 'b']);
+        pids.forEach(pid => { const p = person(pid); if (w != null) p.wake = toHM(w); if (sl != null) p.sleep = toHM(sl); });
+        [...Array(14)].map((_, i) => addDays(today(), i)).forEach(d => dates.add(d));
+        const txt = [w != null ? 'keliasi ' + toHM(w) : '', sl != null ? 'miega nuo ' + toHM(sl) : ''].filter(Boolean).join(', ');
+        logAct(`pakeitė miegą (${pids.map(p => person(p).name).join(' ir ')}: ${txt})`);
+        done.push(`😴 ${esc(pids.map(p => person(p).name).join(' ir '))}: ${esc(txt)}`);
       } else if (a.type === 'regenerate_week') {
         undo(); generateWeek(weekStart(today())); logAct('perdėliojo savaitę 🔀'); done.push('🔀 Perdėliojau likusią savaitę');
       } else if (a.type === 'save_feedback') {
@@ -2205,6 +2221,16 @@ function handle(raw, noAI) {
   if (/pagalb|ka moki|help|kaip naud/.test(t)) return botSay('Galiu: įtraukti įvykį („rytoj 10:00 zoom 30 min“), perkelti („šiandien nesportuojam“, „perkelk surf į šeštadienį“), pažymėti ✓ („atlikom gym“) ar parodyti planą („kas rytoj?“).');
   if ((/\?/.test(raw) || /\b(kas|ka) (siandien|rytoj|poryt|veik|turim|laukia)|planas|koks rytoj|kokia diena/.test(t)) && tm.start == null) return botSay(dayList(dI.date));
   const skip = /(nesport|nenor|neisim|neeisim|neis\b|neisiu|neeisiu|atsauk|perkel|praleid|nebus|negal|ne siandien|nespes|nesp|neturim laiko)/.test(t);
+  // 😴 Kėlimasis / miegas: „keliuosi 8:25“, „einu miegoti 23“
+  if (/(keliuos|kelsiuos|kelimosi|kelimas|kelimasi|atsikel|keltis|keliasi|miegot|eiti miego|gulti|gulsiu)/.test(t) && tm.start != null && !act) {
+    const pids = who || (Me() ? [Me()] : ['a', 'b']), isSleep = /(miego|gult|gulsiu)/.test(t);
+    const v = toHM(isSleep && tm.start < 12 * 60 && tm.start >= 6 * 60 ? tm.start + 12 * 60 : tm.start);
+    pids.forEach(pid => { person(pid)[isSleep ? 'sleep' : 'wake'] = v; });
+    const ms = [...Array(14)].map((_, i) => addDays(today(), i)).flatMap(d => fixDay(d));
+    logAct(`pakeitė ${isSleep ? 'miego' : 'kėlimosi'} laiką (${pids.map(p => person(p).name).join(' ir ')}: ${v})`);
+    render();
+    return botSay(`😴 ${esc(pids.map(p => person(p).name).join(' ir '))}: ${isSleep ? 'miegas nuo' : 'kėlimasis'} <b>${v}</b> – visoms dienoms.${ms.length ? '<br><span class="note">Persidėliojo: ' + esc(ms.join(', ')) + '</span>' : ''}`);
+  }
   if (/(darbas|darbo laik|\bdirb\w*|nedirb)/.test(t) && !act && !/\bpo\s+darb/.test(t)) return workChat(t, dI, tm, who);
   if (act && skip) return skipChat(act, dI, tm, who, t);
   if (act && /(atlik|padar|buvom|buvau|nuejom|nuejau|baig|isbuv|sportavom|surfinom)/.test(t)) return doneChat(act, dI, who);
