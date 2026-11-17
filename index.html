@@ -722,6 +722,7 @@ body.lite .mudu-r button.on i{color:#fff}
 #upfx .ucard>.ok{position:sticky;bottom:0;margin-top:4px}
 #upfx .more{background:none;box-shadow:none;color:#fff;opacity:.8;font:700 14px var(--font);padding:6px 10px;margin:-6px 0 12px;position:static}
 body:has(#upfx){overflow:hidden}
+body[data-tab="msgs"] #toast{bottom:auto;top:calc(env(safe-area-inset-top) + 70px)}
 /* ---------- ✋ v2.21: veiklų tempimas ---------- */
 .drag-ghost{position:fixed!important;z-index:90;margin:0;pointer-events:none;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 18px 40px rgba(0,0,0,.45)!important;transition:none!important;flex-wrap:wrap}
 .drag-ghost .drag-tag{flex:0 0 100%;font-style:normal;font-weight:800;font-size:14px;background:rgba(0,0,0,.28);border-radius:10px;padding:5px 10px;margin-top:4px}
@@ -927,8 +928,11 @@ body.lite #greet .gh{animation:none}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.22';
+const APP_VERSION = '2.23';
 const WHATS_NEW = [
+  '💞 Mudu: paspaudus ritualą atsidaro pats veiksmas – „Ačiū“ atidaro Žinutes ir išsiuntus pasižymi pats ✓, kiti – žingsniai su „Padarėme!“',
+];
+const WHATS_NEW_222 = [
   '💞 „Mudu“ dabar matoma Dienoje: šiandienos ritualus pažymėkite vienu paspaudimu, o savaitės pratimai – Savaitėje',
   '🔧 „Kas naujo“ langą galima slinkti, o mygtukas visada matosi; atnaujinimas nebeužstringa',
 ];
@@ -1737,6 +1741,10 @@ function sendMsg(text) {
   text = text.trim(); if (!text || !Me()) return;
   state.messages = state.messages || [];
   state.messages.push({ id: uid(), by: Me(), text: text.slice(0, 1000), at: Date.now() });
+  // 💞 v2.23: dėkingumo žinutė – pažymima pati (jei atėjote iš „Mudu“ arba žinutėje padėkojote)
+  const thanks = view.thanksAsk || /(aciu|dekui|dekoju|vertinu|myliu|dekinga|dekingas|nuostab|saunuol)/.test(norm(text));
+  view.thanksAsk = false;
+  if (thanks && !relDoneToday('thanks')) { relMark('thanks'); setTimeout(() => { toast('💬 Dėkingumo žinutė ✓ · 💞 Mudu ' + REL.filter(q => q.f === 'day' && relDoneToday(q.id)).length + '/4'); try { chime(); } catch (e) {} }, 150); }
   render(); $('#msgin')?.focus();
 }
 // =============== 🔔 Pranešimai (Web Push) ===============
@@ -3409,10 +3417,11 @@ $('#main').addEventListener('click', e => {
   if (t.dataset.act === 'roulette') return rouletteSheet(null);
   if (t.dataset.act === 'ideas') { view.wcat = 'all'; view.idTab = 'ideas'; return ideasSheet(); }
   if (t.dataset.act === 'mudu') { const mb = e.target.closest('[data-mudu]');
-    if (mb) { const on = relToggleToday(mb.dataset.mudu), x = REL.find(q => q.id === mb.dataset.mudu); haptic();
-      if (on) { const r = mb.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top); chime(); toast(`${x.e} ${x.t} ✓${REL.filter(q => q.f === 'day').every(q => relDoneToday(q.id)) ? ' · visi šiandienos ritualai! 💞' : ''}`); }
-      return render(); }
-    view.idTab = 'rel'; return ideasSheet(); }
+    if (mb) { // v2.23: paspaudus – atidaromas pats veiksmas; pažymima, kai padarote (žinutė išsiųsta / „Baigėme“)
+      const id = mb.dataset.mudu; haptic(); view.relFrom = 'day';
+      if (relDoneToday(id)) return relSheet(id); // jau padaryta – aprašymas ir „Atžymėti“
+      return relGo(id); }
+    view.idTab = 'rel'; view.relFrom = 'sheet'; return ideasSheet(); }
   if (t.dataset.act === 'review') return reviewSheet(weekStart(view.date));
   if (t.dataset.act === 'wizard') return wizardStart();
   if (t.dataset.filter) { ls.set('rutina.filter', t.dataset.filter === 'all' ? null : t.dataset.filter); haptic(); return render(); }
@@ -3707,6 +3716,15 @@ function relToggleToday(id) {
   if (relDoneToday(id)) { const r = rels()[id]; r.done = r.done.filter(t => ymd(new Date(t)) !== today()); save(); return false; }
   relMark(id); return true;
 }
+// Pradėti pratimą: žinutė → Žinutės (pažymės išsiuntus), Love Map → klausimai, kiti → žingsniai su „Baigėme“
+function relGo(id) {
+  const x = REL.find(q => q.id === id); if (!x) return;
+  if (x.msg) { closeSheet(); view.tab = 'msgs'; view.thanksAsk = true; render();
+    setTimeout(() => { const i = $('#msgin'); if (i) { i.placeholder = '💛 Ačiū, kad…'; i.focus(); } }, 300);
+    return toast('💬 Parašykite, už ką dėkojate – išsiuntus pažymėsiu ✓'); }
+  if (x.q) return loveSheet(0);
+  return relRun(id, 0);
+}
 function relSheet(id) {
   const x = REL.find(q => q.id === id); if (!x) return;
   const nx = relNext(id), at = relDoneAt(id);
@@ -3714,16 +3732,17 @@ function relSheet(id) {
     <div class="sh-hero" style="${cvars('#ec4899')}"><span style="font-size:40px">${x.e}</span><div><b style="font-size:19px">${x.t}</b><br><small>${x.d >= 60 ? x.d / 60 + ' val' : x.d + ' min'} · ${x.f === 'day' ? 'kasdien' : x.f === 'week' ? 'kas savaitę' : 'kartą ar kas mėnesį'}${at ? ' · paskutinį kartą ' + fmtAgo(at) : ''}</small></div></div>
     <div class="note">💡 ${esc(x.why)}</div>
     <ol class="rel-steps">${x.s.map(s => `<li>${esc(s)}</li>`).join('')}</ol>
-    ${x.q ? '<button class="btn-grad" style="width:100%" data-wlove>🗺️ Pradėti klausimus</button>' : x.msg ? '<button class="btn-grad" style="width:100%" data-relmsg>💬 Rašyti žinutę</button>' : x.f !== 'day' ? `<button class="btn-grad" style="width:100%" data-relrun="${x.id}">▶ Darome dabar</button>` : ''}
+    ${x.q ? '<button class="btn-grad" style="width:100%" data-wlove>🗺️ Pradėti klausimus</button>' : x.msg ? '<button class="btn-grad" style="width:100%" data-relmsg>💬 Rašyti žinutę</button>' : `<button class="btn-grad" style="width:100%" data-relrun="${x.id}">▶ ${x.f === 'day' ? 'Pradėti' : 'Darome dabar'}</button>`}
     ${nx ? `<div class="note">📅 Suplanuota: <b>${dayName(nx.date)}${nx.allDay ? '' : ' ' + toHM(nx.start)}</b>${nx.series ? ' · kartojasi kas savaitę' : ''}</div>` : ''}
-    <div class="btns">${x.f !== 'day' ? `<button class="btn-soft" data-relplan="${x.id}">📅 ${nx ? 'Kitas laikas' : 'Suplanuoti'}</button>` : ''}<button class="btn-soft" data-relchk="${x.id}" data-back="1">✓ Padarėme${x.f === 'day' && relDoneToday(id) ? ' (jau šiandien)' : ''}</button></div>`);
+    <div class="btns">${x.f !== 'day' ? `<button class="btn-soft" data-relplan="${x.id}">📅 ${nx ? 'Kitas laikas' : 'Suplanuoti'}</button>` : ''}${x.f === 'day' && relDoneToday(id)
+      ? `<button class="btn-soft" data-relundo="${x.id}">↩︎ Atžymėti (šiandien padaryta ✓)</button>` : `<button class="btn-soft" data-relchk="${x.id}" data-back="1">✓ Jau padarėme</button>`}</div>`);
 }
 // „Darome dabar“: žingsniai po vieną, dideliu šriftu
 function relRun(id, i) {
   const x = REL.find(q => q.id === id); i = Math.max(0, Math.min(x.s.length - 1, i || 0));
   openSheet(`<button class="id-back" data-relopen="${id}">‹ ${x.t}</button>
     <div class="lq"><small>${x.e} ${x.t} · ${i + 1} / ${x.s.length}</small><div class="lq-bar"><i style="width:${(i + 1) / x.s.length * 100}%"></i></div><p style="font-size:20px">${esc(x.s[i])}</p></div>
-    <div class="btns"><button class="btn-soft" data-relstep="${i - 1}" ${i ? '' : 'disabled'}>‹ Atgal</button>${i < x.s.length - 1 ? `<button class="btn-grad" data-relstep="${i + 1}">Toliau ›</button>` : `<button class="btn-grad" data-relchk="${x.id}" data-fin="1">🎉 Baigėme!</button>`}</div>`);
+    <div class="btns"><button class="btn-soft" data-relstep="${i - 1}" ${i ? '' : 'disabled'}>‹ Atgal</button>${i < x.s.length - 1 ? `<button class="btn-grad" data-relstep="${i + 1}">Toliau ›</button>` : `<button class="btn-grad" data-relchk="${x.id}" data-fin="1">✓ ${x.f === 'day' ? 'Padarėme!' : 'Baigėme!'}</button>`}</div>`);
   view.relRun = id;
 }
 // Pasiūlymai „Laikas kartu“ veiklos lange
@@ -3819,16 +3838,22 @@ function wishClick(e) {
   if ((b = g('[data-wprep]'))) { view.wp.rep = +b.dataset.wprep; haptic(); return wishPlanSheet(view.wp.id), true; }
   if ((b = g('[data-idtab]'))) { view.idTab = b.dataset.idtab; haptic(); return ideasSheet(), true; }
   if ((b = g('[data-relchk]'))) { const id = b.dataset.relchk, x = REL.find(q => q.id === id);
-    if (x.f === 'day' && relDoneToday(id) && !b.dataset.back) { const r = rels()[id]; r.done = r.done.filter(t => ymd(new Date(t)) !== today()); save(); haptic(); return ideasSheet(true), true; }
-    relMark(id); haptic(); if (b.dataset.fin || x.f !== 'day') { confetti(innerWidth / 2, innerHeight * .4); chime(); }
-    const nx = state.items.find(y => y.relId === id && y.date === today() && y.status === 'planned'); if (nx) { nx.status = 'done'; render(); }
-    if (b.dataset.back || b.dataset.fin) { view.idTab = 'rel'; ideasSheet(); toast(`💞 ${x.t} ✓`); } else ideasSheet(true);
+    if (!b.dataset.back && !b.dataset.fin) { // apskritimas sąraše: padaryta → atžymėti, nepadaryta → pradėti veiksmą
+      haptic(); if (relDoneToday(id)) { relToggleToday(id); return ideasSheet(true), true; }
+      view.relFrom = 'sheet'; return relGo(id), true; }
+    if (!(x.f === 'day' && relDoneToday(id))) relMark(id);
+    haptic(); confetti(innerWidth / 2, innerHeight * .4); chime();
+    const nx = state.items.find(y => y.relId === id && y.date === today() && y.status === 'planned'); if (nx) nx.status = 'done';
+    const dn = REL.filter(q => q.f === 'day' && relDoneToday(q.id)).length;
+    toast(`💞 ${x.t} ✓${x.f === 'day' ? ' · šiandien ' + dn + '/4' + (dn === 4 ? ' – visi! 🎉' : '') : ''}`);
+    if (view.relFrom === 'day') { closeSheet(); render(); } else { view.idTab = 'rel'; ideasSheet(); render(); }
     return true; }
   if ((b = g('[data-relplan]'))) { view.wp = null; return wishPlanSheet(b.dataset.relplan), true; }
   if ((b = g('[data-relopen]'))) return relSheet(b.dataset.relopen), true;
   if ((b = g('[data-relrun]'))) return relRun(b.dataset.relrun, 0), true;
   if ((b = g('[data-relstep]'))) { haptic(); return relRun(view.relRun, +b.dataset.relstep), true; }
-  if (g('[data-relmsg]')) { closeSheet(); view.tab = 'msgs'; render(); setTimeout(() => $('#msgin')?.focus(), 300); return true; }
+  if (g('[data-relmsg]')) return relGo('thanks'), true;
+  if ((b = g('[data-relundo]'))) { relToggleToday(b.dataset.relundo); haptic(); toast('↩︎ Atžymėta'); if (view.relFrom === 'day') { closeSheet(); render(); } else { view.idTab = 'rel'; ideasSheet(); } return true; }
   if ((b = g('[data-rel]'))) { haptic(); return relSheet(b.dataset.rel), true; }
   if ((b = g('[data-wgo]'))) { closeSheet(); view.date = b.dataset.wgo; view.tab = 'day'; render(); return true; }
   if ((b = g('[data-wsetcat]'))) { const w = wishes().find(x => x.id === view.wishId); if (w) { w.cat = b.dataset.wsetcat; save(); haptic(); wishSheet(w.id); } return true; }
@@ -3840,7 +3865,7 @@ function wishClick(e) {
     $('#undoBtn').onclick = () => { L.splice(i, 0, w); save(); t.classList.remove('show', 'act'); if (sheetEl.querySelector('.id-list')) ideasSheet(true); toast('↩︎ Atšaukta'); }; return true; }
   if (g('[data-wlove]')) return loveSheet(0), true;
   if ((b = g('[data-wlq]'))) { haptic(); return loveSheet(+b.dataset.wlq), true; }
-  if (g('[data-wlovedone]')) { const w = wishes().find(x => /love\s*map/i.test(x.title)); confetti(innerWidth / 2, innerHeight * .4); chime(); view.lq = null; if (w) { w.done = true; save(); } relMark('lovemap'); view.idTab = 'rel'; ideasSheet(); toast('💞 Dabar žinote vienas apie kitą dar daugiau!'); render(); return true; }
+  if (g('[data-wlovedone]')) { const w = wishes().find(x => /love\s*map/i.test(x.title)); confetti(innerWidth / 2, innerHeight * .4); chime(); view.lq = null; if (w) { w.done = true; save(); } relMark('lovemap'); if (view.relFrom === 'day') closeSheet(); else { view.idTab = 'rel'; ideasSheet(); } toast('💞 Dabar žinote vienas apie kitą dar daugiau!'); render(); return true; }
   if ((b = g('[data-wish]'))) { haptic(); return wishSheet(b.dataset.wish), true; }
   return false;
 }
