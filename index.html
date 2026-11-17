@@ -628,6 +628,10 @@ body.lite .ag-card.hasscn .e{display:inline}
 .ag-card.gap b{color:var(--text);font-weight:600}
 .add-big{border:1.5px dashed var(--line);color:var(--muted);font-weight:700;font-size:15px;padding:13px}
 .item>div{box-shadow:none}
+.set details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;font:800 18px var(--font);margin:20px 0 10px}
+.set details.sec>summary::-webkit-details-marker{display:none}
+.set details.sec>summary::after{content:"›";margin-left:auto;color:var(--muted);font-size:22px;transition:transform .15s}
+.set details.sec[open]>summary::after{transform:rotate(90deg)}
 .strip button,.chiprow button,.nowc{box-shadow:none}
 .surfcard{background:color-mix(in srgb,#0ea5e9 13%,var(--card));color:var(--text);box-shadow:none;padding:10px 14px;border-radius:16px}
 .surfcard .e{font-size:22px}
@@ -671,8 +675,12 @@ body.lite .ag-card.hasscn .e{display:inline}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.9';
+const APP_VERSION = '2.10';
 const WHATS_NEW = [
+  '🧹 Dar paprastesnė Diena: sąraše tik tikros veiklos – be „Laisva kartu“ eilučių ir antro „Pridėti“ mygtuko',
+  '🗂️ „Daugiau“ trumpesnis: Miegas, Darbas ir Užsiėmimai suskleisti – paspauskite pavadinimą',
+];
+const WHATS_NEW_29 = [
   '🎤 Balsas dabar supranta lietuviškai ir iPhone: paspauskite 🎤, pasakykite ir patylėkite – tekstas atsiras pats',
   '🎙️ Pirmą kartą telefonas paklaus leidimo naudoti mikrofoną – pasirinkite „Leisti“',
   '🧹 Ramesnė Diena: planas matosi iškart – be didelės kortelės ir pasikartojančių mygtukų (🎤 Balsu – mygtukų eilutėje)',
@@ -796,7 +804,8 @@ migrate();
 const body = st => JSON.stringify({ ...st, lastBy: undefined });
 let lastSaved = body(state);
 const save = () => { const s = body(state); if (s === lastSaved) return; lastSaved = s; if (Me()) state.lastBy = Me(); ls.set(KEY, JSON.stringify(state)); Sync.schedule(); };
-const view = { tab:'day', date: today(), warn: null };
+const view = { tab:'day', date: today(), warn: null, sec: {} };
+document.addEventListener('toggle', e => { const id = e.target.dataset?.sec; if (id) view.sec[id] = e.target.open; }, true);
 const Me = () => ls.get('rutina.me') || '';
 // 🍃 Lite režimas – kiekvienam telefonui atskirai (Pauliui gali būti Lite, Mildai – pilnas)
 const LITE = () => ls.get('rutina.lite') === '1';
@@ -1398,7 +1407,7 @@ const HELP_NEW = [
 ];
 const HELP = [
   { e:'➕', t:'Kaip pridėti veiklą?', k:['prideti','itraukti','irasyti','nauja veikl','susitikim','ivyk','sukurti veikl'],
-    a:'Trys būdai:<br>1) <b>Diena → ＋ Pridėti</b> – pasirinkite veiklą (ar „📌 Kita veikla“), patikslinkite kas, kada, kiek laiko → <b>✓ Įtraukti</b>.<br>2) Paspauskite <b>„＋ Laisva kartu“</b> kortelę – veikla bus pasiūlyta tuo laisvu laiku.<br>3) Parašykite man, pvz. <i>„rytoj 13:00 susitikimas 1 val“</i>.' },
+    a:'Du būdai:<br>1) <b>Diena → ＋ Pridėti</b> – pasirinkite veiklą (ar „📌 Kita veikla“), patikslinkite kas, kada, kiek laiko → <b>✓ Įtraukti</b>.<br>2) Parašykite ar pasakykite man, pvz. <i>„rytoj 13:00 susitikimas 1 val“</i>.' },
   { e:'↪︎', t:'Kaip perkelti ar atšaukti veiklą?', k:['perkel','atsauk','praleis','nenorim','nesportuoj','kita diena','pakeisti laik'],
     a:'Paspauskite veiklą → <b>↪︎ Ne šiandien – perkelti</b> (programa pati suras kitą laisvą dieną) arba įrašykite naują dieną/laiką ir <b>🕐 Išsaugoti laiką</b>. <b>🗑 Praleisti</b> – pašalina.<br>Arba parašykite man: <i>„šiandien nesportuojam“</i>, <i>„perkelk surf į šeštadienį“</i>.' },
   { e:'✓', t:'Kaip pažymėti, kad atlikta?', k:['atlikt','pazymet','padarem','padariau','tiksl'],
@@ -1430,7 +1439,7 @@ const HELP = [
   { e:'🔔', t:'Kas yra varpelis viršuje?', k:['varpel','kas nutiko','istorij','pakeitim'],
     a:'<b>🔔</b> viršuje – visų pakeitimų juosta: kas ką pridėjo, perkėlė, atliko, pakomentavo. Raudonas skaičius – kiek naujų nuo kito žmogaus. Paspaudus įrašą atsidaro ta veikla.' },
   { e:'🕒', t:'Kuo skiriasi sąrašas ir laiko juosta?', k:['laiko juost','sarasas','stulpel','vaizd'],
-    a:'<b>Diena</b> skirtuke mygtukas <b>🕒 Laiko juosta / 📋 Sąrašas</b>. Sąrašas – paprasta diena su laisvu laiku kartu. Laiko juosta – du stulpeliai (Paulius / Milda); paspaudus tuščią vietą pridedate veiklą tuo laiku.' },
+    a:'<b>Diena</b> skirtuke mygtukas <b>🕒 Laiko juosta / 📋 Sąrašas</b>. Sąrašas – paprasta diena (laisvi bendri langai matosi Savaitės žemėlapyje). Laiko juosta – du stulpeliai (Paulius / Milda); paspaudus tuščią vietą pridedate veiklą tuo laiku.' },
   { e:'📸', t:'Kaip pakeisti nuotrauką?', k:['nuotrauk','avatar','foto'],
     a:'<b>⚙️ Daugiau → 😴 Miegas</b> skiltyje prie vardo – <b>📷 Keisti nuotrauką</b>. Ji automatiškai apkarpoma ir atsiranda abiejuose telefonuose.' },
   { e:'✨', t:'Ką moka asistentas?', k:['ka moki','asistent','padek','pagalb','help','ka gali'],
@@ -1623,8 +1632,6 @@ function agenda(d) {
   state.people.filter(p => !F || p.id === F).forEach(p => workRanges(p.id, d).forEach(([a, b]) => { (wk[a + '-' + b] = wk[a + '-' + b] || { a, b, who: [] }).who.push(p.id); }));
   Object.values(wk).forEach(w => rows.push({ t: w.a, html: `<div class="ag-row"><div class="ag-t">${toHM(w.a)}</div>
     <div class="ag-card work" data-act="work"><span>💻 Darbas ${toHM(w.a)}–${toHM(w.b)}</span>${avs(w.who)}</div></div>` }));
-  if (!F) freeGaps(d).forEach(([a, b]) => rows.push({ t: a + 0.1, html: `<div class="ag-row"><div class="ag-t">${toHM(a)}</div>
-    <div class="ag-card gap" data-addat="${a}"><span><b>＋ Laisva kartu</b> ${toHM(a)}–${toHM(b)}</span><small>${fmtDur(b - a)}</small></div></div>` }));
   if (d === today()) { const n = nowMin(); rows.push({ t: n - 0.2, html: `<div class="ag-now">dabar ${toHM(n)}</div>` }); }
   rows.sort((x, y) => x.t - y.t);
   const PP = state.people.filter(p => !F || p.id === F);
@@ -1632,8 +1639,7 @@ function agenda(d) {
   const body = rows.length ? rows.map(r => r.html).join('') : '<div class="empty" style="text-align:center;padding:20px">Šiai dienai nieko nėra 🌴</div>';
   const hint = !ls.get('rutina.swipehint') && rows.length ? (ls.set('rutina.swipehint', '1'), '<div class="hint" style="text-align:center">💡 Brūkštelėkite veiklą → atlikta, ← perkelti. Dieną braukite ← →</div>') : '';
   const banners = allDay.map(it => { const m = itemMeta(it); return `<div class="allday" data-item="${it.id}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><b>${esc(m.name)}</b><small>Visa diena${it.block ? ' · kelionės diena – kitų veiklų nededu' : ''}</small></div>${avs(it.who)}</div>`; }).join('');
-  return `${seg}${hint}${banners}<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>
-    <button class="add-big" data-act="add">＋ Pridėti veiklą</button>`;
+  return `${seg}${hint}${banners}<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>`;
 }
 
 // ＋ Pridėti: pasirinkti veiklą → patikslinti → įtraukti
@@ -1687,7 +1693,7 @@ function renderWeek(main) {
     });
     h += '</div>';
   });
-  h += `<div class="btns"><button class="btn-grad" data-act="review">📊 Savaitės apžvalga</button>${surfAct() ? '<button class="btn-soft" data-act="surf">🏄 Surf prognozė</button>' : ''}<button class="btn-soft" data-act="gen">🔀 Perdėlioti savaitę</button><button class="btn-soft" data-act="ics">📲 Į Apple kalendorių</button></div>`;
+  h += `<div class="btns"><button class="btn-soft" data-act="gen">🔀 Perdėlioti savaitę</button><button class="btn-soft" data-act="ics">📲 Į Apple kalendorių</button></div>`;
   main.innerHTML = h;
 }
 
@@ -1768,7 +1774,7 @@ function renderSettings(main) {
   h += `<button class="guide-btn" data-set="guide"><span>📖</span><b>Kaip naudotis programa</b><small>Visos funkcijos paprastai – paspauskite</small></button>`;
   h += `<button class="guide-btn alt" data-act="wizard"><span>✨</span><b>Pritaikyti planą (vedlys)</b><small>Miegas, darbas, veiklos, surf – per 1 minutę</small></button>`;
   h += `<h2>🎨 Išvaizda</h2><div class="card lite-card"><div class="seg"><button data-set="lite0" class="${!LITE() ? 'on' : ''}">✨ Pilna</button><button data-set="lite1" class="${LITE() ? 'on' : ''}">🍃 Lite</button></div>
-    <div class="hint" style="margin:8px 0 0">Lite – rami, švari sąsaja: be spalvų gradientų, animacijų, konfeti ir garsų. Viskas veikia taip pat. Nustatymas – tik šiam telefonui.</div></div>`;
+    <div class="hint" style="margin:8px 0 0">Lite – rami sąsaja be animacijų ir garsų. Tik šiam telefonui.</div></div>`;
   h += aiCard();
   h += `<h2>📱 Šis telefonas ${hq(8)}</h2><div class="card"><div class="seg">${state.people.map(p => `<button data-me="${p.id}" class="${me === p.id ? 'on' : ''}">${av(p.id, 'sm')} ${esc(p.name)}</button>`).join('')}</div>
     <div class="hint" style="margin:8px 0 0">Asistentas žinos, kas rašo („turiu susitikimą“ – įtrauks tik jums).</div></div>`;
@@ -1786,18 +1792,20 @@ function renderSettings(main) {
       <div class="btns" style="margin-bottom:10px"><button class="btn-grad" data-set="create">✨ Sukurti bendrą planą</button></div>
       <div class="row" style="margin:0"><input id="joinlink" placeholder="Įklijuokite gautą nuorodą"><button class="btn-soft" data-set="join" style="flex:none">Prisijungti</button></div>`;
   h += '</div>';
-  h += `<h2>😴 Miegas ir nuotraukos ${hq(10)}</h2>`;
+  // v2.10: retai keičiamos, ilgos skiltys – suskleistos (atidarymo būsena išlieka per perpiešimus)
+  const sec = (id, title) => `<details class="sec" data-sec="${id}" ${view.sec?.[id] ? 'open' : ''}><summary>${title}</summary>`;
+  h += sec('sleep', `😴 Miegas ir nuotraukos ${hq(10)}`);
   state.people.forEach((p, i) => {
     h += `<div class="card"><div class="row">${av(p.id, 'lg')}<label>Vardas<input data-k="people.${i}.name" value="${esc(p.name)}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="people.${i}.color" value="${p.color}"></label></div>
       <div class="row"><label class="photo-btn">📷 ${photoOk(p.photo) ? 'Keisti nuotrauką' : 'Įkelti nuotrauką'}<input type="file" accept="image/*" data-photo="${i}"></label>${photoOk(p.photo) ? `<button class="btn-soft" data-set="nophoto" data-i="${i}" style="flex:none">Pašalinti</button>` : ''}</div>
       <div class="row" style="margin:0"><label>☀️ Keliasi<input type="time" data-k="people.${i}.wake" value="${p.wake}"></label><label>🌙 Eina miegoti<input type="time" data-k="people.${i}.sleep" value="${p.sleep}"></label></div></div>`;
   });
-  h += `<h2>💻 Darbas online ${hq(9)}</h2><div class="hint">Įprasta savaitė. Formatas <b>09:00-13:00, 14:00-17:00</b>, tuščia – nedirba. Konkrečią dieną keiskite Dienos vaizde arba parašykite asistentui.</div>`;
+  h += '</details>' + sec('work', `💻 Darbas online ${hq(9)}`) + `<div class="hint">Įprasta savaitė. Formatas <b>09:00-13:00, 14:00-17:00</b>, tuščia – nedirba. Konkrečią dieną keiskite Dienos vaizde arba parašykite asistentui.</div>`;
   state.people.forEach(p => {
     h += `<div class="card"><h3>${av(p.id, 'sm')} ${esc(p.name)}</h3><div class="wt">` +
       DAYKEYS.map((k, i) => `<span>${DAYS[i]}</span><input data-k="work.${p.id}.${k}" value="${esc(state.work[p.id][k])}" placeholder="nedirba">`).join('') + '</div></div>';
   });
-  h += `<h2>🎯 Užsiėmimai ${hq(11)}</h2><div class="hint"><b>Kas</b> – kartu ar atskirai · <b>Kartai/sav.</b> – kiek kartų sudėlioti · <b>Minutės</b> – trukmė · <b>Nuo–Iki</b> – kuriame paros lange ieškoti laiko · <b>↑↓</b> – prioritetas (viršutiniai dėliojami pirmiau) · varnelė – įjungta. Pakeitę spauskite „🔀 Perdėlioti savaitę“.</div>`;
+  h += '</details>' + sec('acts', `🎯 Užsiėmimai ${hq(11)}`) + `<div class="hint"><b>Kas</b> – kartu ar atskirai · <b>Kartai/sav.</b> – kiek kartų sudėlioti · <b>Minutės</b> – trukmė · <b>Nuo–Iki</b> – kuriame paros lange ieškoti laiko · <b>↑↓</b> – prioritetas (viršutiniai dėliojami pirmiau) · varnelė – įjungta. Pakeitę spauskite „🔀 Perdėlioti savaitę“.</div>`;
   state.acts.forEach((a, i) => {
     h += `<div class="card act" style="--c:${a.color}">
       <div class="row"><input class="emo" data-k="acts.${i}.emoji" value="${esc(a.emoji)}"><input data-k="acts.${i}.name" value="${esc(a.name)}" style="font-weight:700"><input type="checkbox" title="Įjungta" data-k="acts.${i}.on" ${a.on ? 'checked' : ''}></div>
@@ -1805,9 +1813,9 @@ function renderSettings(main) {
       <div class="row"><label>Nuo<input type="time" data-k="acts.${i}.from" value="${a.from}"></label><label>Iki<input type="time" data-k="acts.${i}.to" value="${a.to}"></label><label style="flex:0 0 64px">Spalva<input type="color" data-k="acts.${i}.color" value="${a.color}"></label></div>
       <div class="row end" style="margin:0"><button data-set="up" data-i="${i}" ${i === 0 ? 'disabled' : ''}>↑</button><button data-set="down" data-i="${i}" ${i === state.acts.length - 1 ? 'disabled' : ''}>↓</button><button class="btn-danger" data-set="del" data-i="${i}">Šalinti</button></div></div>`;
   });
-  h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div>
+  h += `<div class="btns"><button class="btn-soft" data-set="add">＋ Naujas užsiėmimas</button><button class="btn-grad" data-act="gen">🔀 Perdėlioti savaitę</button></div></details>
     <h2>🛠️ Problemos ir idėjos ${hq(21)}</h2><div class="card">
-      <div class="hint" style="margin-top:0">Kas neveikia ar ką norėtumėte pagerinti? Užrašykite – viskas kaupiama ir bus peržiūrėta kito atnaujinimo metu. Galite rašyti ir ✨ asistentui, pvz. „problema: …“ ar „idėja: …“.</div>
+      <div class="hint" style="margin-top:0">Kas neveikia ar ką pagerinti? Užrašykite – peržiūrėsime kito atnaujinimo metu.</div>
       <div class="row"><input id="fbtext" placeholder="pvz. norėtume priminimų prieš surf"><button class="btn-grad" data-set="fb" style="flex:none">Siųsti</button></div>
       ${(state.feedback || []).slice(-5).reverse().map(f => `<div class="wrow" style="cursor:default">${f.by && person(f.by) ? av(f.by, 'sm') : '📝'}<span class="tx"><b style="font-weight:600">${esc(f.text)}</b><small>${fmtAgo(f.at)} · v${esc(f.ver)}</small></span></div>`).join('')}
     </div>
@@ -2311,8 +2319,7 @@ function aiCard() {
   const st = !aiOn() ? '⏸ Išjungtas – veikia taisyklėmis' : AI.status === 'ok' ? '✅ Veikia (Claude)' : AI.status === 'no_key' ? '🔑 Laukia API rakto (Supabase)' : AI.status === 'err' ? '⚠️ Paskutinį kartą nepasiekiamas – veikia taisyklėmis' : '🧠 Įjungtas';
   return `<h2>🧠 Išmanusis asistentas</h2><div class="card"><div class="row" style="margin:0 0 8px;align-items:center"><span style="flex:1"><b>Claude AI</b><br><small style="color:var(--muted)">${st}</small></span></div>
     <div class="seg"><button data-set="ai1" class="${aiOn() ? 'on' : ''}">🧠 AI</button><button data-set="ai0" class="${!aiOn() ? 'on' : ''}">⚙️ Be AI</button></div>
-    <div class="hint" style="margin:8px 0">AI supranta laisvą tekstą, kelis dalykus viename sakinyje ir klausimus apie planą. Viską vis tiek parodo kortele patvirtinti. Be interneto – veikia įprastas asistentas.</div>
-    <div class="btns"><button class="btn-soft" data-set="aitest">🔍 Patikrinti AI</button></div></div>`;
+    <div class="btns" style="margin-top:8px"><button class="btn-soft" data-set="aitest">🔍 Patikrinti AI</button></div></div>`;
 }
 
 function handle(raw, noAI) {
