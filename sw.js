@@ -13,6 +13,11 @@ self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c =>
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE && k !== BADGE).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener('fetch', e => {
   const u = new URL(e.request.url);
+  // 🏄 3D biblioteka (Three.js iš cdnjs): pirma iš talpyklos, kad surfo scena veiktų ir be interneto
+  if (e.request.method === 'GET' && u.href === 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js') {
+    e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(r => { if (r.ok) { const c = r.clone(); caches.open(CACHE).then(x => x.put(e.request, c)); } return r; })));
+    return;
+  }
   if (e.request.method !== 'GET' || u.origin !== location.origin) return; // duomenų bazės užklausų neliečiam
   e.respondWith(fetch(e.request).then(r => { const c = r.clone(); caches.open(CACHE).then(x => x.put(e.request, c)); return r; })
     .catch(() => caches.match(e.request).then(r => r || caches.match('index.html'))));
