@@ -628,6 +628,19 @@ body.lite .ag-card.hasscn .e{display:inline}
 .ag-card.gap b{color:var(--text);font-weight:600}
 .add-big{border:1.5px dashed var(--line);color:var(--muted);font-weight:700;font-size:15px;padding:13px}
 .item>div{box-shadow:none}
+/* ➕ Įterpimo kortelė (atsiranda tik palaikius tarpą tarp veiklų) */
+/* Kaip tikroje programoje: palaikius nerodomas teksto žymėjimas / Copy / „Save image“ – tik laukeliuose galima žymėti ir įklijuoti */
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea,[contenteditable]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+img,svg,a,.av{-webkit-user-drag:none;-webkit-touch-callout:none}
+.ins{margin-left:58px;background:var(--card);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:10px;box-shadow:0 0 0 1.5px color-mix(in srgb,#a855f7 45%,transparent);transform-origin:top;animation:insin .25s ease}
+@keyframes insin{from{opacity:0;transform:scaleY(.6)}}
+.ins{scroll-margin:90px 0 calc(130px + env(safe-area-inset-bottom))}
+.ins-h{display:flex;align-items:center;font-size:15px;font-weight:700}
+.ins-h button{margin-left:auto;width:30px;height:30px;padding:0;border-radius:50%;background:var(--card2);font-size:13px}
+.ins .pchips button{background:var(--card2);box-shadow:none}
+.ins label{font-size:12px;color:var(--muted);font-weight:600;display:flex;flex-direction:column;gap:4px}
+.ins input[type=range]{padding:0;border:0;background:none;accent-color:#a855f7;height:28px}
 .set details.sec>summary{list-style:none;cursor:pointer;display:flex;align-items:center;font:800 18px var(--font);margin:20px 0 10px}
 .set details.sec>summary::-webkit-details-marker{display:none}
 .set details.sec>summary::after{content:"›";margin-left:auto;color:var(--muted);font-size:22px;transition:transform .15s}
@@ -709,8 +722,11 @@ body.lite #vdock{box-shadow:0 4px 18px rgba(0,0,0,.14)}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.12';
+const APP_VERSION = '2.13';
 const WHATS_NEW = [
+  '➕ Įterpkite veiklą tarp kitų: palaikykite pirštą tarpe tarp dviejų veiklų – jis išsiplės su pasiūlymais',
+];
+const WHATS_NEW_212 = [
   '🎤 Balsas tiesiai kalendoriuje: apvalus 🎤 mygtukas Dienoje ir Savaitėje – pasakykite, ir veikla įtraukiama vietoje',
   '✓ Nebereikia atidaryti asistento: apačioje matote, ką supratau, ir vienu paspaudimu „Įtraukti“ (arba „Keisti“)',
 ];
@@ -1445,6 +1461,8 @@ const HELP_NEW = [
     a:'<b>Daugiau → 🎨 Išvaizda → 🍃 Lite</b> – sąsaja tampa rami ir švari: be gradientų, animacijų, konfeti ir garsų. Viskas veikia taip pat. Atgal – ten pat <b>✨ Pilna</b>. Nustatymas – kiekvienam telefonui atskirai.' },
   { e:'🧠', t:'Kaip veikia AI asistentas?', k:[' ai ','dirbtin','claude','protingas','ismanus'],
     a:'Kai yra internetas, asistentas klausia <b>Claude AI</b> – supranta laisvą kalbą, kelis dalykus vienu sakiniu ir klausimus apie planą. Viską parodo kortele patvirtinti. Be interneto veikia įprastas asistentas. Būsena ir patikra: <b>Daugiau → 🧠 Išmanusis asistentas</b>.' },
+  { e:'➕', t:'Kaip įterpti veiklą tarp kitų?', k:['iterpti','iterpt','iterp','tarp veikl','tarp kitu','palaikyti','palaikius'],
+    a:'Dienos sąraše <b>palaikykite pirštą tarpe tarp dviejų veiklų</b> (apie pusę sekundės) – tarpas išsiplės į kortelę: pasirinkite veiklą (ar ☕ Kava, 📞 Skambutis, ✨ Kita…) ir slankikliu – pradžios laiką. Veikla įsiterps tame laisvame tarpe. Užsidaro paspaudus ✕ arba šalia. Trumpas paspaudimas nieko nedaro.' },
 ];
 const HELP = [
   { e:'➕', t:'Kaip pridėti veiklą?', k:['prideti','itraukti','irasyti','nauja veikl','susitikim','ivyk','sukurti veikl'],
@@ -1648,6 +1666,68 @@ function scene(it, big) {
   };
   return `<svg class="scn${big ? ' big' : ''}" viewBox="0 0 90 50" aria-hidden="true">${S[k]}</svg>`;
 }
+// ➕ Nematomas įterpimas: palaikius ~0,4 s tarpe tarp dviejų kortelių, tarpas išsiplečia į pasiūlymų kortelę
+function insClose() { $('#main .ins')?.remove(); view.ins = null; }
+function insOpenAt(y) {
+  const ag = $('#main .ag'); if (!ag) return false;
+  const rows = [...ag.querySelectorAll('.ag-row[data-a]')]; if (!rows.length) return false;
+  // artimiausias tarpas (riba tarp dviejų eilučių arba po paskutinės), ne toliau kaip 16 px nuo piršto
+  let best = -1, bd = 17;
+  rows.forEach((r, i) => { const b = r.getBoundingClientRect().bottom, n = rows[i + 1] ? rows[i + 1].getBoundingClientRect().top : b + 8, dd = Math.abs(y - (b + n) / 2) - (n - b) / 2; if (dd < bd) { bd = dd; best = i; } });
+  if (best < 0) return false;
+  insClose(); haptic();
+  const d = view.date;
+  if (d < today()) { toast('Ši diena jau praėjo'); return true; }
+  const hi = rows[best + 1] ? +rows[best + 1].dataset.a : +ag.dataset.end;
+  const lo = Math.ceil(Math.max(minStartFor(d), ...rows.slice(0, best + 1).map(r => +r.dataset.b)) / STEP) * STEP;
+  if (!(hi - lo >= STEP)) { toast('Čia laisvo tarpo nėra'); return true; }
+  view.ins = { date: d, lo, hi, start: lo };
+  const el = document.createElement('div'); el.className = 'ins';
+  el.innerHTML = `<div class="ins-h"><span>➕ Įterpti <b id="insT">${toHM(lo)}–${toHM(hi)}</b></span><button data-ins="x" aria-label="Uždaryti">✕</button></div>
+    <div class="pchips">${state.acts.filter(a => a.on).map(a => `<button data-ins="act" data-id="${esc(a.id)}">${a.emoji} ${esc(a.name)}</button>`).join('')}<button data-ins="ev" data-e="☕" data-n="Kava">☕ Kava</button><button data-ins="ev" data-e="📞" data-n="Skambutis">📞 Skambutis</button><button data-ins="other">✨ Kita…</button></div>
+    ${hi - lo > STEP ? `<label>Pradžia<input type="range" id="insR" min="${lo}" max="${hi - STEP}" step="${STEP}" value="${lo}"></label>` : ''}`;
+  rows[best].after(el);
+  el.querySelector('#insR')?.addEventListener('input', e => { view.ins.start = +e.target.value; $('#insT').textContent = toHM(view.ins.start) + '–' + toHM(hi); });
+  el.scrollIntoView({ block: 'nearest', behavior: LITE() ? 'auto' : 'smooth' });
+  return true;
+}
+function insPick(b) {
+  const I = view.ins, k = b.dataset.ins; if (!I || k === 'x') return insClose();
+  const F = ls.get('rutina.filter'), me = Me(), room = I.hi - I.start;
+  if (k === 'other') { // „Kita…“ – asistentas su jau įrašytu laiku
+    insClose(); openChat();
+    $('#ask').value = `${I.date === today() ? 'šiandien' : I.date === addDays(today(), 1) ? 'rytoj' : parseYmd(I.date).getDate() + ' d.'} ${toHM(I.start)} `;
+    return;
+  }
+  let it, label;
+  if (k === 'act') {
+    const a = actById(b.dataset.id); if (!a) return;
+    it = { id: uid(), kind:'auto', actId: a.id, who: a.who === 'each' ? [F || me || 'a'] : groupsFor(a)[0], date: I.date, start: I.start, dur: Math.min(a.dur, room), status:'planned', pinned: true };
+    label = a.emoji + ' ' + a.name;
+  } else {
+    it = { id: uid(), kind:'event', title: b.dataset.n, emoji: b.dataset.e, who: F ? [F] : me ? [me] : ['a', 'b'], date: I.date, start: I.start, dur: Math.min(30, room), status:'planned' };
+    label = it.emoji + ' ' + it.title;
+  }
+  snapUndo(); state.items.push(it);
+  const ms = fixDay(I.date);
+  logAct(`pridėjo ${label} → ${whenShort(I.date, I.start)}`, it.id);
+  insClose(); haptic(); render();
+  if (!LITE()) $(`#main .ag-card[data-item*="${it.id}"]`)?.animate([{ transform:'scale(.9)', opacity:.3 }, { transform:'scale(1.03)', opacity:1 }, { transform:'none' }], { duration: 320, easing:'ease-out' });
+  toastUndo('✓ Įterpta: ' + label + ' ' + toHM(it.start) + (ms.length ? ' · pastumta: ' + ms.join(', ') : ''));
+}
+(() => {
+  const main = $('#main'); let lp = null, p0 = null, fired = false;
+  const cancel = () => { clearTimeout(lp); lp = null; };
+  main.addEventListener('pointerdown', e => {
+    cancel(); fired = false;
+    if (view.tab !== 'day' || !e.isPrimary || e.button > 0 || !e.target.closest('.ag') || e.target.closest('.ins')) return;
+    p0 = { x: e.clientX, y: e.clientY };
+    lp = setTimeout(() => { lp = null; if (insOpenAt(p0.y)) { fired = true; view.noClick = Date.now(); } }, 400);
+  });
+  main.addEventListener('pointermove', e => { if (lp && p0 && Math.hypot(e.clientX - p0.x, e.clientY - p0.y) > 10) cancel(); });
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => main.addEventListener(ev, () => { cancel(); if (fired) { view.noClick = Date.now(); fired = false; } }));
+  main.addEventListener('contextmenu', e => { if (e.target.closest('.ag')) e.preventDefault(); });
+})();
 // Paprastas dienos sąrašas
 function agenda(d) {
   const rows = [], groups = {}, F = ls.get('rutina.filter'); // filtras: visi / tik Paulius / tik Milda
@@ -1663,14 +1743,14 @@ function agenda(d) {
   const nowM = nowMin(), focus = d !== today() ? null : Object.values(groups).map(g => g[0]).filter(it => it.status === 'planned' && it.start + it.dur > nowM).sort((a, b) => a.start - b.start)[0];
   Object.values(groups).forEach(g => {
     const it = g[0], m = itemMeta(it), who = state.people.map(p => p.id).filter(id => g.some(x => x.who.includes(id))), sc = scene(it);
-    rows.push({ t: it.start, html: `<div class="ag-row sw-row"><div class="ag-t">${toHM(it.start)}</div>
+    rows.push({ t: it.start, html: `<div class="ag-row sw-row" data-a="${it.start}" data-b="${it.start + it.dur}"><div class="ag-t">${toHM(it.start)}</div>
       <div class="ag-swipe"><span class="l">${it.status === 'done' ? '↩︎ Neatlikta' : '✓ Atlikta'}</span><span class="r">Perkelti ↪︎</span></div>
       <div class="ag-card ${it.status === 'done' ? 'done' : it.status === 'skipped' ? 'skipped' : ''}${sc ? ' hasscn' : ''}${focus && it.start === focus.start ? ' live' : ''}" data-item="${g.map(x => x.id).join(',')}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span>
       <span class="tx"><b>${esc(m.name)}</b><small>${toHM(it.start)}–${toHM(it.start + it.dur)}${(n => n ? ' · 💬 ' + n : '')(commentsOf(g).length)}${it.actId === sid && Surf.data?.[d] ? ' · ' + Surf.stars(Surf.score(d, it.start, it.dur)) : ''}${it.series ? ' · 🔁' : ''}</small></span>${sc}${avs(who)}</div></div>` });
   });
   const wk = {};
   state.people.filter(p => !F || p.id === F).forEach(p => workRanges(p.id, d).forEach(([a, b]) => { (wk[a + '-' + b] = wk[a + '-' + b] || { a, b, who: [] }).who.push(p.id); }));
-  Object.values(wk).forEach(w => rows.push({ t: w.a, html: `<div class="ag-row"><div class="ag-t">${toHM(w.a)}</div>
+  Object.values(wk).forEach(w => rows.push({ t: w.a, html: `<div class="ag-row" data-a="${w.a}" data-b="${w.b}"><div class="ag-t">${toHM(w.a)}</div>
     <div class="ag-card work" data-act="work"><span>💻 Darbas ${toHM(w.a)}–${toHM(w.b)}</span>${avs(w.who)}</div></div>` }));
   if (d === today()) { const n = nowMin(); rows.push({ t: n - 0.2, html: `<div class="ag-now">dabar ${toHM(n)}</div>` }); }
   rows.sort((x, y) => x.t - y.t);
@@ -1679,7 +1759,7 @@ function agenda(d) {
   const body = rows.length ? rows.map(r => r.html).join('') : '<div class="empty" style="text-align:center;padding:20px">Šiai dienai nieko nėra 🌴</div>';
   const hint = !ls.get('rutina.swipehint') && rows.length ? (ls.set('rutina.swipehint', '1'), '<div class="hint" style="text-align:center">💡 Brūkštelėkite veiklą → atlikta, ← perkelti. Dieną braukite ← →</div>') : '';
   const banners = allDay.map(it => { const m = itemMeta(it); return `<div class="allday" data-item="${it.id}" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><b>${esc(m.name)}</b><small>Visa diena${it.block ? ' · kelionės diena – kitų veiklų nededu' : ''}</small></div>${avs(it.who)}</div>`; }).join('');
-  return `${seg}${hint}${banners}<div class="ag"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>`;
+  return `${seg}${hint}${banners}<div class="ag" data-end="${Math.min(...PP.map(p => awake(p.id)[1]))}"><div class="ag-edge">☀️ Keliasi: ${wake}</div>${body}<div class="ag-edge">🌙 Miegas: ${sleep}</div></div>`;
 }
 
 // ＋ Pridėti: pasirinkti veiklą → patikslinti → įtraukti
@@ -2745,6 +2825,8 @@ $('#main').addEventListener('click', e => {
     return addSheet(view.date, Math.round((t0 + (e.clientY - r.top) / px) / STEP) * STEP);
   }
   if (Date.now() - (view.noClick || 0) < 450) return; // ką tik buvo braukimas
+  const ib = e.target.closest('[data-ins]'); if (ib) return insPick(ib);
+  if ($('#main .ins')) { if (!e.target.closest('.ins')) insClose(); return; } // paspaudus šalia – įterpimo kortelė užsidaro
   const hb = e.target.closest('[data-help]'); if (hb) return guideSheet(+hb.dataset.help);
   const t = e.target.closest('[data-nav],[data-date],[data-act],[data-item],[data-set],[data-me],[data-addat],[data-filter],[data-quick],[data-goday]'); if (!t) return;
   if (t.dataset.goday) { view.date = t.dataset.goday; view.tab = 'day'; haptic(); render(); window.scrollTo({ top: 0 }); return; }
