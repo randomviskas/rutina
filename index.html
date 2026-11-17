@@ -722,6 +722,13 @@ body.lite .mudu-r button.on i{color:#fff}
 #upfx .ucard>.ok{position:sticky;bottom:0;margin-top:4px}
 #upfx .more{background:none;box-shadow:none;color:#fff;opacity:.8;font:700 14px var(--font);padding:6px 10px;margin:-6px 0 12px;position:static}
 body:has(#upfx){overflow:hidden}
+.mv-cmp{display:flex;align-items:center;gap:10px}
+.mv-cmp>div{flex:1;background:var(--card2);border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.mv-cmp>div.to{background:color-mix(in srgb,#a855f7 16%,var(--card2));box-shadow:inset 0 0 0 2px #a855f7}
+.mv-cmp small{color:var(--muted);font-size:12px;font-weight:700}
+.mv-cmp b{font-size:16px}
+.mv-cmp span{font-size:14px;font-weight:600}
+.mv-cmp em{font-style:normal;font-size:22px;color:var(--muted)}
 body[data-tab="msgs"] #toast{bottom:auto;top:calc(env(safe-area-inset-top) + 70px)}
 /* ---------- ✋ v2.21: veiklų tempimas ---------- */
 .drag-ghost{position:fixed!important;z-index:90;margin:0;pointer-events:none;transform:scale(1.04) rotate(-1deg)!important;box-shadow:0 18px 40px rgba(0,0,0,.45)!important;transition:none!important;flex-wrap:wrap}
@@ -928,8 +935,12 @@ body.lite #greet .gh{animation:none}
 <script>
 // =============== Versija ===============
 // Kiekvieną kartą keičiant programą – padidinti versiją ir įrašyti, kas naujo.
-const APP_VERSION = '2.23';
+const APP_VERSION = '2.24';
 const WHATS_NEW = [
+  '💬 Žinutės: kai kitas parašo, jūsų rašomas tekstas nebedingsta ir klaviatūra neužsidaro',
+  '🛡️ Susitikimai ir kito žmogaus veiklos perkeliami tik patvirtinus – matysite „Dabar → Naujas laikas“',
+];
+const WHATS_NEW_223 = [
   '💞 Mudu: paspaudus ritualą atsidaro pats veiksmas – „Ačiū“ atidaro Žinutes ir išsiuntus pasižymi pats ✓, kiti – žingsniai su „Padarėme!“',
 ];
 const WHATS_NEW_222 = [
@@ -1718,7 +1729,7 @@ function renderMsgs(main) {
   if (!me) { main.innerHTML = `<div class="card" style="margin-top:12px"><h3>💬 Žinutės</h3><div class="hint" style="margin:0">Pirma skiltyje <b>⚙️ Daugiau → „Šis telefonas“</b> pasirinkite savo vardą.</div></div>`; return; }
   const other = person(me === 'a' ? 'b' : 'a');
   const ms = (state.messages || []).slice().sort((a, b) => a.at - b.at).slice(-200);
-  let h = `<div class="mhead">${av(other.id, 'lg')}<div><b>${esc(other.name)}</b><small>${state.seen?.[other.id] ? 'buvo ' + fmtAgo(state.seen[other.id]) : ''}</small></div>
+  let h = `<div class="msgwrap"><div class="mhead">${av(other.id, 'lg')}<div><b>${esc(other.name)}</b><small>${state.seen?.[other.id] ? 'buvo ' + fmtAgo(state.seen[other.id]) : ''}</small></div>
     <button class="pingbtn" data-act="ping" aria-label="Pagalvojau apie tave">💗</button></div><div class="hint" style="text-align:center;margin:-4px 0 6px">Du kartus palieskite žinutę – reakcija ❤️😂👍</div><div class="msgs">`;
   let last = '';
   ms.forEach(m => {
@@ -1732,10 +1743,15 @@ function renderMsgs(main) {
   if (myLast && ms[ms.length - 1] === myLast && (state.readMsg?.[other.id] || 0) >= myLast.at) h += `<div class="seen">Matė ✓✓</div>`;
   if (lastOther && lastOther.at > (state.readMsg?.[me] || 0)) state.readMsg = { ...(state.readMsg || {}), [me]: Date.now() };
   if (!ms.length) h += `<div class="empty" style="text-align:center;padding:40px 10px">Parašykite pirmą žinutę ${esc(other.name)} 💌</div>`;
-  h += `</div><form id="msgform" class="composer mcomp" autocomplete="off"><input id="msgin" placeholder="Žinutė ${esc(other.name)}…" enterkeyhint="send"><button class="btn-grad" aria-label="Siųsti">↑</button></form>`;
-  main.innerHTML = h;
+  h += `</div></div>`;
+  // v2.24: kai ateina nauja žinutė, perpiešiam tik pokalbį – rašomas tekstas, klaviatūra ir žymeklis lieka vietoje
+  const wrap = main.querySelector(':scope > .msgwrap'), form = main.querySelector('#msgform');
+  const nearBottom = innerHeight + scrollY >= document.body.scrollHeight - 160, nMsg = ms.length;
+  if (wrap && form) { const t = document.createElement('div'); t.innerHTML = h; wrap.replaceWith(t.firstElementChild); }
+  else main.innerHTML = h + `<form id="msgform" class="composer mcomp" autocomplete="off"><input id="msgin" placeholder="Žinutė ${esc(other.name)}…" enterkeyhint="send"><button class="btn-grad" aria-label="Siųsti">↑</button></form>`;
   ls.set('rutina.readAt', String(Date.now()));
-  requestAnimationFrame(() => scrollTo(0, document.body.scrollHeight));
+  if (!wrap || nearBottom || nMsg !== view.msgN) requestAnimationFrame(() => scrollTo(0, document.body.scrollHeight));
+  view.msgN = nMsg;
 }
 function sendMsg(text) {
   text = text.trim(); if (!text || !Me()) return;
@@ -2243,6 +2259,7 @@ function dragEnd(e) {
   D.ghost.remove(); D.bar.remove(); D.card.classList.remove('drag-src'); document.body.classList.remove('dragging');
   view.noClick = Date.now();
   if (!e || (D.date === D.it.date && D.t === D.it.start)) return;
+  if (moveNeedsOk(D.G)) return moveConfirm(D.G, D.date, D.t); // susitikimas ar kito veikla – paklausiam
   snapUndo();
   const old = D.it.date, m = itemMeta(D.it);
   D.G.forEach(x => Object.assign(x, { date: D.date, start: D.t, pinned: true }));
@@ -2252,6 +2269,35 @@ function dragEnd(e) {
   const clash = clashList(D.G, D.date, D.t, D.it.dur);
   toastUndo([`${m.emoji} ${m.name} → ${D.date !== old ? dayName(D.date) + ' ' : ''}${toHM(D.t)}`, clash.length ? '⚠️ Kertasi: ' + clash.join(', ') : '', ...new Set(msgs)].filter(Boolean).join(' · '));
   const c = document.querySelector(`.ag-card[data-item*="${D.it.id}"]`); if (c) c.classList.add('pop');
+}
+// v2.24: susitikimai (įvykiai su konkrečiu laiku) ir kito žmogaus veiklos perkeliami tik patvirtinus – kad netyčia nepajudėtų
+function moveNeedsOk(G) {
+  const me = Me();
+  return G.some(x => x.kind === 'event') || (me && !G.some(x => x.who.includes(me)));
+}
+function moveConfirm(G, d, s) {
+  const it = G[0], m = itemMeta(it), me = Me(), owners = [...new Set(G.flatMap(x => x.who))];
+  const other = me && !owners.includes(me) ? owners.map(p => person(p).name).join(' ir ') : '';
+  const clash = clashList(G, d, s, it.dur);
+  haptic();
+  openSheet(`<div class="sh-hero" style="${cvars(m.color)}"><span class="e">${m.emoji}</span><div><h3>Perkelti?</h3><small>${esc(m.name)}</small></div></div>
+    <div class="mv-cmp"><div><small>Dabar</small><b>${dayName(it.date)}</b><span>${toHM(it.start)}–${toHM(it.start + it.dur)}</span></div><em>→</em>
+      <div class="to"><small>Naujas laikas</small><b>${dayName(d)}</b><span>${toHM(s)}–${toHM(s + it.dur)}</span></div></div>
+    ${other ? `<div class="note">👤 Tai <b>${esc(other)}</b> veikla.</div>` : ''}
+    ${clash.length ? `<div class="note" style="color:#f59e0b">⚠️ Kertasi: ${esc(clash.join(', '))}</div>` : ''}
+    <div class="btns"><button class="btn-soft" data-sheet="close">Ne, palikti</button><button class="btn-grad" data-mvok>✓ Perkelti</button></div>`);
+  view.mvPending = { ids: G.map(x => x.id), d, s };
+}
+function moveApply() {
+  const P = view.mvPending; view.mvPending = null; if (!P) return closeSheet();
+  const G = P.ids.map(id => state.items.find(x => x.id === id)).filter(Boolean), it = G[0]; if (!it) return closeSheet();
+  snapUndo();
+  const old = it.date, m = itemMeta(it);
+  G.forEach(x => Object.assign(x, { date: P.d, start: P.s, pinned: true }));
+  logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(P.d, P.s)}`, it.id);
+  const msgs = [...new Set([P.d, old])].flatMap(x => fixDay(x));
+  closeSheet(); haptic(); render();
+  toastUndo([`${m.emoji} ${m.name} → ${P.d !== old ? dayName(P.d) + ' ' : ''}${toHM(P.s)}`, ...new Set(msgs)].join(' · '));
 }
 // Paprastas dienos sąrašas
 function agenda(d) {
@@ -2559,6 +2605,7 @@ sheetEl.addEventListener('click', e => {
   if (e.target === sheetEl) return closeSheet();
   const wzb = e.target.closest('[data-wz],[data-wzme],[data-wzpre],[data-wzday],[data-wzwho],[data-wzn],[data-wzlvl],[data-wzspot]'); if (wzb && wz) return wizardClick(wzb);
   if (e.target.closest('[data-act="ideas"]')) { view.wcat = 'all'; return ideasSheet(); }
+  if (e.target.closest('[data-mvok]')) return moveApply();
   if (wishClick(e)) return;
   const di = e.target.closest('[data-delidea]');
   if (di) { state.ideas = ideas().filter((_, i) => i !== +di.dataset.delidea); save(); return rouletteSheet(view.rlStart); }
@@ -2612,6 +2659,12 @@ sheetEl.addEventListener('click', e => {
     logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${itemMeta(it).emoji} ${itemMeta(it).name}`, it.id);
     const r = b.getBoundingClientRect(); haptic(); if (st === 'done') { confetti(r.left + r.width / 2, r.top); chime(); }
     closeSheet(); render(); if (st === 'done') toastUndo('Šaunuoliai! ' + itemMeta(it).emoji + ' ✓');
+  }
+  if (a === 'move' && moveNeedsOk(G)) { // susitikimas ar kito veikla – pirma parodom, kur perkels, ir paklausiam
+    const keep = G.map(x => ({ x, d: x.date, s: x.start, p: x.pinned }));
+    const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean), nd = it.date, ns = it.start;
+    keep.forEach(k => Object.assign(k.x, { date: k.d, start: k.s, pinned: k.p }));
+    return ok ? moveConfirm(G, nd, ns) : toast('Per artimiausią savaitę laisvo laiko nerasta 😕');
   }
   if (a === 'move') {
     snapUndo();
@@ -4351,7 +4404,14 @@ function swipeAct(ids, kind) {
       logAct(`${st === 'done' ? 'pažymėjo ✓' : 'atžymėjo'} ${m.emoji} ${m.name}`, it.id);
       if (st === 'done') { confetti(innerWidth / 2, innerHeight * .45); chime(); toastUndo('Šaunuoliai! ' + m.emoji + ' ✓' + streakNote()); } else toastUndo('Atžymėta');
     } else if (it.date < today()) toast('Praėjusios dienos veiklos perkelti negalima');
-    else {
+    else if (moveNeedsOk(G)) { // v2.24: susitikimą ar kito žmogaus veiklą – tik patvirtinus
+      const keep = G.map(x => ({ x, d: x.date, s: x.start, p: x.pinned }));
+      const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean), nd = it.date, ns = it.start;
+      keep.forEach(k => Object.assign(k.x, { date: k.d, start: k.s, pinned: k.p })); UNDO = null;
+      if (!ok) { toast('Per savaitę laisvo laiko nerasta 😕'); return render(); }
+      render();
+      return moveConfirm(G, nd, ns);
+    } else {
       const ok = G.map(x => rescheduleOtherDay(x)).every(Boolean);
       if (ok) { logAct(`perkėlė ${m.emoji} ${m.name} → ${whenShort(it.date, it.start)}`, it.id); toastUndo(`↪︎ ${m.emoji} ${m.name} → ${dayName(it.date)} ${toHM(it.start)}`); }
       else toast('Per savaitę laisvo laiko nerasta 😕');
